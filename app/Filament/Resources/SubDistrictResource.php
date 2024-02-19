@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CityResource\Pages;
-use App\Filament\Resources\CityResource\RelationManagers;
+use App\Filament\Resources\SubDistrictResource\Pages;
+use App\Filament\Resources\SubDistrictResource\RelationManagers;
 use App\Models\City;
-use App\Models\Province;
+use App\Models\SubDistrict;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,48 +14,38 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CityResource extends Resource
+use function Laravel\Prompts\search;
+
+class SubDistrictResource extends Resource
 {
-    protected static ?string $model = City::class;
-
+    protected static ?string $model = SubDistrict::class;
     protected static ?string $navigationIcon = 'heroicon-o-flag';
-    protected static ?string $navigationLabel = 'City';
-    protected static ?string $modelLabel = 'Master City';
+    protected static ?string $navigationLabel = 'Sub District';
+    protected static ?string $modelLabel = 'Master Sub District';
     protected static ?string $navigationGroup = 'Master Management';
-    protected static ?string $slug = 'master-data/cities';
-    protected static ?int $navigationSort = 3;
-
-
+    protected static ?string $slug = 'master-data/sub-district';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('City Information')
+                Forms\Components\Section::make('Sub District Information')
                     ->schema([
-                        Forms\Components\Select::make('province_id')
-                            // ->label('Province')
-                            ->relationship('province', titleAttribute: 'name')
-                            // ->options(Province::all()->pluck('name', 'id'))
-                            ->placeholder('Select Province')
+                        Forms\Components\Select::make('city_id')
+                            ->relationship('city', titleAttribute: 'name')
                             ->searchable()
-                            ->preload()
-                            ->required(),
-                        Forms\Components\Select::make('type')
-                            ->options([
-                                'regency' => 'Regency',
-                                'city' => 'City'
-                            ])
-                            ->placeholder('Select Type')
                             ->required(),
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('rajaongkir')
                             ->required()
+                            ->maxLength(50),
+                        Forms\Components\TextInput::make('postal_code')
+                            ->required()
                             ->maxLength(10),
                     ])->columns(2)
-
             ]);
     }
 
@@ -63,11 +53,8 @@ class CityResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('province.name')
-                    ->searchable('provinces.name')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('type')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('city.name')
+
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -75,6 +62,8 @@ class CityResource extends Resource
                 Tables\Columns\TextColumn::make('rajaongkir')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('postal_code')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -85,16 +74,16 @@ class CityResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('province_id')
-                    ->label('Province')
-                    ->relationship('province', titleAttribute: 'name')
+                Tables\Filters\SelectFilter::make('city_id')
+                    ->label('City')
+                    ->relationship('city', titleAttribute: 'name')
                     ->searchable()
                     ->preload()
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -113,9 +102,9 @@ class CityResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCities::route('/'),
-            'create' => Pages\CreateCity::route('/create'),
-            'edit' => Pages\EditCity::route('/{record}/edit'),
+            'index' => Pages\ListSubDistricts::route('/'),
+            'create' => Pages\CreateSubDistrict::route('/create'),
+            'edit' => Pages\EditSubDistrict::route('/{record}/edit'),
         ];
     }
 }

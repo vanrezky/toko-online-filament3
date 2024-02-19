@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('provice_id')->references('id')->on('provinces')->onDelete('cascade');
+            $table->foreignId('province_id')->references('id')->on('provinces')->onDelete('cascade');
             $table->string('type', 50)->comment('kabupaten/kota');
             $table->string('name');
             $table->string('rajaongkir', 10);

@@ -17,18 +17,26 @@ class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-flag';
+    protected static ?string $navigationLabel = 'Country';
+    protected static ?string $modelLabel = 'Master Country';
+    protected static ?string $navigationGroup = 'Master Management';
+    protected static ?string $slug = 'master-data/country';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('iso')
-                    ->required()
-                    ->maxLength(2),
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Section::make('Country Information')
+                    ->schema([
+                        Forms\Components\TextInput::make('iso')
+                            ->required()
+                            ->maxLength(2),
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                    ])->columns(2)
             ]);
     }
 
@@ -37,8 +45,11 @@ class CountryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('iso')
+                    ->label('ISO')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -54,6 +65,7 @@ class CountryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
