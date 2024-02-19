@@ -4,9 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CountryResource\Pages;
 use App\Filament\Resources\CountryResource\RelationManagers;
+use App\Filament\Resources\CountryResource\RelationManagers\EmployeesRelationManager;
+use App\Filament\Resources\CountryResource\RelationManagers\ProvincesRelationManager;
 use App\Models\Country;
+use App\Models\Employee;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -31,6 +37,7 @@ class CountryResource extends Resource
                 Forms\Components\Section::make('Country Information')
                     ->schema([
                         Forms\Components\TextInput::make('iso')
+                            ->label('ISO')
                             ->required()
                             ->maxLength(2),
                         Forms\Components\TextInput::make('name')
@@ -39,6 +46,7 @@ class CountryResource extends Resource
                     ])->columns(2)
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
@@ -66,10 +74,20 @@ class CountryResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
+                    ->successNotification(
+                        Notification::make()
+                            ->success()
+                            ->title('Country deleted')
+                            ->body('The country has been deleted successfully.'),
+                    )
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->successNotification(Notification::make()
+                            ->success()
+                            ->title('Country deleted')
+                            ->body('The country has been deleted successfully.')),
                 ]),
             ]);
     }
@@ -77,7 +95,8 @@ class CountryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProvincesRelationManager::class,
+            EmployeesRelationManager::class
         ];
     }
 

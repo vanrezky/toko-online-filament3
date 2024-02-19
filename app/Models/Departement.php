@@ -22,7 +22,7 @@ class Departement extends Model
 
     public function setNameAttribute($name): String
     {
-        return  strtoupper($name);
+        return  Str::upper($name);
     }
 
     public function getCreatedAtAttribute($created_at): String

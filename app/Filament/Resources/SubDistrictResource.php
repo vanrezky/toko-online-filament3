@@ -8,6 +8,9 @@ use App\Models\City;
 use App\Models\SubDistrict;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,7 +22,7 @@ use function Laravel\Prompts\search;
 class SubDistrictResource extends Resource
 {
     protected static ?string $model = SubDistrict::class;
-    protected static ?string $navigationIcon = 'heroicon-o-flag';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationLabel = 'Sub District';
     protected static ?string $modelLabel = 'Master Sub District';
     protected static ?string $navigationGroup = 'Master Management';
@@ -45,6 +48,20 @@ class SubDistrictResource extends Resource
                         Forms\Components\TextInput::make('postal_code')
                             ->required()
                             ->maxLength(10),
+                    ])->columns(2)
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Subdistrict Information')
+                    ->schema([
+                        TextEntry::make('city.name')->label('City name'),
+                        TextEntry::make('name')->label('Subdistrict name'),
+                        TextEntry::make('postal_code'),
+                        TextEntry::make('rajaongkir')->label('Rajaongkir code'),
                     ])->columns(2)
             ]);
     }

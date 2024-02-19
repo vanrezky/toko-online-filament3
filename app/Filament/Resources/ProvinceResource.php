@@ -4,10 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProvinceResource\Pages;
 use App\Filament\Resources\ProvinceResource\RelationManagers;
+use App\Filament\Resources\ProvinceResource\RelationManagers\CitiesRelationManager;
+use App\Filament\Resources\ProvinceResource\RelationManagers\EmployeeRelationManager;
 use App\Models\Country;
 use App\Models\Province;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,7 +24,7 @@ class ProvinceResource extends Resource
 {
     protected static ?string $model = Province::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-flag';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
     protected static ?string $navigationLabel = 'Province';
     protected static ?string $navigationGroup = 'Master Management';
     protected static ?string $modelLabel = 'Master Province';
@@ -45,6 +51,19 @@ class ProvinceResource extends Resource
                         Forms\Components\TextInput::make('rajaongkir')
                             ->required()
                             ->maxLength(255),
+                    ])->columns(2)
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Province Information')
+                    ->schema([
+                        TextEntry::make('country.name')->label('Country name'),
+                        TextEntry::make('name')->label('Pronvice name'),
+                        TextEntry::make('rajaongkir')->label('Rajaongkir code'),
                     ])->columns(2)
             ]);
     }
@@ -93,7 +112,10 @@ class ProvinceResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            CitiesRelationManager::class,
+            EmployeeRelationManager::class
+        ];
     }
 
     public static function getPages(): array

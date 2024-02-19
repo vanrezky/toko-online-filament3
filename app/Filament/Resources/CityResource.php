@@ -4,10 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CityResource\Pages;
 use App\Filament\Resources\CityResource\RelationManagers;
+use App\Filament\Resources\CityResource\RelationManagers\EmployeesRelationManager;
+use App\Filament\Resources\CityResource\RelationManagers\SubDistrictsRelationManager;
 use App\Models\City;
 use App\Models\Province;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,7 +23,7 @@ class CityResource extends Resource
 {
     protected static ?string $model = City::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-flag';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
     protected static ?string $navigationLabel = 'City';
     protected static ?string $modelLabel = 'Master City';
     protected static ?string $navigationGroup = 'Master Management';
@@ -56,6 +61,20 @@ class CityResource extends Resource
                             ->maxLength(10),
                     ])->columns(2)
 
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('City Information')
+                    ->schema([
+                        TextEntry::make('province.name')->label('Province name'),
+                        TextEntry::make('name')->label('City name'),
+                        TextEntry::make('type'),
+                        TextEntry::make('rajaongkir')->label('Rajaongkir code'),
+                    ])->columns(2)
             ]);
     }
 
@@ -106,7 +125,8 @@ class CityResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SubDistrictsRelationManager::class,
+            EmployeesRelationManager::class,
         ];
     }
 

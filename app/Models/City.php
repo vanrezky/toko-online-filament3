@@ -22,4 +22,9 @@ class City extends Model
     {
         return $this->hasMany(SubDistrict::class);
     }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
 }

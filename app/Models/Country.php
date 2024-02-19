@@ -14,9 +14,14 @@ class Country extends Model
 
     protected $fillable = ['iso', 'name'];
 
-    public function province(): HasMany
+    public function provinces(): HasMany
     {
         return $this->hasMany(Province::class);
+    }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
     }
 
     public function getNameAttribute($name): String

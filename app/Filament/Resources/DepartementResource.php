@@ -4,20 +4,26 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DepartementResource\Pages;
 use App\Filament\Resources\DepartementResource\RelationManagers;
+use App\Filament\Resources\ProvinceResource\RelationManagers\EmployeeRelationManager;
 use App\Models\Departement;
+use App\Models\Employee;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DepartementResource extends Resource
 {
     protected static ?string $model = Departement::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
     protected static ?string $navigationLabel = 'Departement';
     protected static ?string $navigationGroup = 'Master Management';
     protected static ?string $modelLabel = 'Master Departement';
@@ -34,6 +40,23 @@ class DepartementResource extends Resource
                             ->required()
                             ->maxLength(255),
                     ])
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Province Information')
+                    ->schema([
+                        TextEntry::make('name')->label('Pronvice name'),
+                        TextEntry::make('empeloyees_count')
+                            ->state(fn (Model $model): Int => $model->employees()->count())
+                            ->badge()
+                            ->color('success')
+                            ->prefix('Total: ')
+                            ->label('Employees'),
+                    ])->columns(2)
             ]);
     }
 
@@ -63,6 +86,7 @@ class DepartementResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
             ])
@@ -76,7 +100,7 @@ class DepartementResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            EmployeeRelationManager::class
         ];
     }
 
