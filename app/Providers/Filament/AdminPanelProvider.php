@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile()
             ->colors([
                 'danger' => Color::Red,
                 'gray' => Color::Slate,
@@ -37,7 +38,7 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->font('Open Sans')
-            ->navigationGroups(['Master Management', 'Employee Management', 'User Management', 'Reports'])
+            ->navigationGroups(['Master Management', 'Customer Management', 'User Management', 'Reports'])
             ->navigationItems([
                 NavigationItem::make('Analytics')
                     ->url('https://filament.pirsch.io', shouldOpenInNewTab: true)
@@ -46,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
                     ->sort(3),
             ])
             // ->sidebarCollapsibleOnDesktop()
-            ->topNavigation()
+            // ->topNavigation()
             ->favicon(asset('assets/images/favicon.ico'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

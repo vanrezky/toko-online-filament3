@@ -3,11 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CountryResource\Pages;
-use App\Filament\Resources\CountryResource\RelationManagers;
-use App\Filament\Resources\CountryResource\RelationManagers\EmployeesRelationManager;
 use App\Filament\Resources\CountryResource\RelationManagers\ProvincesRelationManager;
 use App\Models\Country;
-use App\Models\Employee;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\TextEntry;
@@ -96,7 +93,6 @@ class CountryResource extends Resource
     {
         return [
             ProvincesRelationManager::class,
-            EmployeesRelationManager::class
         ];
     }
 

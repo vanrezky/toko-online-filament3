@@ -3,8 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CityResource\Pages;
-use App\Filament\Resources\CityResource\RelationManagers;
-use App\Filament\Resources\CityResource\RelationManagers\EmployeesRelationManager;
 use App\Filament\Resources\CityResource\RelationManagers\SubDistrictsRelationManager;
 use App\Models\City;
 use App\Models\Province;
@@ -126,7 +124,6 @@ class CityResource extends Resource
     {
         return [
             SubDistrictsRelationManager::class,
-            EmployeesRelationManager::class,
         ];
     }
 

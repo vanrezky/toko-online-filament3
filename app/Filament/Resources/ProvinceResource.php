@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProvinceResource\Pages;
 use App\Filament\Resources\ProvinceResource\RelationManagers;
 use App\Filament\Resources\ProvinceResource\RelationManagers\CitiesRelationManager;
-use App\Filament\Resources\ProvinceResource\RelationManagers\EmployeeRelationManager;
 use App\Models\Country;
 use App\Models\Province;
 use Filament\Forms;
@@ -114,7 +113,6 @@ class ProvinceResource extends Resource
     {
         return [
             CitiesRelationManager::class,
-            EmployeeRelationManager::class
         ];
     }
 

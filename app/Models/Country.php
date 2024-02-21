@@ -19,11 +19,6 @@ class Country extends Model
         return $this->hasMany(Province::class);
     }
 
-    public function employees(): HasMany
-    {
-        return $this->hasMany(Employee::class);
-    }
-
     public function getNameAttribute($name): String
     {
         return Str::upper($name);

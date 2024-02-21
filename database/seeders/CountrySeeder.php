@@ -14,18 +14,10 @@ class CountrySeeder extends Seeder
      */
     public function run(): void
     {
-
-        // curl
-        $response = Http::get('https://countriesnow.space/api/v0.1/countries/flag/unicode')->collect('data');
-
-        if ($response) {
-            $response->each(function ($country) {
-                Country::create([
-                    'name' => $country['name'],
-                    'iso' => $country['iso2'],
-                    // 'iso3' => $country['iso3']
-                ]);
-            });
-        }
+        Country::create([
+            'name' => 'Indonesia',
+            'iso' => 'ID',
+            'iso3' => 'IDN'
+        ]);
     }
 }
