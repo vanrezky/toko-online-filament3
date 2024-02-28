@@ -16,6 +16,7 @@ use Filament\Forms\Set;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -26,9 +27,10 @@ use Illuminate\Support\Str;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Master Management';
-    protected static ?string $slug = 'master-data/categories';
+    protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
+    protected static ?string $navigationLabel = 'Category Product';
+    protected static ?string $navigationGroup = 'PRODUCT';
+    protected static ?string $slug = 'product/category';
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -74,13 +76,17 @@ class CategoryResource extends Resource
                     ->square(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->afterStateUpdated(function ($record, $state) {
-                        $record->is_active = $state;
-                        $record->save();
+                        return Notification::make()
+                            ->title('Activation status updated successfully')
+                            ->success()
+                            ->send();
                     }),
                 Tables\Columns\ToggleColumn::make('is_featured')
                     ->afterStateUpdated(function ($record, $state) {
-                        $record->is_featured = $state;
-                        $record->save();
+                        return Notification::make()
+                            ->title('Featured status updated successfully')
+                            ->success()
+                            ->send();
                     }),
             ])
             ->filters([

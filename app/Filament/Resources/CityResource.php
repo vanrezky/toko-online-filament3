@@ -26,7 +26,7 @@ class CityResource extends Resource
     protected static ?string $modelLabel = 'Master City';
     protected static ?string $navigationGroup = 'Master Management';
     protected static ?string $slug = 'master-data/cities';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 92;
 
 
 

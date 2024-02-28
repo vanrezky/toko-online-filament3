@@ -27,7 +27,7 @@ class SubDistrictResource extends Resource
     protected static ?string $modelLabel = 'Master Sub District';
     protected static ?string $navigationGroup = 'Master Management';
     protected static ?string $slug = 'master-data/sub-district';
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 93;
 
     public static function form(Form $form): Form
     {

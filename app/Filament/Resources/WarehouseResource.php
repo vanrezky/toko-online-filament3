@@ -7,6 +7,7 @@ use App\Filament\Resources\WarehouseResource\RelationManagers;
 use App\Models\Warehouse;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -17,9 +18,10 @@ class WarehouseResource extends Resource
 {
     protected static ?string $model = Warehouse::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Master Management';
-    protected static ?string $slug = 'master-data/warehouse';
+    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+    protected static ?string $navigationLabel = 'Warehouse Location';
+    protected static ?string $navigationGroup = 'SETTING';
+    protected static ?string $slug = 'setting/warehouse';
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
@@ -74,11 +76,19 @@ class WarehouseResource extends Resource
                 Tables\Columns\TextColumn::make('contact_phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('courier')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->afterStateUpdated(function ($record, $state) {
+                        return Notification::make()
+                            ->title('Featured status updated successfully')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Columns\TextColumn::make('description')
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->boolean(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -93,6 +103,7 @@ class WarehouseResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

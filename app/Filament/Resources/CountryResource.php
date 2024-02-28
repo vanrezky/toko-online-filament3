@@ -25,7 +25,7 @@ class CountryResource extends Resource
     protected static ?string $modelLabel = 'Master Country';
     protected static ?string $navigationGroup = 'Master Management';
     protected static ?string $slug = 'master-data/country';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 90;
 
     public static function form(Form $form): Form
     {

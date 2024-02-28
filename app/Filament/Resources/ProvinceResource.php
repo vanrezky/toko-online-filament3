@@ -28,7 +28,7 @@ class ProvinceResource extends Resource
     protected static ?string $navigationGroup = 'Master Management';
     protected static ?string $modelLabel = 'Master Province';
     protected static ?string $slug = 'Province';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 91;
 
     public static function form(Form $form): Form
     {

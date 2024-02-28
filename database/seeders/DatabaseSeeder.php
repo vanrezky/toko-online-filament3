@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             ProvinceSeeder::class,
             WarehouseSeeder::class,
-            CategorySeeder::class
+            CategorySeeder::class,
+            SliderSeeder::class,
+            PromotionSeeder::class,
         ]);
     }
 }

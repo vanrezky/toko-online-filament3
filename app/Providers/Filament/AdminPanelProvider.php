@@ -38,7 +38,7 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->font('Open Sans')
-            ->navigationGroups(['Master Management', 'Customer Management', 'User Management', 'Reports'])
+            ->navigationGroups(['PRODUCT', 'PROMO', 'USER', 'ORDER', 'REPORT', 'SETTING', 'MASTER', 'Customer Management', 'USER'])
             ->navigationItems([
                 NavigationItem::make('Analytics')
                     ->url('https://filament.pirsch.io', shouldOpenInNewTab: true)
