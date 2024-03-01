@@ -29,6 +29,7 @@ class PromotionResource extends Resource
     {
         return $form
             ->schema([
+
                 Forms\Components\Section::make('Promotion Information')
                     ->schema([
                         Forms\Components\TextInput::make('title')
@@ -50,8 +51,23 @@ class PromotionResource extends Resource
                             ->default('top'),
                         Forms\Components\Toggle::make('is_active')
                             ->required(),
-                    ])->columns(2)
-            ]);
+                    ])->columnSpan(2)->columns(2),
+
+                Forms\Components\Section::make('Promotion Information')
+                    ->schema([
+                        Forms\Components\DatePicker::make('start_at')->native(false),
+                        Forms\Components\DatePicker::make('end_at')->native(false),
+                        Forms\Components\TextInput::make('position')
+                            ->required()
+                            ->maxLength(255)
+                            ->default('top')
+                            ->columnSpanFull(),
+                        Forms\Components\Toggle::make('is_active')
+                            ->required(),
+                    ])->columnSpan(1)->columns(2)
+
+
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table

@@ -21,8 +21,8 @@ class PromotionSeeder extends Seeder
                 'is_active' => true,
                 'start_at' => now(),
                 'end_at' => now()->addDays(7),
-                'link' => '#',
-                'target' => '_self',
+                'target_link' => '#',
+                'target_anchor' => '_self',
             ],
             [
                 'position' => 'top',
@@ -32,8 +32,8 @@ class PromotionSeeder extends Seeder
                 'is_active' => true,
                 'start_at' => now(),
                 'end_at' => now()->addDays(7),
-                'link' => '#',
-                'target' => '_self',
+                'target_link' => '#',
+                'target_anchor' => '_self',
             ]
         ]);
 

@@ -20,6 +20,8 @@ return new class extends Migration
             $table->dateTime('start_at')->nullable();
             $table->dateTime('end_at')->nullable();
             $table->string('position')->default('top');
+            $table->tinyText('target_link')->nullable();
+            $table->enum('target_anchor', ['_self', '_blank'])->default('_self');
             $table->timestamps();
         });
     }

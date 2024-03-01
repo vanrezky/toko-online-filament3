@@ -29,6 +29,7 @@ class SliderResource extends Resource
     {
         return $form
             ->schema([
+
                 Forms\Components\Section::make('Slider Information')
                     ->schema([
                         Forms\Components\FileUpload::make('image')
@@ -49,16 +50,22 @@ class SliderResource extends Resource
                             ->options([
                                 '_self' => 'Same Tab',
                                 '_blank' => 'New Tab'
-                            ]),
+                            ])
+                            ->default('_self')
+                            ->native(false),
+
+
+                    ])->columnSpan(2)->columns(2),
+                Forms\Components\Section::make('Other')
+                    ->schema([
                         Forms\Components\DatePicker::make('start_at')->native(false),
                         Forms\Components\DatePicker::make('end_at')->native(false),
                         Forms\Components\Toggle::make('is_active')
                             ->required()
                             ->default(true),
 
-                    ])->columns(2),
-
-            ]);
+                    ])->columnSpan(1)->columns(2),
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table

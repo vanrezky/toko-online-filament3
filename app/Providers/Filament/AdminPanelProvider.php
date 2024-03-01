@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'warning' => Color::Orange,
             ])
-            ->font('Open Sans')
+            ->font('Roboto')
             ->navigationGroups(['PRODUCT', 'PROMO', 'USER', 'ORDER', 'REPORT', 'SETTING', 'MASTER', 'Customer Management', 'USER'])
             ->navigationItems([
                 NavigationItem::make('Analytics')

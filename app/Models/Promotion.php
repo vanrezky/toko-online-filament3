@@ -9,5 +9,5 @@ class Promotion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'image', 'is_active', 'start_at', 'end_at', 'position'];
+    protected $fillable = ['title', 'description', 'image', 'is_active', 'start_at', 'end_at', 'position', 'target_link', 'target_anchor'];
 }
