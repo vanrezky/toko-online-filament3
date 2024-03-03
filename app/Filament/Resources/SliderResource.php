@@ -39,13 +39,17 @@ class SliderResource extends Resource
                             ->columnSpanFull()
                             ->directory(UploadPath::IMAGES_UPLOAD_PATH),
                         Forms\Components\Textarea::make('description')
-                            ->required()
+                            ->string()
                             ->maxLength(255)
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('target_link')
+                            ->label('Link')
                             ->required()
+                            ->nullable()
+                            ->url()
                             ->maxLength(255),
                         Forms\Components\Select::make('target_anchor')
+                            ->label('Target')
                             ->required()
                             ->options([
                                 '_self' => 'Same Tab',
@@ -74,8 +78,8 @@ class SliderResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image'),
                 Tables\Columns\TextColumn::make('description')->searchable(),
-                Tables\Columns\TextColumn::make('target_link')->searchable(),
-                Tables\Columns\TextColumn::make('target_anchor')->sortable(),
+                Tables\Columns\TextColumn::make('target_link')->label('Link')->searchable(),
+                Tables\Columns\TextColumn::make('target_anchor')->label('Target')->sortable(),
                 Tables\Columns\TextColumn::make('start_at')->sortable()
                     ->date()
                     ->sortable(),

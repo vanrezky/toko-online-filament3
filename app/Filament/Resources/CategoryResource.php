@@ -7,6 +7,7 @@ use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
 use Filament\Forms;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Tabs\Tab;
@@ -37,43 +38,49 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                Split::make([
-                    Section::make([
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->minLength(3)
-                            ->live()
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
-                        Forms\Components\TextInput::make('slug')
-                            ->required(),
-                    ]),
-                    Section::make([
-                        Forms\Components\Toggle::make('is_active')
-                            ->default(fn (): bool => true),
-                        Forms\Components\Toggle::make('is_featured')
-                            ->default(fn (): bool => true),
-                        Forms\Components\FileUpload::make('image')
-                            ->image()
-                            ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
-                            ->imageEditorAspectRatios([null, '1:1'])
-                    ])
-                ])->from('md')
-            ]);
+                Section::make([
+                    Forms\Components\TextInput::make('name')
+                        ->required()
+                        ->minLength(3)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                    Forms\Components\TextInput::make('slug')
+                        ->unique(ignoreRecord: true)
+                        ->required(),
+                ])->columnSpan(2),
+                Group::make([
+                    Section::make('Image')
+                        ->schema([
+                            Forms\Components\FileUpload::make('image')
+                                ->hiddenLabel()
+                                ->image()
+                                ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
+                                ->imageEditorAspectRatios([null, '1:1'])
+                        ]),
+                    Section::make('Status')
+                        ->schema([
+                            Forms\Components\Toggle::make('is_active')
+                                ->default(fn (): bool => true),
+                            Forms\Components\Toggle::make('is_featured')
+                                ->default(fn (): bool => true),
+
+                        ])
+                ])->columnSpan(1)
+
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Category Name')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->sortable()
-                    ->searchable(),
+
                 Tables\Columns\ImageColumn::make('image')
                     ->square(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Name')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->afterStateUpdated(function ($record, $state) {
                         return Notification::make()

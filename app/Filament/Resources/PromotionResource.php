@@ -34,23 +34,19 @@ class PromotionResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('title')
                             ->required()
+                            ->minLength(3)
                             ->maxLength(255),
                         Forms\Components\Textarea::make('description')
                             ->maxLength(255)
+                            ->string()
                             ->columnSpanFull(),
                         Forms\Components\FileUpload::make('image')
                             ->image()
                             ->imageEditor()
                             ->directory(UploadPath::IMAGES_UPLOAD_PATH)
                             ->columnSpanFull(),
-                        Forms\Components\DatePicker::make('start_at'),
-                        Forms\Components\DatePicker::make('end_at'),
-                        Forms\Components\TextInput::make('position')
-                            ->required()
-                            ->maxLength(255)
-                            ->default('top'),
-                        Forms\Components\Toggle::make('is_active')
-                            ->required(),
+                        Forms\Components\DatePicker::make('start_at')->native(false),
+                        Forms\Components\DatePicker::make('end_at')->native(false),
                     ])->columnSpan(2)->columns(2),
 
                 Forms\Components\Section::make('Promotion Information')
