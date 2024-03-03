@@ -43,45 +43,46 @@ class ProductResource extends Resource
         return $form
             ->schema([
 
-                Forms\Components\Section::make()
-                    ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('Product Name'))
-                            ->hiddenLabel()
-                            ->placeholder('Product Name')
-                            ->helperText(__('Product name of at least 15 letters/characters.'))
-                            ->minLength(5)
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpanFull()
-                            ->id('product-name')
-                            ->live(onBlur: true)
-                            ->extraInputAttributes(['class' => 'font-bold py-10'], true)
-                            ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
 
-                                if ($operation == 'edit') {
-                                    return;
-                                }
-                                if (!$get('is_slug_changed_manually') && filled($state)) {
-                                    $set('slug', Str::slug($state));
-                                }
-
-                                $set('slug', Str::slug($state));
-                            }),
-                        Forms\Components\RichEditor::make('description')
-                            ->hiddenLabel()
-                            ->placeholder('Product Description')
-                            ->helperText(__('Add product descriptions to make it easier for buyers to understand the products being sold.'))
-                            ->required()
-                            ->string()
-                            ->disableToolbarButtons([
-                                'attachFiles',
-                            ])
-                            ->columnSpanFull(),
-                    ]),
 
                 Group::make([
-                    Forms\Components\Section::make(__('Name & Product Category'))
+                    Forms\Components\Section::make('Name & Description Product')
+                        ->schema([
+                            Forms\Components\TextInput::make('name')
+                                ->label(__('Product Name'))
+                                ->hiddenLabel()
+                                ->placeholder('Product Name')
+                                ->helperText(__('Product name of at least 15 letters/characters.'))
+                                ->minLength(5)
+                                ->required()
+                                ->maxLength(255)
+                                ->columnSpanFull()
+                                ->id('product-name')
+                                ->live(onBlur: true)
+                                ->extraInputAttributes(['class' => 'font-bold py-10'], true)
+                                ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
+
+                                    if ($operation == 'edit') {
+                                        return;
+                                    }
+                                    if (!$get('is_slug_changed_manually') && filled($state)) {
+                                        $set('slug', Str::slug($state));
+                                    }
+
+                                    $set('slug', Str::slug($state));
+                                }),
+                            Forms\Components\RichEditor::make('description')
+                                ->hiddenLabel()
+                                ->placeholder('Product Description')
+                                ->helperText(__('Add product descriptions to make it easier for buyers to understand the products being sold.'))
+                                ->required()
+                                ->string()
+                                ->disableToolbarButtons([
+                                    'attachFiles',
+                                ])
+                                ->columnSpanFull(),
+                        ]),
+                    Forms\Components\Section::make(__('Code & Product Category'))
                         ->schema(
                             [
                                 Forms\Components\TextInput::make('code')
@@ -242,7 +243,11 @@ class ProductResource extends Resource
                         ])->visible(fn (string $operation): bool => $operation == 'create')
                             ->columnSpanFull()
                     ])
-                    ->columnSpanFull()->columns(2)
+                    ->columnSpanFull()->columns(2),
+
+
+                // hidden value
+                Forms\Components\Hidden::make('user_id')->dehydrated()
 
             ])->columns(3);
     }

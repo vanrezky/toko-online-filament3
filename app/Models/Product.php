@@ -13,7 +13,7 @@ class Product extends Model
 {
     use HasFactory, HasUuidTrait;
 
-    protected $fillable = ['name', 'slug', 'warehouse_id', 'category_id', 'digital', 'digital_url', 'description', 'code', 'images', 'weight', 'stock', 'price', 'sale_price', 'afiliate_price', 'min_order', 'variation', 'sub_variation',];
+    protected $fillable = ['name', 'slug', 'warehouse_id', 'category_id', 'digital', 'digital_url', 'description', 'code', 'images', 'weight', 'stock', 'price', 'sale_price', 'afiliate_price', 'min_order', 'variation', 'sub_variation', 'user_id'];
 
     protected $casts = [
         'images' => 'array'
@@ -32,5 +32,10 @@ class Product extends Model
     public function productVariants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

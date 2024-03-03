@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('variant')->nullable();
             $table->string('sub_variant')->nullable();
             $table->boolean('is_active')->default(true)->index();
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
