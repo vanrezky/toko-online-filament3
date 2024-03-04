@@ -247,7 +247,13 @@ class ProductResource extends Resource
 
 
                 // hidden value
-                Forms\Components\Hidden::make('user_id')->dehydrated()
+                Forms\Components\Hidden::make('user_id')->dehydrated(),
+                Forms\Components\ViewField::make('rating')
+                    ->view('filament.forms.components.range-slider')
+                    ->viewData([
+                        'min' => 1,
+                        'max' => 5,
+                    ])
 
             ])->columns(3);
     }
