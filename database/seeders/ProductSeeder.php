@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -31,6 +32,7 @@ class ProductSeeder extends Seeder
             'sale_price' => 650000,
             'afiliate_price' => 2500,
             'min_order' => 1,
+            'user_id' => User::first()->id
         ]);
     }
 }
