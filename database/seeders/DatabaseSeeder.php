@@ -21,7 +21,10 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             SliderSeeder::class,
             PromotionSeeder::class,
-            ProductSeeder::class
+            ProductSeeder::class,
+            // VoucherSeeder::class
+            CustomerSeeder::class,
+            DistributorLevelSeeder::class,
         ]);
     }
 }
