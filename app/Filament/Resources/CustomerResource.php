@@ -30,7 +30,8 @@ class CustomerResource extends Resource
                     ->directory(UploadPath::PROFILE_UPLOAD_PATH)
                     ->imageEditorAspectRatios([
                         '1:1',
-                    ]),
+                    ])->columnSpanFull(),
+
                 Forms\Components\Group::make([
                     Forms\Components\TextInput::make('first_name')
                         ->placeholder(__('e.g: ') . 'John')

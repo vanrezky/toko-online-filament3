@@ -59,7 +59,7 @@ class ProductResource extends Resource
                                 ->columnSpanFull()
                                 ->id('product-name')
                                 ->live(onBlur: true)
-                                ->extraInputAttributes(['class' => 'font-bold py-10'], true)
+                                ->extraInputAttributes(['class' => 'column-title'], true)
                                 ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
 
                                     if ($operation == 'edit') {

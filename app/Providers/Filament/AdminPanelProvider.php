@@ -29,13 +29,20 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->profile()
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
-                'danger' => Color::Red,
+                'danger' => '#F3797E',
                 'gray' => Color::Slate,
-                'info' => Color::Blue,
-                'primary' => Color::Indigo,
+                'info' => '#3490DC',
+                'primary' => '#4B49AC',
                 'success' => Color::Emerald,
-                'warning' => Color::Orange,
+                'warning' => '#7DA0FA',
+                // 'danger' => Color::Red,
+                // 'gray' => Color::Slate,
+                // 'info' => Color::Blue,
+                // 'primary' => Color::Purple,
+                // 'success' => Color::Emerald,
+                // 'warning' => Color::Orange,
             ])
             ->font('Roboto')
             ->navigationGroups(['PRODUCT', 'PROMO', 'USER', 'ORDER', 'REPORT', 'SETTING', 'MASTER', 'Customer Management', 'USER'])
