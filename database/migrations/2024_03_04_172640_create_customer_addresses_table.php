@@ -15,12 +15,15 @@ return new class extends Migration
         Schema::create('customer_addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->references('id')->on('customers')->onDelete('cascade');
-            $table->boolean('is_active')->default(StatusType::ACTIVE->value);
+            $table->foreignId('province_id')->references('id')->on('provinces')->onDelete('cascade');
+            $table->foreignId('city_id')->references('id')->on('cities')->onDelete('cascade');
             $table->foreignId('sub_district_id')->references('id')->on('sub_districts')->onDelete('cascade');
             $table->string('name');
             $table->string('phone');
             $table->string('address');
             $table->string('postal_code');
+            $table->boolean('is_active')->default(StatusType::ACTIVE->value);
+            $table->boolean('is_featured')->default(StatusType::FEATURED->value);
             $table->timestamps();
         });
     }

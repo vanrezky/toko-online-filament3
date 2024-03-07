@@ -30,7 +30,7 @@ class ListCustomers extends ListRecords
             'All' => Tab::make()->label(__('All')),
         ];
 
-        $distributorLevels = DistributorLevel::all();
+        $distributorLevels = DistributorLevel::active()->get();
 
         foreach ($distributorLevels as $distributorLevel) {
             $tabs[$distributorLevel->name] = Tab::make()

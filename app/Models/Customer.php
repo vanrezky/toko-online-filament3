@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -29,8 +30,8 @@ class Customer extends Model
         return $this->hasMany(CustomerAddress::class);
     }
 
-    public function distributorLevel(): HasOne
+    public function distributorLevel(): BelongsTo
     {
-        return $this->hasOne(DistributorLevel::class);
+        return $this->belongsTo(DistributorLevel::class);
     }
 }

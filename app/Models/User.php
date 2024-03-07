@@ -44,4 +44,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+
+    public function scopeSuperUser($query, $status)
+    {
+        return $query->where('is_super_user', $status);
+    }
 }
