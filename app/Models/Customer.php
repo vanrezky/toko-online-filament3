@@ -28,6 +28,7 @@ class Customer extends Model
 
     protected $appends = [
         'profile_photo_url',
+        'has_verified_email',
     ];
 
 
@@ -44,5 +45,10 @@ class Customer extends Model
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->profile_photo_url;
+    }
+
+    public function getHasVerifiedEmailAttribute(): ?bool
+    {
+        return $this->email_verified_at !== null;
     }
 }

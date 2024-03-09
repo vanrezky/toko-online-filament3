@@ -10,10 +10,15 @@ use App\Filament\Resources\CustomerResource\RelationManagers\CustomerAddressRela
 use App\Models\Customer;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CustomerResource extends Resource
@@ -22,6 +27,48 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationGroup = 'USER';
+
+    protected static ?string $navigationLabel = 'Customer';
+    // protected static ?string $recordTitleAttribute = 'first_name';
+    // protected static int $globalSearchResultsLimit = 10;
+
+    // public static  function getGlobalSearchResultTitle(Model $record): string
+    // {
+    //     return $record->first_name . ' ' .  $record->last_name;
+    // }
+
+    // public static function getGloballySearchableAttributes(): array
+    // {
+    //     return ['first_name', 'last_name', 'departement.name'];
+    // }
+
+    // public static function getGlobalSearchResultDetails(Model $record): array
+    // {
+    //     return [
+    //         'Country' => $record->country->name,
+    //         'Departement' => $record->departement->name
+    //     ];
+    // }
+
+    // public static function getGlobalSearchEloquentQuery(): Builder
+    // {
+    //     return parent::getGlobalSearchEloquentQuery()->with(['departement', 'country']);
+    // }
+
+    // public static function getGlobalSearchResultUrl(Model $record): string
+    // {
+    //     return EmployeeResource::getUrl('view', ['record' => $record]);
+    // }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::count() > 10 ? 'info' : 'primary';
+    }
 
     public static function form(Form $form): Form
     {
@@ -108,6 +155,11 @@ class CustomerResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('distributorLevel.name')
+                    ->label(__('Level'))
+                    ->default('Free')
+                    ->badge()
+                    ->color('info'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -118,11 +170,32 @@ class CustomerResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TernaryFilter::make('email_verified_at')
+                    ->label('Email verification')
+                    ->nullable()
+                    ->placeholder(__('All'))
+                    ->trueLabel(__('Verified'))
+                    ->falseLabel(__('Not verified'))
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()->label('Profile'),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Action::make('verifed_email')
+                        ->label(__('Verification Email'))
+                        ->icon('heroicon-o-at-symbol')
+                        ->requiresConfirmation()
+                        ->action(function (Customer $record) {
+                            $record->update(['email_verified_at' => now()]);
+                            return Notification::make()
+                                ->title(__('Email has been verified  successfully'))
+                                ->success()
+                                ->send();
+                        })
+                        ->color('danger')
+                        ->visible(fn (Customer $record): bool => $record->email_verified_at === null),
+                    Tables\Actions\ViewAction::make()->label('Profile'),
+                    Tables\Actions\EditAction::make(),
+                ])->tooltip(__('Actions'))
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
