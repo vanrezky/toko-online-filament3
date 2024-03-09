@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Constants\UploadPath;
 use App\Filament\Resources\CustomerResource\Pages;
+use App\Filament\Resources\CustomerResource\Pages\Profile;
 use App\Filament\Resources\CustomerResource\RelationManagers;
 use App\Filament\Resources\CustomerResource\RelationManagers\CustomerAddressRelationManager;
 use App\Models\Customer;
@@ -27,11 +28,16 @@ class CustomerResource extends Resource
         return $form
             ->schema([
                 Forms\Components\FileUpload::make('image')
+                    ->label('Profile Image')
                     ->image()
+                    ->avatar()
                     ->directory(UploadPath::PROFILE_UPLOAD_PATH)
                     ->imageEditorAspectRatios([
                         '1:1',
-                    ])->columnSpanFull(),
+                    ])
+                    ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
+                    ->columnSpanFull()
+                    ->alignCenter(),
 
                 Forms\Components\Group::make([
                     Forms\Components\TextInput::make('first_name')
@@ -82,7 +88,8 @@ class CustomerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('image')
+                Tables\Columns\ImageColumn::make('profile_photo_url')
+                    ->label('Photo')
                     ->square(),
                 Tables\Columns\TextColumn::make('first_name')
                     ->searchable(),
@@ -92,12 +99,6 @@ class CustomerResource extends Resource
                     ->icon(fn (Customer $record): string => $record->email_verified_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->iconColor(fn (Customer $record): string => $record->email_verified_at ? 'success' : 'warning')
                     ->searchable(),
-                // Tables\Columns\TextColumn::make('email_verified_at')
-                //     ->dateTime()
-                //     ->sortable(),
-                // Tables\Columns\TextColumn::make('username')
-                //     ->default('-')
-                //     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('balance')
@@ -120,7 +121,7 @@ class CustomerResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make()->label('Profile'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -143,6 +144,7 @@ class CustomerResource extends Resource
             'index' => Pages\ListCustomers::route('/'),
             // 'create' => Pages\CreateCustomer::route('/create'),
             'edit' => Pages\EditCustomer::route('/{record}/edit'),
+            // 'edit' => Pages\Profile::route('/{record}/edit'),
         ];
     }
 }

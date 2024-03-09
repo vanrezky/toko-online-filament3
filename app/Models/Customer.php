@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasProfilePictureTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Customer extends Model
 {
-    use HasFactory;
+    use HasFactory, HasProfilePictureTrait;
 
     protected $fillable = ['first_name', 'last_name', 'email', 'email_verified_at', 'username', 'password', 'phone', 'balance', 'image', 'is_active'];
 
@@ -25,6 +26,11 @@ class Customer extends Model
         'password' => 'hashed',
     ];
 
+    protected $appends = [
+        'profile_photo_url',
+    ];
+
+
     public function address(): HasMany
     {
         return $this->hasMany(CustomerAddress::class);
@@ -33,5 +39,10 @@ class Customer extends Model
     public function distributorLevel(): BelongsTo
     {
         return $this->belongsTo(DistributorLevel::class);
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->profile_photo_url;
     }
 }
