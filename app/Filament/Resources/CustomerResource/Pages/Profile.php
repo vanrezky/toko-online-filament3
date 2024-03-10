@@ -3,118 +3,105 @@
 namespace App\Filament\Resources\CustomerResource\Pages;
 
 use App\Filament\Resources\CustomerResource;
+use App\Filament\Resources\CustomerResource\Widgets\TotalBalanceWidget;
 use App\Models\Customer;
-use Filament\Actions\Action;
-use Filament\Forms\Components\Component;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Navigation\MenuItem;
-use Filament\Resources\Pages\Page;
-use Filament\Widgets\StatsOverviewWidget\Stat;
-use Filament\Panel;
-use Filament\Forms\Form;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Tabs;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-class Profile extends Page implements HasForms
+class Profile extends ViewRecord
 {
-    use InteractsWithForms;
-
     protected static string $resource = CustomerResource::class;
 
-    protected static string $view = 'filament.resources.customer-resource.pages.profile';
 
-    public  ?Model $customer;
-
-    public function getTitle(): string | Htmlable
+    public function infolist(Infolist $infolist): Infolist
     {
-        return __('Profile') . ' ';
+        return $infolist
+            ->schema([
+                Section::make([
+                    ImageEntry::make('profile_photo_url')
+                        ->hiddenLabel()
+                        ->extraAttributes([
+                            'class' => 'justify-center'
+                        ])
+                        ->extraImgAttributes([
+                            'alt' => 'Profile photo',
+                            'loading' => 'lazy',
+                            'class' => 'border-2 border-primary'
+                        ])
+                        ->circular(),
+                    TextEntry::make('full_name')
+                        ->label(__('Name'))
+                        ->inlineLabel()
+                        ->icon('heroicon-o-user')
+                        ->iconColor('primary')
+                        ->extraAttributes(['class' => 'font-bold -mb-8'])
+                        ->alignEnd(),
+                    TextEntry::make('email')
+                        ->inlineLabel()
+                        ->alignEnd()
+                        ->icon('heroicon-o-envelope')
+                        ->iconColor('primary'),
+                    TextEntry::make('distributorLevel.name')
+                        ->label(__('Level'))
+                        ->inlineLabel()
+                        ->icon('heroicon-o-briefcase')
+                        ->iconColor('primary')
+                        ->extraAttributes(['class' => 'font-bold'])
+                        ->visible(fn (Customer $record): bool => !empty($record->distributor_level_id))
+                        ->alignEnd(),
+                ])
+                    ->columnSpan(1),
+                Tabs::make('Tabs')
+                    ->tabs([
+                        Tabs\Tab::make('Profile Details')
+                            ->icon('heroicon-o-user')
+                            ->schema([
+                                TextEntry::make('first_name'),
+                                TextEntry::make('last_name'),
+                                TextEntry::make('email')
+                                    ->icon(fn (Customer $record): string => $record->has_verified_email ? 'heroicon-o-check-badge' : 'heroicon-o-x-circle')
+                                    ->iconColor(fn (Customer $record): string => $record->has_verified_email ? 'success' : 'danger')
+                                    ->iconPosition('after')
+                                    ->tooltip(fn (Customer $record): string => $record->has_verified_email ? __('Email Verified') : __('Email Unverified')),
+                                TextEntry::make('username')->default('-'),
+                                TextEntry::make('phone'),
+                                TextEntry::make('balance')->numeric(decimalPlaces: 2)->prefix('IDR ')
+                                    ->badge()
+                                    ->color('primary')
+                                    ->size('xl'),
+
+
+                            ])->inlineLabel(),
+                        Tabs\Tab::make('Balance')
+                            ->icon('heroicon-o-banknotes')
+                            ->schema([
+                                TextEntry::make('balance')->numeric(decimalPlaces: 2)->prefix('IDR ')
+                                    ->color('primary')
+                                    ->size('xl'),
+                            ])->inlineLabel(),
+                        Tabs\Tab::make('Activity')
+                            ->schema([
+                                // ...
+                            ]),
+                        Tabs\Tab::make('Logs')
+                            ->schema([
+                                // ...
+                            ]),
+                    ])
+                    ->columnSpan(2),
+
+            ])->columns(3);
     }
 
-    public function panel(Panel $panel): Panel
-    {
-        return $panel
-            // ...
-            ->userMenuItems([
-                MenuItem::make()
-                    ->label('Profile')
-                    ->url(fn (): string => Profile::getUrl())
-                    ->icon('heroicon-o-user'),
-            ]);
-        // ...
-    }
 
-    protected function getHeaderActions(): array
+    protected function getHeaderWidgets(): array
     {
         return [
-            // Action::make('edit')
-            //     ->url(route('posts.edit', ['post' => $this->post])),
-            // Action::make('delete')
-            //     ->requiresConfirmation()
-            //     ->action(fn () => $this->post->delete()),
-
-            // Action::make('approve')
-            //     ->action(function (Post $record) {
-            //         $record->approve();
-
-            //         $this->refreshFormData([
-            //             'status',
-            //         ]);
-            //     })
+            TotalBalanceWidget::class,
         ];
-    }
-
-
-    public function mount(Customer $customer): void
-    {
-        $this->customer = $customer;
-
-        // $this->form->fill(
-        //     auth()->user()->attributesToArray()
-        // );
-    }
-
-    protected function getFormActions(): array
-    {
-        return [
-            Action::make('Update')
-                ->color('primary')
-                ->submit('Update'),
-        ];
-    }
-
-    public function update()
-    {
-        auth()->user()->update(
-            $this->form->getState()
-        );
-    }
-
-
-    public function getGeneralSection(): Component
-    {
-
-        return Section::make('General')
-            ->schema([
-                TextInput::make('number')
-                    ->live()
-                    ->required()
-            ]);
-    }
-
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->autofocus()
-                    ->required(),
-                TextInput::make('email')
-                    ->required(),
-            ])
-            ->statePath('data')
-            ->model(auth()->user());
     }
 }

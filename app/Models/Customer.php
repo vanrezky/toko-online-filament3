@@ -29,6 +29,7 @@ class Customer extends Model
     protected $appends = [
         'profile_photo_url',
         'has_verified_email',
+        'full_name',
     ];
 
 
@@ -50,5 +51,10 @@ class Customer extends Model
     public function getHasVerifiedEmailAttribute(): ?bool
     {
         return $this->email_verified_at !== null;
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

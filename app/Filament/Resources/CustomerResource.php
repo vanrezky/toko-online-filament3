@@ -137,7 +137,11 @@ class CustomerResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('profile_photo_url')
                     ->label('Photo')
-                    ->square(),
+                    ->circular()
+                    ->extraImgAttributes([
+                        'class' => 'border border-gray-200',
+                        'lazy' => 'loading'
+                    ]),
                 Tables\Columns\TextColumn::make('first_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('last_name')
@@ -217,7 +221,7 @@ class CustomerResource extends Resource
             'index' => Pages\ListCustomers::route('/'),
             // 'create' => Pages\CreateCustomer::route('/create'),
             'edit' => Pages\EditCustomer::route('/{record}/edit'),
-            // 'edit' => Pages\Profile::route('/{record}/edit'),
+            'view' => Pages\Profile::route('/{record}'),
         ];
     }
 }
