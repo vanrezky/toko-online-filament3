@@ -21,16 +21,6 @@ class UserResource extends Resource
     protected static ?string $navigationGroup = 'Setting';
     protected static ?string $slug = 'setting/users';
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::count();
-    }
-
-    public static function getNavigationBadgeColor(): ?string
-    {
-        return static::getModel()::count() > 10 ? 'info' : 'primary';
-    }
-
 
     public static function form(Form $form): Form
     {
@@ -44,9 +34,17 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('email')
                             ->email()
                             ->required()
-                            ->maxLength(255),
-                        Forms\Components\DateTimePicker::make('email_verified_at'),
+                            ->minLength(5)
+                            ->maxLength(50)
+                            ->unique(),
                         Forms\Components\TextInput::make('password')
+                            ->password()
+                            ->required()
+                            ->maxLength(255)
+                            ->minLength(8)
+                            ->hiddenOn('view'),
+                        Forms\Components\TextInput::make('confirm_password')
+                            ->same('password')
                             ->password()
                             ->required()
                             ->maxLength(255)
@@ -60,6 +58,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->superUser(false))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -106,6 +105,7 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
+
         ];
     }
 }

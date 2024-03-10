@@ -66,7 +66,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->sidebarWidth('18rem')
+            // ->sidebarWidth('18rem')
             ->plugin(FilamentProgressbarPlugin::make()->color('#29b'))
             ->spa();
     }

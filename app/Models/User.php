@@ -21,7 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_super_user'
+        'is_super_user',
+        'email_verified_at'
     ];
 
     /**
@@ -44,7 +45,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
 
     public function scopeSuperUser($query, $status)
     {
