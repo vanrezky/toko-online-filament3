@@ -24,11 +24,14 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationGroup = 'Shop';
     protected static ?string $slug = 'shop/customers';
     protected static ?int $navigationSort = 4;
+
+    public Customer $record;
+
+
 
     // protected static ?string $navigationLabel = 'Customer';
     // protected static ?string $recordTitleAttribute = 'first_name';
@@ -163,7 +166,7 @@ class CustomerResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('distributorLevel.name')
                     ->label(__('Level'))
-                    ->default('Free')
+                    ->default('None')
                     ->badge()
                     ->color('info'),
                 Tables\Columns\TextColumn::make('created_at')

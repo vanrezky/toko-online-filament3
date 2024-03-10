@@ -27,7 +27,9 @@ class ListCustomers extends ListRecords
     {
 
         $tabs = [
-            'All' => Tab::make()->label(__('All')),
+            'All' => Tab::make()->label(__('All'))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereNull('distributor_level_id'))
+                ->badge(Customer::query()->whereNull('distributor_level_id')->count()),
         ];
 
         $distributorLevels = DistributorLevel::active()->get();

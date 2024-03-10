@@ -63,7 +63,10 @@ class Profile extends ViewRecord
                                 TextEntry::make('first_name'),
                                 TextEntry::make('last_name'),
                                 TextEntry::make('email')
-                                    ->icon(fn (Customer $record): string => $record->has_verified_email ? 'heroicon-o-check-badge' : 'heroicon-o-x-circle')
+                                    ->icon(fn ($record): string => match ($record->has_verified_email) {
+                                        true => 'heroicon-o-check-badge',
+                                        false => 'heroicon-o-x-circle',
+                                    })
                                     ->iconColor(fn (Customer $record): string => $record->has_verified_email ? 'success' : 'danger')
                                     ->iconPosition('after')
                                     ->tooltip(fn (Customer $record): string => $record->has_verified_email ? __('Email Verified') : __('Email Unverified')),
@@ -73,15 +76,17 @@ class Profile extends ViewRecord
                                     ->badge()
                                     ->color('primary')
                                     ->size('xl'),
-
-
                             ])->inlineLabel(),
                         Tabs\Tab::make('Balance')
                             ->icon('heroicon-o-banknotes')
                             ->schema([
-                                TextEntry::make('balance')->numeric(decimalPlaces: 2)->prefix('IDR ')
+                                TextEntry::make('balance')->numeric(decimalPlaces: 2)
+                                    ->icon('heroicon-o-banknotes')
+                                    ->iconColor('primary')
                                     ->color('primary')
+                                    ->weight('bold')
                                     ->size('xl'),
+
                             ])->inlineLabel(),
                         Tabs\Tab::make('Activity')
                             ->schema([
@@ -100,8 +105,9 @@ class Profile extends ViewRecord
 
     protected function getHeaderWidgets(): array
     {
+
         return [
-            TotalBalanceWidget::class,
+            // TotalBalanceWidget::class,
         ];
     }
 }
