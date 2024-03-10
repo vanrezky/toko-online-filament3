@@ -19,9 +19,9 @@ class DistributorLevelResource extends Resource
     protected static ?string $model = DistributorLevel::class;
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $navigationLabel = 'Distributor & Agent Level';
-    protected static ?string $navigationGroup = 'SETTING';
+    protected static ?string $navigationGroup = 'Setting';
     protected static ?string $slug = 'setting/distributor-level';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

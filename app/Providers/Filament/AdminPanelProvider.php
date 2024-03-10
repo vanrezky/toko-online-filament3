@@ -18,6 +18,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Njxqlus\FilamentProgressbar\FilamentProgressbarPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -37,24 +38,9 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => '#4B49AC',
                 'success' => Color::Emerald,
                 'warning' => '#7DA0FA',
-                // 'danger' => Color::Red,
-                // 'gray' => Color::Slate,
-                // 'info' => Color::Blue,
-                // 'primary' => Color::Purple,
-                // 'success' => Color::Emerald,
-                // 'warning' => Color::Orange,
             ])
             ->font('Roboto')
-            ->navigationGroups(['PRODUCT', 'PROMO', 'USER', 'ORDER', 'REPORT', 'SETTING', 'MASTER', 'Customer Management', 'USER'])
-            ->navigationItems([
-                NavigationItem::make('Analytics')
-                    ->url('https://filament.pirsch.io', shouldOpenInNewTab: true)
-                    ->icon('heroicon-o-presentation-chart-line')
-                    ->group('Reports')
-                    ->sort(3),
-            ])
-            // ->sidebarCollapsibleOnDesktop()
-            // ->topNavigation()
+            ->navigationGroups(['Shop', 'Promotion', 'Blog', 'Setting'])
             ->favicon(asset('assets/images/favicon.ico'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -80,7 +66,8 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->sidebarWidth('18rem');
-        // ->spa();
+            ->sidebarWidth('18rem')
+            ->plugin(FilamentProgressbarPlugin::make()->color('#29b'))
+            ->spa();
     }
 }

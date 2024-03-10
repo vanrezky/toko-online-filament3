@@ -29,10 +29,10 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
-    protected static ?string $navigationLabel = 'Category Product';
-    protected static ?string $navigationGroup = 'PRODUCT';
-    protected static ?string $slug = 'product/category';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = 'Categories';
+    protected static ?string $navigationGroup = 'Shop';
+    protected static ?string $slug = 'shop/categories';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -78,7 +78,15 @@ class CategoryResource extends Resource
                 Tables\Columns\ImageColumn::make('image')
                     ->square(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('Category Name'))
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('products_count')->counts('products')
+                    ->prefix('Products: ')
+                    ->badge()
+                    ->icon('heroicon-o-squares-2x2')
+                    ->label(__('Total Product'))
+                    ->color('danger')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\ToggleColumn::make('is_active')
@@ -101,11 +109,37 @@ class CategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()->action(function ($record) {
+                    if ($record->products()->count()) {
+                        return Notification::make()
+                            ->title('Category cannot be deleted')
+                            ->warning()
+                            ->send();
+                    }
+
+                    return $record->delete();
+                }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->action(function ($records) {
+                        $delete = true;
+                        foreach ($records as $key => $record) {
+                            if ($record->products()->count()) {
+                                $delete = false;
+                                break;
+                            }
+                        }
+
+                        if (!$delete) {
+                            return Notification::make()
+                                ->title('There are categories that cannot be deleted')
+                                ->warning()
+                                ->send();
+                        }
+
+                        return $records->each(fn ($record) => $record->delete());
+                    }),
                 ]),
             ]);
     }

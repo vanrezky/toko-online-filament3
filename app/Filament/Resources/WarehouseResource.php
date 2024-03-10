@@ -20,9 +20,9 @@ class WarehouseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
     protected static ?string $navigationLabel = 'Warehouse Location';
-    protected static ?string $navigationGroup = 'SETTING';
+    protected static ?string $navigationGroup = 'Setting';
     protected static ?string $slug = 'setting/warehouse';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
