@@ -44,15 +44,15 @@ class BlogPostResource extends Resource
                 Group::make([
                     Section::make('Post Information')
                         ->schema([
-                            TextInput::make('name')
-                                ->label(__('Post Name'))
+                            TextInput::make('title')
+                                ->label(__('Post title'))
                                 ->hiddenLabel()
-                                ->placeholder(__('Post Name'))
+                                ->placeholder(__('Post title'))
                                 ->minLength(5)
                                 ->required()
                                 ->maxLength(255)
                                 ->columnSpanFull()
-                                ->id('product-name')
+                                ->id('post-title')
                                 ->live(onBlur: true)
                                 ->extraInputAttributes(['class' => 'column-title'], true)
                                 ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
@@ -66,14 +66,11 @@ class BlogPostResource extends Resource
 
                                     $set('slug', Str::slug($state));
                                 }),
-                            RichEditor::make('description')
+                            RichEditor::make('content')
                                 ->hiddenLabel()
-                                ->placeholder('Product Description')
+                                ->placeholder('Post Content')
                                 ->required()
                                 ->string()
-                                ->disableToolbarButtons([
-                                    'attachFiles',
-                                ])
                                 ->columnSpanFull(),
                             FileUpload::make('image')
                                 ->image()
@@ -127,7 +124,7 @@ class BlogPostResource extends Resource
                                 ->default(now()),
                             Hidden::make('user_id')
                                 ->default(auth()->id())
-                                ->dehydrated(fn (string $operation) => $operation === 'edit'),
+                                ->dehydrated(fn (string $operation) => $operation !== 'edit'),
 
                         ]),
 
@@ -139,13 +136,32 @@ class BlogPostResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('title')
+                    ->label(__('Post title'))
+                    ->searchable()
+                    ->sortable()
+                    ->words(5),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label(__('Category'))
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('author.name')
+                    ->label(__('Author'))
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('published_at')
+                    ->date()
+                    ->label(__('Published')),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('Last Updated'))
+                    ->date(),
+
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
