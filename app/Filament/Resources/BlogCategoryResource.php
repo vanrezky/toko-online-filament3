@@ -28,11 +28,12 @@ class BlogCategoryResource extends Resource
 {
     protected static ?string $model = BlogCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationGroup = 'Blog';
     protected static ?string $navigationLabel = 'Categories';
     protected static ?int $navigationSort = 2;
+    protected static ?string $slug = 'blog/categories';
 
     public static function form(Form $form): Form
     {

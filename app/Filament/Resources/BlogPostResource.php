@@ -35,11 +35,12 @@ class BlogPostResource extends Resource
 {
     protected static ?string $model = BlogPost::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Posts';
     protected static ?string $navigationGroup = 'Blog';
     protected static ?int $navigationSort = 1;
+    protected static ?string $slug = 'blog/posts';
 
     public static function form(Form $form): Form
     {
