@@ -91,7 +91,7 @@ class BlogPostResource extends Resource
                                     ->preload()
                                     ->required(),
                             ]),
-                        Tab::make('Seo')
+                        Tab::make('SEO')
                             ->schema([
                                 Textarea::make('description')
                                     ->label(__('Description'))
