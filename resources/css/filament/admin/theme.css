@@ -3,6 +3,10 @@
 @config 'tailwind.config.js';
 
 @layer components {
+    .fi-active {
+        @apply text-primary  !important;
+    }
+
     .column-title {
         @apply font-bold py-2 text-xl !important;
     }
@@ -28,10 +32,6 @@
 
     .fi-sidebar-group {
         @apply rounded-3xl rounded-tl-none border p-2 bg-gray-100/30 shadow-md !important;
-    }
-
-    .fi-sidebar-item-active {
-        @apply text-primary  !important;
     }
 
     .fi-sidebar-item-active .fi-sidebar-item-label {

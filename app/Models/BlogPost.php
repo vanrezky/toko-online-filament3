@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Spatie\Tags\HasTags;
 
 class BlogPost extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTags;
 
     protected $fillable = ['title', 'slug', 'content', 'published_at', 'blog_category_id', 'image', 'is_status', 'user_id'];
 
@@ -22,11 +23,6 @@ class BlogPost extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(BlogCategory::class, 'blog_category_id');
-    }
-
-    public function tags(): BelongsTo
-    {
-        return $this->belongsTo(BlogTag::class);
     }
 
     public function author(): HasOne

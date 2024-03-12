@@ -15,7 +15,11 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieTagsInput;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -41,93 +45,101 @@ class BlogPostResource extends Resource
     {
         return $form
             ->schema([
-                Group::make([
-                    Section::make('Post Information')
-                        ->schema([
-                            TextInput::make('title')
-                                ->label(__('Post title'))
-                                ->hiddenLabel()
-                                ->placeholder(__('Post title'))
-                                ->minLength(5)
-                                ->required()
-                                ->maxLength(255)
-                                ->columnSpanFull()
-                                ->id('post-title')
-                                ->live(onBlur: true)
-                                ->extraInputAttributes(['class' => 'column-title'], true)
-                                ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
+                Tabs::make()
+                    ->schema([
+                        Tab::make('Title & Content')
+                            ->schema([
+                                TextInput::make('title')
+                                    ->autofocus()
+                                    ->label(__('Post title'))
+                                    ->hiddenLabel()
+                                    ->placeholder(__('Post title'))
+                                    ->minLength(5)
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpanFull()
+                                    ->id('post-title')
+                                    ->live(onBlur: true)
+                                    ->extraInputAttributes(['class' => 'column-title'], true)
+                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
 
-                                    if ($operation == 'edit') {
-                                        return;
-                                    }
-                                    if (!$get('is_slug_changed_manually') && filled($state)) {
+                                        if ($operation == 'edit') {
+                                            return;
+                                        }
+                                        if (!$get('is_slug_changed_manually') && filled($state)) {
+                                            $set('slug', Str::slug($state));
+                                        }
+
                                         $set('slug', Str::slug($state));
-                                    }
+                                    }),
+                                RichEditor::make('content')
+                                    ->hiddenLabel()
+                                    ->placeholder('Post Content')
+                                    ->required()
+                                    ->string()
+                                    ->columnSpanFull(),
+                                Select::make('blog_category_id')
+                                    ->relationship('category', titleAttribute: 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(),
+                            ]),
+                        Tab::make('Seo')
+                            ->schema([
+                                Textarea::make('description')
+                                    ->label(__('Description'))
+                                    ->hint(__('Write an excerpt for your post')),
+                                TextInput::make('slug')
+                                    ->label(__('Post Slug'))
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->rules(['alpha_dash'])
+                                    ->unique(ignoreRecord: true)
+                                    ->afterStateUpdated(function (Set $set) {
+                                        $set('is_slug_changed_manually', true);
+                                    })
+                                    ->required()->columnSpanFull(),
+                                Hidden::make('is_slug_changed_manually')
+                                    ->default(false)
+                                    ->dehydrated(false),
+                            ]),
+                        Tab::make('Tags')
+                            ->schema([
+                                SpatieTagsInput::make('tags')
+                                    ->label(__('Tags'))
+                                    ->placeholder('e.g: electronics, phone, laptop')
+                            ]),
+                        Tab::make('Visibility')
+                            ->schema([
+                                Select::make('is_status')
+                                    ->label(__('Post Status'))
+                                    ->helperText(__('Publish the post or save it as a draft.'))
+                                    ->options([
+                                        BlogPostStatus::DRAFT->value => 'Draft',
+                                        BlogPostStatus::PUBLISHED->value => 'Published',
+                                    ])
+                                    ->default(BlogPostStatus::PUBLISHED->value)
+                                    ->native(false)
+                                    ->required(),
+                                DatePicker::make('published_at')
+                                    ->helperText(__('If published, the post will be visible on this date.'))
+                                    ->default(now())
+                            ]),
+                        Tab::make('Image')
+                            ->schema([
+                                FileUpload::make('image')
+                                    ->label('Featured Image')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->directory(UploadPath::IMAGES_UPLOAD_PATH),
+                            ]),
 
-                                    $set('slug', Str::slug($state));
-                                }),
-                            RichEditor::make('content')
-                                ->hiddenLabel()
-                                ->placeholder('Post Content')
-                                ->required()
-                                ->string()
-                                ->columnSpanFull(),
-                            FileUpload::make('image')
-                                ->image()
-                                ->imageEditor()
-                                ->required()
-                                ->imagePreviewHeight('150')
-                                ->directory(UploadPath::IMAGES_UPLOAD_PATH),
-                        ]),
-                ])->columnSpan(2),
+                    ])->columnSpanFull(),
+                Hidden::make('user_id')
+                    ->default(auth()->id())
+                    ->dehydrated(fn (string $operation) => $operation !== 'edit')
 
-                Group::make([
-                    Section::make('Other Information')
-                        ->schema([
-                            TextInput::make('slug')
-                                ->required()
-                                ->maxLength(255)
-                                ->rules(['alpha_dash'])
-                                ->unique(ignoreRecord: true)
-                                ->afterStateUpdated(function (Set $set) {
-                                    $set('is_slug_changed_manually', true);
-                                })
-                                ->required()->columnSpanFull(),
-                            Hidden::make('is_slug_changed_manually')
-                                ->default(false)
-                                ->dehydrated(false),
-
-                            Select::make('blog_category_id')
-                                ->relationship('category', titleAttribute: 'name')
-                                ->searchable()
-                                ->preload()
-                                ->required(),
-                            TagsInput::make('tags')
-                                ->label(__('Tags'))
-                                ->placeholder('e.g: electronics, phone, laptop')
-                                ->separator(','),
-                            Select::make('is_status')
-                                ->label(__('Post Status'))
-                                ->helperText(__('Publish the post or save it as a draft.'))
-                                ->options([
-                                    BlogPostStatus::DRAFT->value => 'Draft',
-                                    BlogPostStatus::PUBLISHED->value => 'Published',
-                                ])
-                                ->default(BlogPostStatus::PUBLISHED->value)
-                                ->native(false)
-                                ->required(),
-
-                            DatePicker::make('published_at')
-                                ->helperText(__('If published, the post will be visible on this date.'))
-                                ->default(now()),
-                            Hidden::make('user_id')
-                                ->default(auth()->id())
-                                ->dehydrated(fn (string $operation) => $operation !== 'edit'),
-
-                        ]),
-
-                ])->columnSpan(1),
-            ])->columns(3);
+            ]);
     }
 
     public static function table(Table $table): Table
