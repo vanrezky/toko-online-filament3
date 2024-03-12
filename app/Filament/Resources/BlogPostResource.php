@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Constants\UploadPath;
-use App\Enums\StatusType;
+use App\Enums\BlogPostStatus;
 use App\Filament\Resources\BlogPostResource\Pages;
 use App\Filament\Resources\BlogPostResource\RelationManagers;
 use App\Models\BlogPost;
@@ -110,14 +110,12 @@ class BlogPostResource extends Resource
                                 ->label(__('Post Status'))
                                 ->helperText(__('Publish the post or save it as a draft.'))
                                 ->options([
-                                    StatusType::ACTIVE->value => 'Draft',
-                                    StatusType::INACTIVE->value => 'Published',
+                                    BlogPostStatus::DRAFT->value => 'Draft',
+                                    BlogPostStatus::PUBLISHED->value => 'Published',
                                 ])
-                                ->default(StatusType::INACTIVE->value)
+                                ->default(BlogPostStatus::PUBLISHED->value)
                                 ->native(false)
-                                // ->canSelectPlaceholder(false)
-                                ->required()
-                                ->live(),
+                                ->required(),
 
                             DatePicker::make('published_at')
                                 ->helperText(__('If published, the post will be visible on this date.'))
@@ -155,6 +153,9 @@ class BlogPostResource extends Resource
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label(__('Last Updated'))
                     ->date(),
+                Tables\Columns\TextColumn::make('is_status')
+                    ->label(__('Status'))
+                    ->badge()
 
             ])
             ->filters([
@@ -163,6 +164,7 @@ class BlogPostResource extends Resource
             ->actions([
                 // Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
