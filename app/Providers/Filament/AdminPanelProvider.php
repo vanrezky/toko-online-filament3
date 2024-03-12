@@ -33,13 +33,13 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'danger' => '#F3797E',
-                'gray' => Color::Slate,
+                'gray' => Color::Gray,
                 'info' => '#3490DC',
                 'primary' => '#4B49AC',
-                'success' => Color::Emerald,
-                'warning' => '#7DA0FA',
+                'success' => Color::Green,
+                'warning' => Color::Orange,
             ])
-            ->font('Roboto')
+            ->font('Karla')
             ->navigationGroups(['Shop', 'Promotion', 'Blog', 'Setting'])
             ->favicon(asset('assets/images/favicon.ico'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
