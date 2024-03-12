@@ -6,11 +6,13 @@ use App\Filament\Resources\FaqResource\Pages;
 use App\Filament\Resources\FaqResource\RelationManagers;
 use App\Models\Faq;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -21,22 +23,32 @@ class FaqResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-sparkles';
 
     protected static ?string $navigationGroup = 'Setting';
+    protected static ?string $navigationLabel = 'FAQs';
+    protected static ?string $modelLabel = 'Frequenly Asked Questions';
     protected static ?int $navigationSort = 4;
     protected static ?string $slug = 'setting/faqs';
 
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('question')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('answer')
-                    ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+                Section::make(
+                    [
+                        Forms\Components\TextInput::make('question')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\RichEditor::make('answer')
+                            ->required()
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+                    ]
+                )
             ]);
     }
 
@@ -46,13 +58,9 @@ class FaqResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('question')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('answer')
-                    ->searchable()
-                    ->words(5),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -83,8 +91,8 @@ class FaqResource extends Resource
     {
         return [
             'index' => Pages\ListFaqs::route('/'),
-            // 'create' => Pages\CreateFaq::route('/create'),
-            // 'edit' => Pages\EditFaq::route('/{record}/edit'),
+            'create' => Pages\CreateFaq::route('/create'),
+            'edit' => Pages\EditFaq::route('/{record}/edit'),
         ];
     }
 }

@@ -35,6 +35,11 @@ class BlogCategoryResource extends Resource
     protected static ?int $navigationSort = 2;
     protected static ?string $slug = 'blog/categories';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
