@@ -17,7 +17,8 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
-        "njxqlus/filament-progressbar": "^1.0"
+        "njxqlus/filament-progressbar": "^1.0",
+        "openai-php/laravel": "^0.8.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.10",
