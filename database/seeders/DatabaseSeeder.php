@@ -22,10 +22,12 @@ class DatabaseSeeder extends Seeder
             SliderSeeder::class,
             PromotionSeeder::class,
             ProductSeeder::class,
-            // VoucherSeeder::class
+            VoucherSeeder::class,
             CustomerSeeder::class,
             DistributorLevelSeeder::class,
-            PageSeeder::class
+            PageSeeder::class,
+            PaymentGatewaySeeder::class,
+
         ]);
     }
 }
