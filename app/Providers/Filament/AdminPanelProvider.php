@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Settings\GeneralSettings;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -30,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->profile()
+            ->brandName(settings('site_name'))
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'danger' => '#F3797E',
@@ -41,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Karla')
             ->navigationGroups(['Shop', 'Promotion', 'Blog', 'Setting'])
-            ->favicon(asset('assets/images/favicon.ico'))
+            ->favicon(app(GeneralSettings::class)->getFavicon())
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

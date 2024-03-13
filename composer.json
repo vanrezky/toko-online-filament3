@@ -12,6 +12,7 @@
         "ariaieboy/filament-currency": "^1.2",
         "aymanalhattami/filament-page-with-sidebar": "^2.4",
         "filament/filament": "^3.2",
+        "filament/spatie-laravel-settings-plugin": "^3.2",
         "filament/spatie-laravel-tags-plugin": "^3.2",
         "guzzlehttp/guzzle": "^7.8",
         "laravel/framework": "^10.10",
