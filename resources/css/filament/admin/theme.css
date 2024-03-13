@@ -27,11 +27,11 @@
 
     /* sidebar */
     .fi-sidebar-nav {
-        @apply shadow bg-white;
+        @apply shadow bg-white dark:bg-slate-950 !important;
     }
 
     .fi-sidebar-group {
-        @apply rounded-3xl rounded-tl-none border p-2 bg-gray-100/30 shadow-md !important;
+        @apply rounded-3xl rounded-tl-none border dark:border-slate-800 p-2 bg-gray-100/30 dark:bg-slate-900 shadow-md !important;
     }
 
     .fi-sidebar-item-active .fi-sidebar-item-label {
