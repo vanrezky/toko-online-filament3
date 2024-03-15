@@ -84,12 +84,14 @@ class CustomerResource extends Resource
                     ->image()
                     ->avatar()
                     ->directory(UploadPath::PROFILE_UPLOAD_PATH)
+                    ->imageCropAspectRatio('1:1')
                     ->imageEditorAspectRatios([
                         '1:1',
                     ])
                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
                     ->columnSpanFull()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->helperText(__('Ratio Is 1:1. Maximum size is 1MB')),
 
                 Forms\Components\Group::make([
                     Forms\Components\TextInput::make('first_name')
@@ -120,9 +122,11 @@ class CustomerResource extends Resource
                         ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                     Forms\Components\TextInput::make('password')
                         ->password()
+                        ->rules([secure_password()])
                         ->required()
                         ->same('confirm_password')
-                        ->maxLength(255)
+                        ->minLength(8)
+                        ->maxLength(20)
                         ->visible(fn (string $operation): bool  => $operation === 'create'),
                     Forms\Components\TextInput::make('confirm_password')
                         ->password()

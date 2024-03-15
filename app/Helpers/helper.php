@@ -26,3 +26,14 @@ function settings(string $key, $default = null)
         return $default;
     }
 }
+
+/**
+ * Generates a secure password based on settings.
+ *
+ * @param int $minLength the minimum length of the password (default is 8)
+ * @return Illuminate\Validation\Rules\Password the generated secure password
+ */
+function secure_password(int $minLength = 8)
+{
+    return settings('secure_password') ? Illuminate\Validation\Rules\Password::min(8)->symbols()->numbers()->letters() : Illuminate\Validation\Rules\Password::min(8);
+}

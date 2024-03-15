@@ -45,11 +45,13 @@ class EditCustomer extends EditRecord
                             ->avatar()
                             ->image()
                             ->directory(UploadPath::PROFILE_UPLOAD_PATH)
+                            ->imageCropAspectRatio('1:1')
                             ->imageEditorAspectRatios([
                                 '1:1',
                             ])
                             ->alignCenter()
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->helperText(__('Ratio Is 1:1. Maximum size is 1MB')),
                         FormsComponents\Group::make([
                             FormsComponents\TextInput::make('first_name')
                                 ->placeholder(__('e.g: ') . 'John')
@@ -81,9 +83,10 @@ class EditCustomer extends EditRecord
                     ->schema([
                         FormsComponents\TextInput::make('password')
                             ->password()
+                            ->rules([secure_password()])
                             ->same('confirm_password')
                             ->minLength(8)
-                            ->maxLength(255),
+                            ->maxLength(20),
                         FormsComponents\TextInput::make('confirm_password')
                             ->password()
                             ->maxLength(255),
