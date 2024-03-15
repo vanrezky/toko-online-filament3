@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -44,6 +45,7 @@ class UserResource extends Resource
                             ->unique(),
                         Forms\Components\TextInput::make('password')
                             ->password()
+                            ->rules([secure_password()])
                             ->required()
                             ->maxLength(255)
                             ->minLength(8)
@@ -86,13 +88,14 @@ class UserResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('email_verified_at'))
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
