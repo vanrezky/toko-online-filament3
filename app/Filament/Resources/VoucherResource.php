@@ -16,6 +16,7 @@ use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -123,8 +124,12 @@ class VoucherResource extends Resource
                     Forms\Components\Section::make(__('Other Information'))
                         ->schema([
                             Forms\Components\FileUpload::make('image')
+                                ->label(__('Voucher Image'))
+                                ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
                                 ->image()
-                                ->columnSpanFull(),
+                                ->columnSpanFull()
+                                ->imageCropAspectRatio('1:1')
+                                ->helperText(__('Ratio Is 1:1. Maximum size is 1MB')),
                             Forms\Components\Select::make('category_id')
                                 ->placeholder(__('All Category'))
                                 ->relationship('category', 'name')
@@ -213,13 +218,13 @@ class VoucherResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                ])
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
