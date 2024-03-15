@@ -11,23 +11,24 @@ ps: ## Docker containers.
 	@docker compose ps
 
 build: ## Build all containers.
-
-	@docker build --no-cache .
+	@${SAIL} build --no-cache
 
 start: ## Start all containers.
 	@${SAIL} up -d
 
 stop: ## Stop all containers.
-	@${SAIL} stop
-
-destroy: ##Destroy all containers
 	@${SAIL} down
 
-setup: start migrate-fresh db-seed storage-link optimize ## Destroy containers, build images, start containers.
+destroy: ##Destroy all containers
+	@${SAIL} down -v
 
-fresh: stop destroy build start   ## Destroy containers, build images, start containers.
+setup: start start migrate-fresh db-seed storage-link optimize ## Destroy containers, build images, start containers.
 
-fresh-data: fresh migrate db-seed storage-link cache ## Destroy containers, build images, start containers.
+fresh: stop destroy build setup ## Destroy containers, build images, start containers.
+
+wait: ## Wait for 2 seconds before executing.
+	@echo "Waiting for 2 seconds..."
+	@sleep 2
 
 migrate: ## Run migrations file
 	@${SAIL} artisan migrate
