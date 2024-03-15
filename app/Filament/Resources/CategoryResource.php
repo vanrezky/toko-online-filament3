@@ -20,6 +20,7 @@ use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -38,36 +39,31 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                Section::make([
-                    Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->minLength(3)
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
-                    Forms\Components\TextInput::make('slug')
-                        ->unique(ignoreRecord: true)
-                        ->required(),
-                ])->columnSpan(2),
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->minLength(3)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
+                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('slug')
+                    ->unique(ignoreRecord: true)
+                    ->required()
+                    ->columnSpanFull(),
                 Group::make([
-                    Section::make('Image')
-                        ->schema([
-                            Forms\Components\FileUpload::make('image')
-                                ->hiddenLabel()
-                                ->image()
-                                ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
-                                ->imageEditorAspectRatios([null, '1:1'])
-                        ]),
-                    Section::make('Status')
-                        ->schema([
-                            Forms\Components\Toggle::make('is_active')
-                                ->default(fn (): bool => true),
-                            Forms\Components\Toggle::make('is_featured')
-                                ->default(fn (): bool => true),
+                    Forms\Components\FileUpload::make('image')
+                        ->label(__('Category Image'))
+                        ->rules(['required', 'mimes:png,jpg,jpeg', 'max:1024'])
+                        ->image()
+                        ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
+                        ->imageEditorAspectRatios([null, '1:1'])
+                        ->hint(__('Ratio Is 1:1. Maximum size is 1MB')),
+                    Forms\Components\Toggle::make('is_active')
+                        ->default(fn (): bool => true),
+                    Forms\Components\Toggle::make('is_featured')
+                        ->default(fn (): bool => true)
+                ])->columnSpanFull(),
 
-                        ])
-                ])->columnSpan(1)
-
-            ])->columns(3);
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -87,8 +83,7 @@ class CategoryResource extends Resource
                     ->icon('heroicon-o-squares-2x2')
                     ->label(__('Total Product'))
                     ->color('danger')
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->afterStateUpdated(function ($record, $state) {
                         return Notification::make()
@@ -108,39 +103,39 @@ class CategoryResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()->action(function ($record) {
-                    if ($record->products()->count()) {
-                        return Notification::make()
-                            ->title('Category cannot be deleted')
-                            ->warning()
-                            ->send();
-                    }
-
-                    return $record->delete();
-                }),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->action(function ($records) {
-                        $delete = true;
-                        foreach ($records as $key => $record) {
-                            if ($record->products()->count()) {
-                                $delete = false;
-                                break;
-                            }
-                        }
-
-                        if (!$delete) {
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make()->action(function ($record) {
+                        if ($record->products()->count()) {
                             return Notification::make()
-                                ->title('There are categories that cannot be deleted')
+                                ->title('Category cannot be deleted')
                                 ->warning()
                                 ->send();
                         }
 
-                        return $records->each(fn ($record) => $record->delete());
+                        return $record->delete();
                     }),
-                ]),
+                ])
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make()->action(function ($records) {
+                    $delete = true;
+                    foreach ($records as $key => $record) {
+                        if ($record->products()->count()) {
+                            $delete = false;
+                            break;
+                        }
+                    }
+
+                    if (!$delete) {
+                        return Notification::make()
+                            ->title('There are categories that cannot be deleted')
+                            ->warning()
+                            ->send();
+                    }
+
+                    return $records->each(fn ($record) => $record->delete());
+                }),
             ]);
     }
 
@@ -155,8 +150,8 @@ class CategoryResource extends Resource
     {
         return [
             'index' => Pages\ListCategories::route('/'),
-            'create' => Pages\CreateCategory::route('/create'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            // 'create' => Pages\CreateCategory::route('/create'),
+            // 'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
     }
 }

@@ -23,7 +23,7 @@ class UserResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return static::getModel()::superUser(false)->count();
     }
 
 
