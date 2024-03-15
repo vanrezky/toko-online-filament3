@@ -1,6 +1,6 @@
 <?php
 
-
+use Illuminate\Support\Facades\Log;
 
 /**
  * Retrieve a value from the general settings with an optional default value.
@@ -11,5 +11,18 @@
  */
 function settings(string $key, $default = null)
 {
-    return app(App\Settings\GeneralSettings::class)->$key ?? $default;
+    try {
+
+        if ($key === 'favicon') {
+            return app(App\Settings\GeneralSettings::class)->getFavicon();
+        }
+        if ($key === 'logo') {
+            return app(App\Settings\GeneralSettings::class)->getLogo();
+        }
+
+        return app(App\Settings\GeneralSettings::class)->$key ?? $default;
+    } catch (\Illuminate\Database\QueryException $e) {
+        Log::error($e);
+        return $default;
+    }
 }

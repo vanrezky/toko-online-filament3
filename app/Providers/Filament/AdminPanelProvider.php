@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Karla')
             ->navigationGroups(['Shop', 'Promotion', 'Blog', 'Setting'])
-            ->favicon(app(GeneralSettings::class)->getFavicon())
+            ->favicon(settings('favicon'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

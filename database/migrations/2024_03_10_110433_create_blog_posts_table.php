@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('published_at')->nullable();
             $table->boolean('is_status')->default(true);
             $table->string('image')->nullable();
-            $table->bigIncrements('views')->default(0);
+            $table->unsignedBigInteger('views')->default(0);
             $table->text('description')->nullable();
             $table->timestamps();
         });

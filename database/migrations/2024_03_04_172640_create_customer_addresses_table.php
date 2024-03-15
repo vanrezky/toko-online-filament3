@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('address');
             $table->string('postal_code');
             $table->boolean('is_active')->default(StatusType::ACTIVE->value);
-            $table->boolean('is_featured')->default(StatusType::FEATURED->value);
+            $table->boolean('is_featured')->default(true);
             $table->timestamps();
         });
     }

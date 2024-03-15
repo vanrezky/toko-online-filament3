@@ -2,6 +2,7 @@
 
 namespace App\Settings;
 
+use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelSettings\Settings;
 
 class GeneralSettings extends Settings
@@ -50,7 +51,8 @@ class GeneralSettings extends Settings
     public function getLogo()
     {
         if ($this->logo) {
-            return asset($this->logo);
+            // checking file exists
+            return Storage::exists($this->logo) ? asset($this->logo) : $this->logo;
         }
         return null;
     }
@@ -58,7 +60,8 @@ class GeneralSettings extends Settings
     public function getFavicon()
     {
         if ($this->favicon) {
-            return asset($this->favicon);
+            // checking file exists
+            return Storage::exists($this->favicon) ? asset($this->favicon) : $this->favicon;
         }
 
         return asset('assets/images/favicon.ico');
