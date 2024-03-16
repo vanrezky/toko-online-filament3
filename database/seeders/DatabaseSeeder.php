@@ -27,7 +27,9 @@ class DatabaseSeeder extends Seeder
             DistributorLevelSeeder::class,
             PageSeeder::class,
             PaymentGatewaySeeder::class,
-
+            FaqSeeder::class,
+            BlogCategorySeeder::class,
+            BlogPostSeeder::class,
         ]);
     }
 }

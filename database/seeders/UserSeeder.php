@@ -21,5 +21,7 @@ class UserSeeder extends Seeder
             'username' => 'admin',
             'is_super_user' => 1
         ]);
+
+        User::factory(5)->create();
     }
 }

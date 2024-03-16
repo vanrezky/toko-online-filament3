@@ -10,7 +10,7 @@ class BlogCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'image', 'description', 'is_visible'];
+    protected $fillable = ['name', 'slug', 'description', 'is_visible'];
 
     public function posts(): BelongsTo
     {
