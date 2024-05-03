@@ -16,6 +16,7 @@ return new class extends SettingsMigration
         $this->migrator->add('general.social_title', config('app.name'));
         $this->migrator->add('general.social_description', 'toko online website belanja online');
         $this->migrator->add('general.logo');
+        $this->migrator->add('general.login_logo');
         $this->migrator->add('general.favicon');
         $this->migrator->add('general.phone', fake()->e164PhoneNumber());
         $this->migrator->add('general.wa_phone', fake()->phoneNumber());
@@ -41,6 +42,7 @@ return new class extends SettingsMigration
         $this->migrator->add('general.payment_fix_charge', 0);
         $this->migrator->add('general.payment_percent_charge', 0);
         $this->migrator->add('general.site_active', true);
+        $this->migrator->add('general.timezone', 'Asia/Jakarta');
     }
 
     public function down()

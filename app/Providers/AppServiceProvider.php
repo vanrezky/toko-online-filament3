@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // set timezone
+        config()->set('app.timezone', settings('timezone'));
     }
 }

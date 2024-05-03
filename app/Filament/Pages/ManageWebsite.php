@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Illuminate\Support\HtmlString;
 
 class ManageWebsite extends SettingsPage
 {
@@ -44,7 +45,9 @@ class ManageWebsite extends SettingsPage
                                         Group::make([
                                             TextInput::make('currency_text')->required()->maxLength(5),
                                             TextInput::make('currency_symbol')->required()->maxLength(5),
-                                        ])->columns(2)
+                                        ])->columns(2),
+                                        TextInput::make('timezone')->required()
+                                            ->hint(fn () => new HtmlString('<a href="https://php.net/manual/en/timezones.php" target="_blank">See timezone list here</a>'))
 
                                     ])->columnSpanFull(),
                             ])->columns(2),
@@ -54,12 +57,17 @@ class ManageWebsite extends SettingsPage
                                 FileUpload::make('logo')
                                     ->image()
                                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
-                                    ->directory(UploadPath::IMAGES_UPLOAD_PATH)
+                                    ->directory(UploadPath::IMAGE_CONFIG_PATH)
                                     ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB'),
                                 FileUpload::make('favicon')
                                     ->image()
                                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
-                                    ->directory(UploadPath::IMAGES_UPLOAD_PATH)
+                                    ->directory(UploadPath::IMAGE_CONFIG_PATH)
+                                    ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB'),
+                                FileUpload::make('login_logo')
+                                    ->image()
+                                    ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
+                                    ->directory(UploadPath::IMAGE_CONFIG_PATH)
                                     ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB'),
                             ])->columns(2),
                         Tab::make('SEO')

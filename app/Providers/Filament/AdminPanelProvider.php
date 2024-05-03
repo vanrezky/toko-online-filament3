@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->profile()
             ->brandName(settings('site_name'))
+            ->brandLogo(settings('logo'))
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'danger' => '#F3797E',

@@ -16,6 +16,7 @@ class GeneralSettings extends Settings
     public ?string $social_description;
     public ?string $social_image;
     public ?string $logo;
+    public ?string $login_logo;
     public ?string $favicon;
     public ?string $phone;
     public ?string $wa_phone;
@@ -41,6 +42,7 @@ class GeneralSettings extends Settings
     public ?float $payment_fix_charge;
     public ?float $payment_percent_charge;
     public bool $site_active;
+    public string $timezone;
 
 
     public static function group(): string
@@ -51,17 +53,20 @@ class GeneralSettings extends Settings
     public function getLogo()
     {
         if ($this->logo) {
+            $__logo = '/storage/' . $this->logo;
             // checking file exists
-            return Storage::exists($this->logo) ? asset($this->logo) : $this->logo;
+            return Storage::exists($__logo) ? asset($__logo) : $__logo;
         }
+
         return null;
     }
 
     public function getFavicon()
     {
         if ($this->favicon) {
+            $__fav = '/storage/' . $this->favicon;
             // checking file exists
-            return Storage::exists($this->favicon) ? asset($this->favicon) : $this->favicon;
+            return Storage::exists($__fav) ? asset($__fav) : $__fav;
         }
 
         return asset('assets/images/favicon.ico');
