@@ -79,6 +79,7 @@ class CustomerAddressRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('Name Address')),

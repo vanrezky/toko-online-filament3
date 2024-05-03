@@ -6,6 +6,7 @@ use App\Constants\UploadPath;
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Filament\Resources\CustomerResource\Pages\Profile;
 use App\Filament\Resources\CustomerResource\RelationManagers;
+use App\Filament\Resources\CustomerResource\RelationManagers\BalancesRelationManager;
 use App\Filament\Resources\CustomerResource\RelationManagers\CustomerAddressRelationManager;
 use App\Models\Customer;
 use Filament\Forms;
@@ -205,7 +206,8 @@ class CustomerResource extends Resource
                         })
                         ->color('danger')
                         ->visible(fn (Customer $record): bool => $record->email_verified_at === null),
-                    Tables\Actions\ViewAction::make()->label('Profile'),
+                    Tables\Actions\ViewAction::make()->label('Profile')
+                        ->color('info'),
                     Tables\Actions\EditAction::make(),
                 ])->tooltip(__('Actions'))
 
@@ -220,7 +222,8 @@ class CustomerResource extends Resource
     public static function getRelations(): array
     {
         return [
-            CustomerAddressRelationManager::class
+            CustomerAddressRelationManager::class,
+            BalancesRelationManager::class
         ];
     }
 
@@ -229,8 +232,8 @@ class CustomerResource extends Resource
         return [
             'index' => Pages\ListCustomers::route('/'),
             // 'create' => Pages\CreateCustomer::route('/create'),
+            'view' => Pages\Profile::route('/{record}/profile'),
             'edit' => Pages\EditCustomer::route('/{record}/edit'),
-            'view' => Pages\Profile::route('/{record}'),
         ];
     }
 }

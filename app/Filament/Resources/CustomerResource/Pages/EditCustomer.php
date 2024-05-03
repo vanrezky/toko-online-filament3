@@ -18,6 +18,7 @@ class EditCustomer extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\ViewAction::make()->label('Profile'),
             Actions\DeleteAction::make(),
         ];
     }
