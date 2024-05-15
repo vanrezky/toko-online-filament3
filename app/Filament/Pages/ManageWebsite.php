@@ -46,8 +46,6 @@ class ManageWebsite extends SettingsPage
                                             TextInput::make('currency_text')->required()->maxLength(5),
                                             TextInput::make('currency_symbol')->required()->maxLength(5),
                                         ])->columns(2),
-                                        TextInput::make('timezone')->required()
-                                            ->hint(fn () => new HtmlString('<a href="https://php.net/manual/en/timezones.php" target="_blank">See timezone list here</a>'))
 
                                     ])->columnSpanFull(),
                             ])->columns(2),

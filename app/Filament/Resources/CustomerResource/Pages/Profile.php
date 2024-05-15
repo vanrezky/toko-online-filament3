@@ -103,13 +103,13 @@ class Profile extends ViewRecord
                         ->alignEnd()
                         ->icon('heroicon-o-envelope')
                         ->iconColor('primary'),
-                    TextEntry::make('distributorLevel.name')
+                    TextEntry::make('reseller.name')
                         ->label(__('Level'))
                         ->inlineLabel()
                         ->icon('heroicon-o-briefcase')
                         ->iconColor('primary')
                         ->extraAttributes(['class' => 'font-bold'])
-                        ->visible(fn (Customer $record): bool => !empty($record->distributor_level_id))
+                        ->visible(fn (Customer $record): bool => !empty($record->reseller_id))
                         ->alignEnd(),
                 ])
                     ->columnSpan(1),

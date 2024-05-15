@@ -38,9 +38,9 @@ class Customer extends Model
         return $this->hasMany(CustomerAddress::class);
     }
 
-    public function distributorLevel(): BelongsTo
+    public function reseller(): BelongsTo
     {
-        return $this->belongsTo(DistributorLevel::class);
+        return $this->belongsTo(Reseller::class);
     }
 
     public function getFilamentAvatarUrl(): ?string
@@ -75,13 +75,16 @@ class Customer extends Model
     }
 
     // user yang memiliki level user e.g: reseller, agent, distributor
-    public function scopeDistributorUser($query)
+    public function scopeResellerUser($query, $resellerId = null)
     {
-        return $query->whereNotNull('distributor_level_id');
+        if ($resellerId) {
+            return $query->where('reseller_id', $resellerId);
+        }
+        return $query->whereNotNull('reseller_id');
     }
 
     public function scopeNormalUser($query)
     {
-        return $query->whereNull('distributor_level_id');
+        return $query->whereNull('reseller_id');
     }
 }

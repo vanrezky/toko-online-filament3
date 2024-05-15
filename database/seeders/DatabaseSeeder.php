@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             VoucherSeeder::class,
             CustomerSeeder::class,
-            DistributorLevelSeeder::class,
+            ResellerSeeder::class,
             PageSeeder::class,
             PaymentGatewaySeeder::class,
             FaqSeeder::class,

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\CustomerResource\Pages;
 
 use App\Filament\Resources\CustomerResource;
 use App\Models\Customer;
-use App\Models\DistributorLevel;
+use App\Models\Reseller;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
@@ -27,18 +27,18 @@ class ListCustomers extends ListRecords
     {
 
         $tabs = [
-            'All' => Tab::make()->label(__('All'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereNull('distributor_level_id'))
-                ->badge(Customer::query()->whereNull('distributor_level_id')->count()),
+            'Normal' => Tab::make()->label(__('Normal'))
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->normalUser())
+                ->badge(Customer::normalUser()->count()),
         ];
 
-        $distributorLevels = DistributorLevel::active()->get();
+        $resellers = Reseller::active()->orderBy('level', 'ASC')->get();
 
-        foreach ($distributorLevels as $distributorLevel) {
-            $tabs[$distributorLevel->name] = Tab::make()
-                ->label($distributorLevel->name)
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('distributor_level_id', $distributorLevel->id))
-                ->badge(Customer::query()->where('distributor_level_id', $distributorLevel->id)->count());
+        foreach ($resellers as $resel) {
+            $tabs[$resel->name] = Tab::make()
+                ->label($resel->name)
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->resellerUser($resel->id))
+                ->badge(Customer::resellerUser($resel->id)->count());
         }
 
         return $tabs;

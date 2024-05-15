@@ -167,7 +167,7 @@ class CustomerResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('distributorLevel.name')
+                Tables\Columns\TextColumn::make('reseller.name')
                     ->label(__('Level'))
                     ->default('None')
                     ->badge()

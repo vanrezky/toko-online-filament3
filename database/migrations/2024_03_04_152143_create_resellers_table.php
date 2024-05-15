@@ -12,11 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('distributor_levels', function (Blueprint $table) {
+        Schema::create('resellers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('description');
-            $table->string('level');
+            $table->unsignedInteger('level');
             $table->boolean('is_active')->default(StatusType::ACTIVE->value);
             $table->timestamps();
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('distributor_levels');
+        Schema::dropIfExists('resellers');
     }
 };

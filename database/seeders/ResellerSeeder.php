@@ -2,42 +2,42 @@
 
 namespace Database\Seeders;
 
-use App\Models\DistributorLevel;
+use App\Models\Reseller;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class DistributorLevelSeeder extends Seeder
+class ResellerSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $distributorLevels = [
+        $resellers = [
             [
                 'name' => 'Reseller',
-                'description' => 'Reseller description',
+                'description' => 'Is the reseller level',
                 'level' => 1
             ],
             [
                 'name' => 'Agent',
-                'description' => 'Agent description',
+                'description' => 'is the agent level',
                 'level' => 2
             ],
             [
                 'name' => 'Agent Premium',
-                'description' => 'Agent Premium description',
+                'description' => 'Is the agent premium',
                 'level' => 3
             ],
             [
                 'name' => 'Distributor',
-                'description' => 'Distributor description',
+                'description' => 'This is distributor',
                 'level' => 4
             ],
         ];
 
-        foreach ($distributorLevels as $key => $level) {
-            DistributorLevel::create($level);
+        foreach ($resellers as $key => $level) {
+            Reseller::create($level);
         }
     }
 }

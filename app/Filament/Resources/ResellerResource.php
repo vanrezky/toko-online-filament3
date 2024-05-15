@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\DistributorLevelResource\Pages;
-use App\Filament\Resources\DistributorLevelResource\RelationManagers;
-use App\Models\DistributorLevel;
+use App\Filament\Resources\ResellerResource\Pages;
+use App\Filament\Resources\ResellerResource\RelationManagers;
+use App\Models\Reseller;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -14,13 +14,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class DistributorLevelResource extends Resource
+class ResellerResource extends Resource
 {
-    protected static ?string $model = DistributorLevel::class;
+    protected static ?string $model = Reseller::class;
     protected static ?string $navigationIcon = 'heroicon-o-tag';
-    protected static ?string $navigationLabel = 'Distributor & Agent Level';
+    protected static ?string $navigationLabel = 'Reseller Level';
     protected static ?string $navigationGroup = 'Setting';
-    protected static ?string $slug = 'setting/distributor-level';
+    protected static ?string $slug = 'setting/reseller';
     protected static ?int $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string
@@ -93,7 +93,7 @@ class DistributorLevelResource extends Resource
                 Tables\Actions\DeleteAction::make()->action(function ($record) {
                     if ($record->customers()->count()) {
                         return Notification::make()
-                            ->title('Distributor Level cannot be deleted')
+                            ->title('Reseller Level cannot be deleted')
                             ->warning()
                             ->send();
                     }
@@ -122,9 +122,9 @@ class DistributorLevelResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDistributorLevels::route('/'),
-            'create' => Pages\CreateDistributorLevel::route('/create'),
-            'edit' => Pages\EditDistributorLevel::route('/{record}/edit'),
+            'index' => Pages\ListResellers::route('/'),
+            'create' => Pages\CreateReseller::route('/create'),
+            'edit' => Pages\EditReseller::route('/{record}/edit'),
         ];
     }
 }

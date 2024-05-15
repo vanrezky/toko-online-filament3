@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->string('is_active')->default(StatusType::ACTIVE->value);
             $table->string('password');
-            $table->unsignedBigInteger('distributor_level_id')->nullable();
-            $table->foreign('distributor_level_id')->references('id')->on('distributor_levels')->onDelete('cascade');
+            $table->unsignedBigInteger('reseller_id')->nullable();
+            $table->foreign('reseller_id')->references('id')->on('resellers')->onDelete('cascade');
             $table->boolean('is_banned')->default(false);
             $table->rememberToken();
             $table->timestamps();

@@ -42,7 +42,6 @@ class GeneralSettings extends Settings
     public ?float $payment_fix_charge;
     public ?float $payment_percent_charge;
     public bool $site_active;
-    public string $timezone;
 
 
     public static function group(): string

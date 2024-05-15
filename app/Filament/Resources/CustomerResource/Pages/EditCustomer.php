@@ -92,10 +92,10 @@ class EditCustomer extends EditRecord
                             ->password()
                             ->maxLength(255),
                     ])->columnSpan(2),
-                FormsComponents\Section::make('Distributor Level')
+                FormsComponents\Section::make('Reseller Level')
                     ->schema([
-                        FormsComponents\Select::make('distributor_level_id')
-                            ->relationship('distributorLevel', titleAttribute: 'name')
+                        FormsComponents\Select::make('reseller_level')
+                            ->relationship('reseller', titleAttribute: 'name')
                             ->searchable()
                             ->preload()
                     ])->columnSpan(1),
