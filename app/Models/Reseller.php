@@ -18,4 +18,9 @@ class Reseller extends Model
     {
         return $this->hasMany(Customer::class);
     }
+
+    public function getNameLevelAttribute()
+    {
+        return "{$this->name} (level $this->level)";
+    }
 }

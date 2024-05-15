@@ -7,13 +7,17 @@ use App\Constants\UploadPath;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Filament\Resources\ProductResource\RelationManagers\ProductVariantRelationManager;
+use App\Models\Reseller;
 use App\Models\Product;
 use Carbon\Carbon;
+use Closure;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
+use Filament\Forms\FormsComponent;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
@@ -41,46 +45,63 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Section::make('Images')
+                    ->description(__('Drag the image to the top to make it the main image'))
+                    ->schema([
+                        Forms\Components\FileUpload::make('images')
+                            ->image()
+                            ->imageEditor()
+                            ->required()
+                            ->hiddenLabel()
+                            ->multiple()
+                            ->reorderable()
+                            ->maxFiles(5)
+                            // ->panelAspectRatio('1:1')
+                            ->imageCropAspectRatio('1:1')
+                            ->imageEditorAspectRatios([
+                                '1:1'
+                            ])
+                            ->imagePreviewHeight('150')
+                            ->directory(UploadPath::IMAGES_UPLOAD_PATH)
+                    ])->collapsible()->collapsed(),
+                Forms\Components\Section::make('Name & Description Product')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label(__('Product Name'))
+                            ->hiddenLabel()
+                            ->placeholder('Product Name')
+                            ->helperText(__('Product name of at least 15 letters/characters.'))
+                            ->minLength(5)
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull()
+                            ->id('product-name')
+                            ->live(onBlur: true)
+                            ->extraInputAttributes(['class' => 'column-title'], true)
+                            ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
 
-
-
-                Group::make([
-                    Forms\Components\Section::make('Name & Description Product')
-                        ->schema([
-                            Forms\Components\TextInput::make('name')
-                                ->label(__('Product Name'))
-                                ->hiddenLabel()
-                                ->placeholder('Product Name')
-                                ->helperText(__('Product name of at least 15 letters/characters.'))
-                                ->minLength(5)
-                                ->required()
-                                ->maxLength(255)
-                                ->columnSpanFull()
-                                ->id('product-name')
-                                ->live(onBlur: true)
-                                ->extraInputAttributes(['class' => 'column-title'], true)
-                                ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
-
-                                    if ($operation == 'edit') {
-                                        return;
-                                    }
-                                    if (!$get('is_slug_changed_manually') && filled($state)) {
-                                        $set('slug', Str::slug($state));
-                                    }
-
+                                if ($operation == 'edit') {
+                                    return;
+                                }
+                                if (!$get('is_slug_changed_manually') && filled($state)) {
                                     $set('slug', Str::slug($state));
-                                }),
-                            Forms\Components\RichEditor::make('description')
-                                ->hiddenLabel()
-                                ->placeholder('Product Description')
-                                ->helperText(__('Add product descriptions to make it easier for buyers to understand the products being sold.'))
-                                ->required()
-                                ->string()
-                                ->disableToolbarButtons([
-                                    'attachFiles',
-                                ])
-                                ->columnSpanFull(),
-                        ]),
+                                }
+
+                                $set('slug', Str::slug($state));
+                            }),
+                        Forms\Components\RichEditor::make('description')
+                            ->hiddenLabel()
+                            ->placeholder('Product Description')
+                            ->helperText(__('Add product descriptions to make it easier for buyers to understand the products being sold.'))
+                            ->required()
+                            ->string()
+                            ->disableToolbarButtons([
+                                'attachFiles',
+                            ])
+                            ->columnSpanFull(),
+                    ]),
+                Group::make([
+
                     Forms\Components\Section::make(__('Code & Product Category'))
                         ->schema(
                             [
@@ -88,7 +109,7 @@ class ProductResource extends Resource
                                     ->label(__('Product Code'))
                                     ->helperText(__('Enter the unique code for the product and make sure it is not the same as another product.'))
                                     ->required()
-                                    ->maxLength(255)
+                                    ->maxLength(20)
                                     ->columnSpanFull(),
                                 Forms\Components\Select::make('category_id')
                                     ->label(__('Product Category'))
@@ -120,31 +141,44 @@ class ProductResource extends Resource
                                     ->columnSpanFull()
                             ]
                         )->inlineLabel()->columns(2),
-                    Forms\Components\Section::make('Price & Stock')
-                        ->schema([
-                            Forms\Components\TextInput::make('weight')
-                                ->rules('nullable|numeric')
-                                ->label(__('Product Weight (Gram)'))
-                                ->helperText(__('Only enter numbers. e.g: 1000'))
-                                ->visible(fn (Get $get): bool => !$get('digital'))
-                                ->required(fn (Get $get): bool => !$get('digital'))
-                                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
-                            Forms\Components\Select::make('warehouse_id')
-                                ->label(__('Shipping Warehouse'))
-                                ->helperText(str('Select the warehouse where the product will be shipped from, to change the warehouse can be seen in the **<a href="javascript:;">Warehouse Location</a>** menu.')->inlineMarkdown()->toHtmlString())
-                                ->relationship('warehouse', 'name', fn (Builder $query): Builder => $query->active())
-                                ->searchable()
-                                ->preload()
-                                ->visible(fn (Get $get): bool => !$get('digital'))
-                                ->required(fn (Get $get): bool => !$get('digital'))
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('stock')
-                                ->rules('nullable|numeric')
-                                ->helperText(__('Only enter numbers. e.g: 50'))
-                                ->required()
-                                ->default(1)
-                                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
 
+                    Forms\Components\Group::make([
+                        Forms\Components\Section::make('Inventory')
+                            ->schema([
+                                Forms\Components\TextInput::make('weight')
+                                    ->rules('nullable|numeric')
+                                    ->label(__('Product Weight (Gram)'))
+                                    ->helperText(__('Only enter numbers. e.g: 1000'))
+                                    ->visible(fn (Get $get): bool => !$get('digital'))
+                                    ->required(fn (Get $get): bool => !$get('digital'))
+                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                                Forms\Components\Select::make('warehouse_id')
+                                    ->label(__('Shipping Warehouse'))
+                                    ->helperText(str('Select the warehouse where the product will be shipped from, to change the warehouse can be seen in the **<a href="javascript:;">Warehouse Location</a>** menu.')->inlineMarkdown()->toHtmlString())
+                                    ->relationship('warehouse', 'name', fn (Builder $query): Builder => $query->active())
+                                    ->searchable()
+                                    ->preload()
+                                    ->visible(fn (Get $get): bool => !$get('digital'))
+                                    ->required(fn (Get $get): bool => !$get('digital'))
+                                    ->columnSpanFull(),
+                                Forms\Components\TextInput::make('stock')
+                                    ->rules('nullable|numeric')
+                                    ->helperText(__('Only enter numbers. e.g: 50'))
+                                    ->required()
+                                    ->default(1)
+                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                                Forms\Components\TextInput::make('security_stock')
+                                    ->rules('nullable|numeric')
+                                    ->helperText(__('The safety stock is the limit stock for your products which alerts you if the product stock will soon be out of stock.'))
+                                    ->required()
+                                    ->default(0)
+                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                            ])->inlineLabel(),
+                    ]),
+
+
+                    Forms\Components\Section::make('Price')
+                        ->schema([
                             Forms\Components\TextInput::make('min_order')
                                 ->rules('nullable|numeric')
                                 ->helperText(__('Only enter numbers. e.g: 50'))
@@ -167,25 +201,33 @@ class ProductResource extends Resource
                                 ->label('Sales Commission Fee')
                                 ->helperText(__('Sales commission given to the affiliator. just enter a number. e.g: 10000'))
                                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                            Forms\Components\Repeater::make('resellerPrices')
+                                ->relationship('resellerPrices')
+                                ->reorderable(false)
+                                ->collapsible()
+                                ->schema([
+                                    Forms\Components\Select::make('reseller_id')
+                                        ->label(__('Reseller Level'))
+                                        ->options(Reseller::active()->get()->pluck('name_level', 'id')->toArray())
+                                        ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                        ->required(),
+
+                                    Forms\Components\TextInput::make('price')
+                                        ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
+                                        ->required()
+                                        ->numeric()
+                                        ->default(0)
+
+                                ])
+                                ->itemLabel(fn (array $state): ?string => $state['reseller_name'] ?? null)
+                                ->columns(2)
+
 
                         ])->inlineLabel(),
+
                 ])->columnSpan(2),
 
                 Group::make([
-                    Forms\Components\Section::make('Images')
-                        ->description(__('Drag the image to the top to make it the main image'))
-                        ->schema([
-                            Forms\Components\FileUpload::make('images')
-                                ->image()
-                                ->imageEditor()
-                                ->required()
-                                ->hiddenLabel()
-                                ->multiple()
-                                ->reorderable()
-                                ->maxFiles(5)
-                                ->imagePreviewHeight('150')
-                                ->directory(UploadPath::IMAGES_UPLOAD_PATH)
-                        ])->collapsible(),
                     Forms\Components\Section::make('Other Settings Product')
                         ->schema([
                             Forms\Components\TextInput::make('slug')
@@ -219,41 +261,24 @@ class ProductResource extends Resource
 
                 ])->columnSpan(1),
 
-
-                Forms\Components\Section::make('Variant Product')
+                Forms\Components\Section::make('Product Variant')
+                    ->hidden(true)
                     ->schema([
-                        Forms\Components\TextInput::make('variant')
-                            ->placeholder(__('e.g: Colors'))
-                            ->nullable(),
-                        Forms\Components\TextInput::make('sub_variant')
-                            ->placeholder(__('e.g: Sizes'))
-                            ->nullable(),
-
                         Forms\Components\Group::make([
-                            Forms\Components\TagsInput::make('variants')
-                                ->placeholder(__('e.g: Blue, Black, Red, Green, etc.'))
-                                ->live()
-                                ->afterStateUpdated(function (Set $set, ?array $state) {
-                                })
-                                ->nullable(),
-                            Forms\Components\TagsInput::make('sub_variants')
-                                ->placeholder(__('e.g: S, M, L, XL, etc.'))
-                                ->nullable(),
-                        ])->visible(fn (string $operation): bool => $operation == 'create')
-                            ->columnSpanFull()
+                            Forms\Components\TextInput::make('variant')->placeholder('e.g: Color')->label(__('Variant Title')),
+                            Forms\Components\TextInput::make('sub_variant')->placeholder('e.g: Size')->label(__('Sub Variant Title'))
+                        ])->columns(2),
+                        Forms\Components\TagsInput::make('variants')->suggestions([
+                            'Blue', 'Red', 'Cyan', 'Black', 'White'
+                        ])->inlineLabel()->label('Variant Item')
+                            ->placeholder('variants'),
+                        Forms\Components\TagsInput::make('sub_variants')->suggestions([
+                            'S', 'M', 'L', 'XL', 'XXL', 'XXXL'
+                        ])->inlineLabel()->label(__('Sub Variant Item'))
+                            ->placeholder(__('sub variants')),
+
+
                     ])
-                    ->columnSpanFull()->columns(2),
-
-
-                // hidden value
-                Forms\Components\Hidden::make('user_id')->dehydrated(),
-                Forms\Components\ViewField::make('rating')
-                    ->view('filament.forms.components.range-slider')
-                    ->viewData([
-                        'min' => 1,
-                        'max' => 5,
-                    ])
-
             ])->columns(3);
     }
 
@@ -273,6 +298,9 @@ class ProductResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('code')
+                    ->label(__('Product Code'))
+                    ->badge()
+                    ->color('warning')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('stock')
                     ->numeric()
@@ -358,7 +386,7 @@ class ProductResource extends Resource
                             );
                     })
 
-            ], layout: FiltersLayout::AboveContent)
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -373,7 +401,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ProductVariantRelationManager::class
+            // ProductVariantRelationManager::class
         ];
     }
 
@@ -383,6 +411,7 @@ class ProductResource extends Resource
             'index' => Pages\ListProducts::route('/'),
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
+            // 'view' => '',
         ];
     }
 }
