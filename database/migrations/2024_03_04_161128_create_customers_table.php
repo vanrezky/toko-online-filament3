@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('password');
             $table->unsignedBigInteger('distributor_level_id')->nullable();
             $table->foreign('distributor_level_id')->references('id')->on('distributor_levels')->onDelete('cascade');
+            $table->boolean('is_banned')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

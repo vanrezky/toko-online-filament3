@@ -32,8 +32,6 @@ class CustomerResource extends Resource
 
     public Customer $record;
 
-
-
     // protected static ?string $navigationLabel = 'Customer';
     // protected static ?string $recordTitleAttribute = 'first_name';
     // protected static int $globalSearchResultsLimit = 10;

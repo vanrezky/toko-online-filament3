@@ -59,8 +59,29 @@ class Customer extends Model
     }
 
 
-    public function balances():HasMany
+    public function balances(): HasMany
     {
         return $this->hasMany(Balance::class);
+    }
+
+    public function scopeUnbanned($query)
+    {
+        return $query->where('is_banned', false);
+    }
+
+    public function scopeBanned($query)
+    {
+        return $query->where('is_banned', true);
+    }
+
+    // user yang memiliki level user e.g: reseller, agent, distributor
+    public function scopeDistributorUser($query)
+    {
+        return $query->whereNotNull('distributor_level_id');
+    }
+
+    public function scopeNormalUser($query)
+    {
+        return $query->whereNull('distributor_level_id');
     }
 }
