@@ -63,7 +63,7 @@ class ProductResource extends Resource
                             ])
                             ->imagePreviewHeight('150')
                             ->directory(UploadPath::IMAGES_UPLOAD_PATH)
-                    ])->collapsible()->collapsed(),
+                    ])->collapsible()->collapsed(fn (string $context): bool => $context === 'edit'),
                 Forms\Components\Section::make('Name & Description Product')
                     ->schema([
                         Forms\Components\TextInput::make('name')
