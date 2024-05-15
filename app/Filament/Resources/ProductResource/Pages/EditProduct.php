@@ -13,14 +13,18 @@ class EditProduct extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
+            // Actions\ViewAction::make(),
             Actions\DeleteAction::make(),
         ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['user_id'] = auth()->id();
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
 
         return $data;
     }

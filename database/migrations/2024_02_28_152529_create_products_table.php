@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('code');
             $table->text('images');
             $table->unsignedInteger('stock')->default(0);
+            $table->unsignedBigInteger('security_stock')->default(0);
             $table->unsignedInteger('weight')->nullable();
             $table->double('price', 15, 2);
             $table->double('sale_price', 15, 2)->nullable();

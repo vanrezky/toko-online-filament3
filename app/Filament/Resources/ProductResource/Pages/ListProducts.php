@@ -27,8 +27,8 @@ class ListProducts extends ListRecords
             'All' => Tab::make()->label(__('All Product')),
             'Low Stock' => Tab::make()
                 ->label(__('Low Stock'))
-                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('stock', '<=', Status::COUNT_LOW_STOCK)->where('stock', '!=', Status::COUNT_OUT_OF_STOCK))
-                ->badge(Product::query()->where('stock', '<=', Status::COUNT_LOW_STOCK)->where('stock', '!=', Status::COUNT_OUT_OF_STOCK)->count()),
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereColumn('stock', '<=', 'security_stock')->where('stock', '>', Status::COUNT_OUT_OF_STOCK))
+                ->badge(Product::query()->whereColumn('stock', '<=', 'security_stock')->where('stock', '>', Status::COUNT_OUT_OF_STOCK)->count()),
             'Out Of Stock' => Tab::make()
                 ->label(__('Out Of Stock'))
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('stock', Status::COUNT_OUT_OF_STOCK))

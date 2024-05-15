@@ -13,7 +13,7 @@ class Product extends Model
 {
     use HasFactory, HasUuidTrait;
 
-    protected $fillable = ['name', 'slug', 'warehouse_id', 'category_id', 'digital', 'digital_url', 'description', 'code', 'images', 'weight', 'stock', 'price', 'sale_price', 'afiliate_price', 'min_order', 'variation', 'sub_variation', 'user_id'];
+    protected $fillable = ['name', 'slug', 'warehouse_id', 'category_id', 'digital', 'digital_url', 'description', 'code', 'images', 'weight', 'stock', 'price', 'sale_price', 'afiliate_price', 'min_order', 'variant', 'sub_variant', 'user_id', 'security_stock'];
 
     protected $casts = [
         'images' => 'array'
