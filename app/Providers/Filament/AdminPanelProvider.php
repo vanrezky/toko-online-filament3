@@ -71,6 +71,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             // ->sidebarWidth('18rem')
             ->plugin(FilamentProgressbarPlugin::make()->color('#29b'))
-            ->spa();
+            // ->spa()
+            ->resources([
+                config('filament-logger.activity_resource')
+            ])
+            ->plugins([
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+            ]);
     }
 }
