@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Constants\UploadPath;
 use App\Settings\GeneralSettings;
-use Faker\Provider\ar_EG\Text;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
@@ -27,6 +26,11 @@ class ManageWebsite extends SettingsPage
     protected static ?string $slug = 'setting/settings';
 
     protected static string $settings = GeneralSettings::class;
+
+    public static function canAccess(): bool
+    {
+        return isSuperUser();
+    }
 
     public function form(Form $form): Form
     {

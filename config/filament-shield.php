@@ -3,7 +3,7 @@
 return [
     'shield_resource' => [
         'should_register_navigation' => true,
-        'slug' => 'shield/roles',
+        'slug' => 'setting/roles',
         'navigation_sort' => -1,
         'navigation_badge' => true,
         'navigation_group' => true,
@@ -66,14 +66,16 @@ return [
         'enabled' => true,
 
         'pages' => [
-            'Dashboard',
+            'Dashboard', 'ManageWebsite'
         ],
 
         'widgets' => [
             'AccountWidget', 'FilamentInfoWidget',
         ],
 
-        'resources' => [],
+        'resources' => [
+            'ActivityResource', 'RoleResource', 'ExceptionResource'
+        ],
     ],
 
     'discovery' => [
@@ -83,7 +85,7 @@ return [
     ],
 
     'register_role_policy' => [
-        'enabled' => false,
+        'enabled' => true,
     ],
 
 ];

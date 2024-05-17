@@ -42,7 +42,9 @@ class UserResource extends Resource
                             ->required()
                             ->minLength(5)
                             ->maxLength(50)
-                            ->unique(),
+                            ->unique(ignoreRecord: true),
+                        Forms\Components\Select::make('roles')
+                            ->relationship('roles', titleAttribute: 'name'),
                         Forms\Components\TextInput::make('password')
                             ->password()
                             ->rules([secure_password()])

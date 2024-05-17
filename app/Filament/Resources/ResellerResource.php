@@ -19,9 +19,9 @@ class ResellerResource extends Resource
     protected static ?string $model = Reseller::class;
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $navigationLabel = 'Reseller Level';
-    protected static ?string $navigationGroup = 'Setting';
+    protected static ?string $navigationGroup = 'Shop';
     protected static ?string $slug = 'setting/reseller';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 5;
 
     public static function getNavigationBadge(): ?string
     {

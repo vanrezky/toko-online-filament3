@@ -37,3 +37,9 @@ function secure_password(int $minLength = 8)
 {
     return settings('secure_password') ? Illuminate\Validation\Rules\Password::min(8)->symbols()->numbers()->letters() : Illuminate\Validation\Rules\Password::min(8);
 }
+
+
+function isSuperUser(): bool
+{
+    return auth()->user()->is_super_user ?? false;
+}

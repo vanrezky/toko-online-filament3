@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->font('Karla')
-            ->navigationGroups(['Shop', 'Promotion', 'Blog', 'Setting'])
+            ->navigationGroups(['Shop', 'Promotion', 'Blog', 'Setting', 'Logs'])
             ->favicon(settings('favicon'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -76,7 +76,8 @@ class AdminPanelProvider extends PanelProvider
                 config('filament-logger.activity_resource')
             ])
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                \BezhanSalleh\FilamentExceptions\FilamentExceptionsPlugin::make()
             ]);
     }
 }

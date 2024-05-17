@@ -1,9 +1,12 @@
 <?php
+
+use App\Filament\Resources\ActivityResource;
+
 return [
     'datetime_format' => 'd/m/Y H:i:s',
     'date_format' => 'd/m/Y',
 
-    'activity_resource' => \Z3d0X\FilamentLogger\Resources\ActivityResource::class,
+    'activity_resource' => ActivityResource::class,
 
     'resources' => [
         'enabled' => true,
@@ -11,7 +14,7 @@ return [
         'logger' => \Z3d0X\FilamentLogger\Loggers\ResourceLogger::class,
         'color' => 'success',
         'exclude' => [
-            //App\Filament\Resources\UserResource::class,
+            // App\Filament\Resources\UserResource::class,
         ],
     ],
 

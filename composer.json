@@ -11,6 +11,7 @@
         "php": "^8.2",
         "ariaieboy/filament-currency": "^1.2",
         "aymanalhattami/filament-page-with-sidebar": "^2.4",
+        "bezhansalleh/filament-exceptions": "^2.1",
         "bezhansalleh/filament-shield": "^3.2",
         "filament/filament": "^3.2",
         "filament/spatie-laravel-settings-plugin": "^3.2",
