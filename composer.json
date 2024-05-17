@@ -17,6 +17,7 @@
         "filament/spatie-laravel-settings-plugin": "^3.2",
         "filament/spatie-laravel-tags-plugin": "^3.2",
         "guzzlehttp/guzzle": "^7.8",
+        "joshembling/image-optimizer": "^1.4",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",

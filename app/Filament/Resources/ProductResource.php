@@ -62,8 +62,11 @@ class ProductResource extends Resource
                             ->imageEditorAspectRatios([
                                 '1:1'
                             ])
-                            ->imagePreviewHeight('150')
+                            // ->imagePreviewHeight()
+                            ->downloadable()
                             ->directory(UploadPath::IMAGES_UPLOAD_PATH)
+                            ->optimize('webp')
+                            ->panelLayout('grid'),
                     ])->collapsible()->collapsed(fn (string $context): bool => $context === 'edit'),
                 Forms\Components\Section::make('Name & Description Product')
                     ->schema([

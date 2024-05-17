@@ -90,14 +90,14 @@ class CategoryResource extends Resource
                             ->title('Activation status updated successfully')
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_category')),
                 Tables\Columns\ToggleColumn::make('is_featured')
                     ->afterStateUpdated(function ($record, $state) {
                         return Notification::make()
                             ->title('Featured status updated successfully')
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_category')),
             ])
             ->filters([
                 //

@@ -204,7 +204,7 @@ class VoucherResource extends Resource
                             ->title(__('Activation status updated successfully'))
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_voucher')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

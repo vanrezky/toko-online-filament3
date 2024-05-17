@@ -75,7 +75,7 @@ class ResellerResource extends Resource
                             ->title('Activation status updated successfully')
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_reseller')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

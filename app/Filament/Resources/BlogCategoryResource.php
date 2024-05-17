@@ -87,7 +87,7 @@ class BlogCategoryResource extends Resource
                             ->title('Visibility status updated successfully')
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_blog::category')),
                 TextColumn::make('updated_at')
                     ->label(__('Last Updated'))
                     ->dateTime()

@@ -89,7 +89,7 @@ class WarehouseResource extends Resource
                             ->title('Featured status updated successfully')
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_warehouse')),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),

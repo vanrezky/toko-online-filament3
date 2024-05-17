@@ -92,7 +92,7 @@ class PromotionResource extends Resource
                             ->title('Activation status updated successfully')
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_promotion')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

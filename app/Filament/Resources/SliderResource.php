@@ -93,7 +93,7 @@ class SliderResource extends Resource
                             ->title('Activation status updated successfully')
                             ->success()
                             ->send();
-                    }),
+                    })->disabled(!auth()->user()->can('update_slider')),
 
             ])
             ->filters([
