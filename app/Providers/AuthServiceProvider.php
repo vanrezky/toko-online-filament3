@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+
+use App\Policies\ActivityPolicy;
+use App\Policies\ExceptionPolicy;
+use BezhanSalleh\FilamentExceptions\Models\Exception;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 
@@ -16,6 +20,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // Update `Activity::class` with the one defined in `config/activitylog.php`
+        Activity::class => ActivityPolicy::class,
+        Exception::class => ExceptionPolicy::class,
+        // Exception::class => '',
     ];
 
     /**
@@ -23,6 +30,5 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }
