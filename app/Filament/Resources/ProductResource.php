@@ -9,11 +9,13 @@ use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Filament\Resources\ProductResource\RelationManagers\ProductVariantRelationManager;
 use App\Models\Reseller;
 use App\Models\Product;
+use App\Policies\ProductPolicy;
 use Carbon\Carbon;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
@@ -27,7 +29,6 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables\View\TablesRenderHook;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
@@ -154,7 +155,7 @@ class ProductResource extends Resource
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                                 Forms\Components\Select::make('warehouse_id')
                                     ->label(__('Shipping Warehouse'))
-                                    ->helperText(str('Select the warehouse where the product will be shipped from, to change the warehouse can be seen in the **<a href="javascript:;">Warehouse Location</a>** menu.')->inlineMarkdown()->toHtmlString())
+                                    ->helperText(str('Select the warehouse where the product will be shipped from, to change the warehouse can be seen in the **<a href="/admin/setting/warehouse" target="_blank">Warehouse Location</a>** menu.')->inlineMarkdown()->toHtmlString())
                                     ->relationship('warehouse', 'name', fn (Builder $query): Builder => $query->active())
                                     ->searchable()
                                     ->preload()
@@ -180,6 +181,7 @@ class ProductResource extends Resource
                     Forms\Components\Section::make('Price')
                         ->schema([
                             Forms\Components\TextInput::make('min_order')
+                                ->label(__('Minimal Order'))
                                 ->rules('nullable|numeric')
                                 ->helperText(__('Only enter numbers. e.g: 50'))
                                 ->required()
@@ -201,10 +203,20 @@ class ProductResource extends Resource
                                 ->label('Sales Commission Fee')
                                 ->helperText(__('Sales commission given to the affiliator. just enter a number. e.g: 10000'))
                                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                        ])->inlineLabel(),
+
+
+                    Forms\Components\Section::make('Reseller Price')
+                        ->description(__('Set prices based on reseller level'))
+                        ->schema([
                             Forms\Components\Repeater::make('resellerPrices')
                                 ->relationship('resellerPrices')
+                                ->hiddenLabel()
                                 ->reorderable(false)
-                                ->collapsible()
+                                // ->collapsible()
+                                ->deleteAction(
+                                    fn (Action $action) => $action->requiresConfirmation(),
+                                )
                                 ->schema([
                                     Forms\Components\Select::make('reseller_id')
                                         ->label(__('Reseller Level'))
@@ -213,18 +225,34 @@ class ProductResource extends Resource
                                         ->required(),
 
                                     Forms\Components\TextInput::make('price')
-                                        ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
                                         ->required()
                                         ->numeric()
                                         ->default(0)
+                                        ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                                ])->grid([
+                                    'md' => 2
+                                ]),
 
+                        ])->compact()->collapsible()->collapsed(),
+                    Forms\Components\Section::make('Wholesale')
+                        ->description(__('Set prices based on wholesale'))
+                        ->schema([
+                            Forms\Components\Repeater::make('wholesales')
+                                ->relationship('wholesales')
+                                ->reorderable(false)
+                                ->hiddenLabel()
+                                // ->collapsible()
+                                ->deleteAction(
+                                    fn (Action $action) => $action->requiresConfirmation(),
+                                )
+                                ->cloneable()
+                                ->schema(self::getWholesalesSchema())
+                                ->grid([
+                                    'xl' => 2
                                 ])
-                                ->itemLabel(fn (array $state): ?string => $state['reseller_name'] ?? null)
-                                ->columns(2)
+                        ])
 
-
-                        ])->inlineLabel(),
-
+                        ->compact()->collapsible()->collapsed()
                 ])->columnSpan(2),
 
                 Group::make([
@@ -336,7 +364,8 @@ class ProductResource extends Resource
                             ->title(__('Published status updated successfully'))
                             ->success()
                             ->send();
-                    }),
+                    })
+                    ->disabled(!auth()->user()->can('update_product')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -413,5 +442,29 @@ class ProductResource extends Resource
             'edit' => Pages\EditProduct::route('/{record}/edit'),
             // 'view' => '',
         ];
+    }
+
+    public static function getwholesalesSchema(): array
+    {
+        return [
+
+            Forms\Components\TextInput::make('min_qty')
+                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
+                ->required()
+                ->default(0),
+            Forms\Components\TextInput::make('max_qty')
+                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
+                ->required()
+                ->default(0),
+            Forms\Components\TextInput::make('price')
+                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
+                ->required()
+                ->default(0)
+        ];
+    }
+
+    public static function canUpdateProduct(): bool
+    {
+        return auth()->user()->can('update_product') ?? false;
     }
 }

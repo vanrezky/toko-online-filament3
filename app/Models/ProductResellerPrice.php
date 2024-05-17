@@ -24,4 +24,9 @@ class ProductResellerPrice extends Model
     {
         return $this->hasOne(Reseller::class);
     }
+
+    public function wholesales(): HasMany
+    {
+        return $this->hasMany(ProductWholesale::class, 'reseller_id');
+    }
 }

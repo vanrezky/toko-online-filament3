@@ -18,9 +18,8 @@ class ProductVariantRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\TextInput::make('variant'),
+                Forms\Components\TextInput::make('sub_varian'),
             ]);
     }
 
@@ -29,7 +28,11 @@ class ProductVariantRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('code'),
+                Tables\Columns\TextColumn::make('variant'),
+                Tables\Columns\TextColumn::make('sub_varian'),
+                Tables\Columns\TextColumn::make('price'),
+                Tables\Columns\TextColumn::make('stock'),
             ])
             ->filters([
                 //

@@ -16,7 +16,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // Update `Activity::class` with the one defined in `config/activitylog.php`
-
     ];
 
     /**

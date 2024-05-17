@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductActiveStatus;
 use App\Traits\HasUuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ class Product extends Model
     protected $fillable = ['name', 'slug', 'warehouse_id', 'category_id', 'digital', 'digital_url', 'description', 'code', 'images', 'weight', 'stock', 'price', 'sale_price', 'afiliate_price', 'min_order', 'variant', 'sub_variant', 'user_id', 'security_stock'];
 
     protected $casts = [
-        'images' => 'array'
+        'images' => 'array',
     ];
 
     public function category(): BelongsTo
@@ -42,5 +43,10 @@ class Product extends Model
     public function resellerPrices(): HasMany
     {
         return $this->hasMany(ProductResellerPrice::class);
+    }
+
+    public function wholesales(): HasMany
+    {
+        return $this->hasMany(ProductWholesale::class);
     }
 }
