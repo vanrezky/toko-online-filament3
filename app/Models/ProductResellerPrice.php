@@ -27,6 +27,7 @@ class ProductResellerPrice extends Model
 
     public function wholesales(): HasMany
     {
-        return $this->hasMany(ProductWholesale::class, 'reseller_id');
+        return $this->hasMany(ProductWholesale::class, 'product_id', 'product_id')
+            ->where('reseller_id', $this->reseller_id);
     }
 }

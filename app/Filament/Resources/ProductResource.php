@@ -17,6 +17,7 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
 use Filament\Forms\FormsComponent;
@@ -30,8 +31,12 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
+
+use function Laravel\Prompts\error;
 
 class ProductResource extends Resource
 {
@@ -217,31 +222,54 @@ class ProductResource extends Resource
                                 ->hiddenLabel()
                                 ->reorderable(false)
                                 // ->collapsible()
-                                ->deleteAction(
-                                    fn (Action $action) => $action->requiresConfirmation(),
-                                )
+                                ->deleteAction(function (Action $action) {
+                                    $action->requiresConfirmation()
+                                        ->action(function (array $arguments, Repeater $component) {
+                                            $itemData = $component->getItemState($arguments['item']);
+
+
+                                        });
+                                })
                                 ->schema([
                                     Forms\Components\Select::make('reseller_id')
                                         ->label(__('Reseller Level'))
                                         ->options(Reseller::active()->get()->pluck('name_level', 'id')->toArray())
                                         ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-                                        ->required(),
+                                        ->required()
+                                        ->hintAction(
+                                            Action::make('wholesale')
+                                                ->icon('heroicon-m-currency-dollar')
+                                                ->label('Add wholesale')
+                                                ->form([
+                                                    Forms\Components\Repeater::make('wholesales')
+                                                        ->default(function ($record): array {
+                                                            return $record ? $record->wholesales->toArray() : [];
+                                                        })
+                                                        ->schema(self::getwholesalesSchema())
+                                                        ->hiddenLabel()
+                                                        ->grid(2)
+
+                                                ])
+                                                ->action(fn (array $data, $record) => self::setActionWholesales($data, $record))
+                                                ->visible(fn ($record): bool => !empty($record))
+                                        ),
 
                                     Forms\Components\TextInput::make('price')
                                         ->required()
                                         ->numeric()
                                         ->default(0)
                                         ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+
                                 ])->grid([
                                     'md' => 2
                                 ]),
 
                         ])->compact()->collapsible()->collapsed(),
                     Forms\Components\Section::make('Wholesale')
-                        ->description(__('Set prices based on wholesale'))
+                        ->description(__('Set prices based on wholesale prices'))
                         ->schema([
                             Forms\Components\Repeater::make('wholesales')
-                                ->relationship('wholesales')
+                                ->relationship('wholesales', fn (Builder $query): Builder => $query->whereNull('reseller_id'))
                                 ->reorderable(false)
                                 ->hiddenLabel()
                                 // ->collapsible()
@@ -454,20 +482,51 @@ class ProductResource extends Resource
             Forms\Components\TextInput::make('min_qty')
                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
                 ->required()
-                ->default(0),
+                ->default(0)
+                ->distinct(),
             Forms\Components\TextInput::make('max_qty')
                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
                 ->required()
-                ->default(0),
+                ->default(0)
+                ->distinct(),
             Forms\Components\TextInput::make('price')
                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
                 ->required()
                 ->default(0)
+                ->distinct()
         ];
     }
 
     public static function canUpdateProduct(): bool
     {
         return auth()->user()->can('update_product') ?? false;
+    }
+    public static function setActionWholesales($data, $record): Notification
+    {
+        try {
+            $ins = [];
+            foreach ($data['wholesales'] as $key => $who) {
+                $ins[] = [
+                    'reseller_id' => $record->reseller_id,
+                    'product_id' => $record->product_id,
+                    'min_qty' => $who['min_qty'],
+                    'max_qty' => $who['max_qty'],
+                    'price' => $who['price'],
+                ];
+            }
+
+            $record->wholesales()->delete();
+            $record->wholesales()->createMany($ins);
+
+            return Notification::make()
+                ->title(__('Wholesale price submited successfully'))
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            return Notification::make()
+                ->title(__('Failed to create wholesale price'))
+                ->danger()
+                ->send();
+        }
     }
 }
