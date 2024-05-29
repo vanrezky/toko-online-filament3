@@ -17,6 +17,7 @@ class EditProduct extends EditRecord
     {
         return [
             // Actions\ViewAction::make(),
+            Actions\Action::make('back')->label('Back')->color('warning')->url($this->getResource()::getUrl('index')),
             Actions\DeleteAction::make(),
         ];
     }

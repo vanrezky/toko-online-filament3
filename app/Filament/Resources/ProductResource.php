@@ -175,12 +175,14 @@ class ProductResource extends Resource
                                     ->helperText(__('Only enter numbers. e.g: 50'))
                                     ->required()
                                     ->default(1)
-                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
+                                    ->live(),
                                 Forms\Components\TextInput::make('security_stock')
                                     ->rules('nullable|numeric')
                                     ->helperText(__('The safety stock is the limit stock for your products which alerts you if the product stock will soon be out of stock.'))
                                     ->required()
                                     ->default(0)
+                                    ->maxValue(fn (Get $get) => $get('stock'))
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                             ])->inlineLabel(),
                     ]),
@@ -194,7 +196,8 @@ class ProductResource extends Resource
                                 ->helperText(__('Only enter numbers. e.g: 50'))
                                 ->required()
                                 ->default(1)
-                                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
+                                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
+                                ->maxValue(fn (Get $get) => $get('stock')),
                             Forms\Components\TextInput::make('sale_price')
                                 ->rules('nullable|numeric')
                                 ->label(__('Price Before Discount'))
@@ -223,19 +226,20 @@ class ProductResource extends Resource
                                 ->reorderable(false)
                                 // ->collapsible()
                                 ->deleteAction(function (Action $action) {
-                                    $action->requiresConfirmation()
-                                        ->action(function (array $arguments, Repeater $component) {
-                                            $itemData = $component->getItemState($arguments['item']);
+                                    $action->requiresConfirmation();
+                                    // ->action(function (array $arguments, Repeater $component) {
+                                    //     $itemData = $component->getItemState($arguments['item']);
 
 
-                                        });
+                                    // });
                                 })
+                                ->defaultItems(0)
+
                                 ->schema([
                                     Forms\Components\Select::make('reseller_id')
                                         ->label(__('Reseller Level'))
                                         ->options(Reseller::active()->get()->pluck('name_level', 'id')->toArray())
                                         ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-                                        ->required()
                                         ->hintAction(
                                             Action::make('wholesale')
                                                 ->icon('heroicon-m-currency-dollar')
@@ -277,6 +281,7 @@ class ProductResource extends Resource
                                     fn (Action $action) => $action->requiresConfirmation(),
                                 )
                                 ->cloneable()
+                                ->defaultItems(0)
                                 ->schema(self::getWholesalesSchema())
                                 ->grid([
                                     'xl' => 2
