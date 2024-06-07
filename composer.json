@@ -21,6 +21,7 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "livewire/livewire": "^3.5",
         "njxqlus/filament-progressbar": "^1.0",
         "openai-php/laravel": "^0.8.1",
         "z3d0x/filament-logger": "^0.7.1"
