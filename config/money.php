@@ -4,7 +4,7 @@ return [
 
     'defaults' => [
 
-        'currency'  => env('MONEY_DEFAULTS_CURRENCY', 'USD'),
+        'currency'  => env('MONEY_DEFAULTS_CURRENCY', 'IDR'),
 
         'convert'   => env('MONEY_DEFAULTS_CONVERT', false),
 
@@ -686,8 +686,8 @@ return [
         'IDR' => [
             'name'                => 'Rupiah',
             'code'                => 360,
-            'precision'           => 2,
-            'subunit'             => 100,
+            'precision'           => 0,
+            'subunit'             => 1,
             'symbol'              => 'Rp',
             'symbol_first'        => true,
             'decimal_mark'        => ',',

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="{{ settings('favicon') }}">
 
-    <title>{{ $title ?? settings('site_name') }}</title>
+    <title>{{ !empty($title) ? $title . ' - ' . settings('site_name') : settings('site_name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -16,9 +16,9 @@
     @livewireStyles
 </head>
 
-<body class="dark:bg-neutral-900">
+<body class="flex flex-col min-h-screen">
     @livewire('partials.navbar')
-    <main>
+    <main class="flex-grow">
         {{ $slot }}
     </main>
     @livewire('partials.footer')

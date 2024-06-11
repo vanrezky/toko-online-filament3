@@ -43,3 +43,14 @@ function isSuperUser(): bool
 {
     return auth()->user()->is_super_user ?? false;
 }
+
+
+function getUrlImage($image): string
+{
+    return asset('/storage/' . $image);
+}
+
+function toMoney($price): string
+{
+    return \Akaunting\Money\Money::IDR($price);
+}

@@ -2,12 +2,19 @@
 
 namespace App\Livewire;
 
+use App\Models\Product;
+use App\Models\Slider;
 use Livewire\Component;
 
-class Homepage extends Component
+class HomePage extends Component
 {
     public function render()
     {
-        return view('livewire.homepage');
+        return view('livewire.home-page', [
+            'sliders' => Slider::active()->get(),
+            'flashSales' => Product::inRandomOrder()->take(5)->get(),
+            'bestSelling' => Product::inRandomOrder()->take(5)->get(),
+            'products' => Product::inRandomOrder()->take(10)->get(),
+        ]);
     }
 }

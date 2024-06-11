@@ -60,7 +60,8 @@ class ManageWebsite extends SettingsPage
                                     ->image()
                                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
                                     ->directory(UploadPath::IMAGE_CONFIG_PATH)
-                                    ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB'),
+                                    ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB')
+                                    ->imageEditor(),
                                 FileUpload::make('favicon')
                                     ->image()
                                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])

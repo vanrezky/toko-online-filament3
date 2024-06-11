@@ -13,6 +13,7 @@
         "aymanalhattami/filament-page-with-sidebar": "^2.4",
         "bezhansalleh/filament-exceptions": "^2.1",
         "bezhansalleh/filament-shield": "^3.2",
+        "blade-ui-kit/blade-icons": "^1.6",
         "filament/filament": "^3.2",
         "filament/spatie-laravel-settings-plugin": "^3.2",
         "filament/spatie-laravel-tags-plugin": "^3.2",
@@ -24,6 +25,7 @@
         "livewire/livewire": "^3.5",
         "njxqlus/filament-progressbar": "^1.0",
         "openai-php/laravel": "^0.8.1",
+        "ryangjchandler/blade-tabler-icons": "^2.3",
         "z3d0x/filament-logger": "^0.7.1"
     },
     "require-dev": {

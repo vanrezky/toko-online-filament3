@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Constants\UploadPath;
 use App\Enums\ProductActiveStatus;
 use App\Traits\HasUuidTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +21,61 @@ class Product extends Model
     protected $casts = [
         'images' => 'array',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    protected function priceCurrency(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) =>  toMoney($attributes['price']),
+        );
+    }
+    protected function salePriceCurrency(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => toMoney($attributes['sale_price']),
+        );
+    }
+
+    protected function thumbnail(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if (!empty($attributes['images'])) {
+
+                    $images = json_decode($attributes['images'], true);
+                    return getUrlImage($images[0]);
+                }
+
+                return null;
+            },
+        );
+    }
+
+    protected function savePriceCurrency(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value,  array $attributes) {
+                if (!empty($attributes['sale_price']) && $attributes['sale_price'] > $attributes['price']) {
+                    $savePrice = $attributes['sale_price'] - $attributes['price'];
+                    return toMoney($savePrice);
+                }
+
+
+                return null;
+            },
+        );
+    }
+
+    protected function discountPercentace(): Attribute
+    {
+        return Attribute::make(get: fn (mixed $value, array $attributes) => round(($attributes['sale_price'] - $attributes['price']) / $attributes['price'] * 100));
+    }
+
+
 
     public function category(): BelongsTo
     {
