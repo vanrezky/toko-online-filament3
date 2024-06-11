@@ -70,4 +70,8 @@
     input.form-primary {
         @apply focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary;
     }
+
+    .btn-primary {
+        @apply bg-primary hover:bg-blue-500;
+    }
 }

@@ -30,15 +30,24 @@
             <div class="hidden lg:block">
                 <x-navbar-search />
             </div>
-            <a href="/login" class="inline-flex items-center gap-2" wire:navigate>
-                <x-tabler-user class="stroke-primary" />
-                <span class="hidden font-semibold text-text sm:block hover:text-light">Sign In/Sign Up</span>
-            </a>
-            <div class="h-6 border-l border-border"></div> <!-- Separator -->
             <a href="/cart" wire:navigate class="inline-flex items-center gap-2">
                 <x-tabler-shopping-cart class="stroke-primary" />
                 <span class="hidden font-semibold text-text sm:block ">Cart</span>
+                <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-primary rounded-full">5</span>
             </a>
+            <div class="h-6 border-l border-border"></div> <!-- Separator -->
+            @if (!auth()->guard('customer')->check())
+                <a href="/login" class="inline-flex items-center gap-2" wire:navigate>
+                    <x-tabler-user class="stroke-primary" />
+                    <span class="hidden font-semibold text-text sm:block hover:text-light">Sign In/Sign Up</span>
+                </a>
+            @else
+                <a href="/profile" class="inline-flex items-center gap-2" wire:navigate>
+                    <x-tabler-user class="stroke-primary" />
+                    <span class="hidden font-semibold text-text sm:block hover:text-light">Profile</span>
+                </a>
+            @endif
+
         </div>
     </nav>
     {{-- end head --}}

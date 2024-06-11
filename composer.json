@@ -23,6 +23,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.5",
+        "masmerise/livewire-toaster": "^2.1",
         "njxqlus/filament-progressbar": "^1.0",
         "openai-php/laravel": "^0.8.1",
         "ryangjchandler/blade-tabler-icons": "^2.3",

@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthenticateCustomer
+use function Laravel\Prompts\error;
+
+class RedirectIfAuthenticatedCustomer
 {
     /**
      * Handle an incoming request.
@@ -16,9 +18,10 @@ class AuthenticateCustomer
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::guard('customer')->check()) {
-            return redirect()->route('login');
+        if (Auth::guard('customer')->check()) {
+            return redirect()->route('home');
         }
+
         return $next($request);
     }
 }

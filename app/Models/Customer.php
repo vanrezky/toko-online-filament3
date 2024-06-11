@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Customer extends Model
+class Customer extends Authenticatable
 {
-    use HasFactory, HasProfilePictureTrait;
+    use HasFactory, HasProfilePictureTrait, Notifiable;
 
     protected $fillable = ['first_name', 'last_name', 'email', 'email_verified_at', 'username', 'password', 'phone', 'balance', 'image', 'is_active'];
 

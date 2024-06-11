@@ -37,15 +37,13 @@
 
             <div class="col-span-2">
                 <h4 class="font-semibold text-gray-100">Stay up to date</h4>
-                <form>
+                <form action="#" method="POST">
                     <div class="flex flex-col items-center gap-2 p-2 mt-4 bg-white rounded-lg sm:flex-row sm:gap-3 ">
                         <div class="w-full">
-                            <input type="text" id="hero-input" name="hero-input" class="block w-full px-4 py-3 text-sm border-transparent rounded-lg disabled:opacity-50 disabled:pointer-events-none form-primary" placeholder="Enter your email">
+                            <x-form-input class="px-4 py-3" name="email" type="email" placeholder="Enter your email" />
                         </div>
-                        <a class="inline-flex items-center justify-center w-full p-3 text-sm font-semibold text-white bg-primary border border-transparent rounded-lg sm:w-auto whitespace-nowrap gap-x-2 hover:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-                            href="#">
-                            Subscribe
-                        </a>
+                        <x-button type="submit" class="btn-primary font-semibold inline-flex items-center justify-center text-sm rounded-lg sm:w-auto whitespace-nowrap gap-x-2">Subscribe</x-button>
+
                     </div>
 
                 </form>

@@ -21,6 +21,7 @@
     <main class="flex-grow">
         {{ $slot }}
     </main>
+    <x-toaster-hub />
     @livewire('partials.footer')
     @vite('resources/js/app.js')
     @livewireScripts
