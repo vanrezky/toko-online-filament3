@@ -1,7 +1,7 @@
 <div class="mx-auto w-full px-4 lg:px-[120px] bg-background1">
-    <div class="flex items-center justify-between gap-x-5 w-full py-2 sm:py-3.5">
+    <div class="flex items-center justify-between gap-x-5 w-full py-2">
         <p class="text-sm font-light text-text hover:text-neutral-500">
-            Welcome to worldwide Megamart!
+            {{ settings('site_tag_line') }}
         </p>
         <div class="flex items-center gap-x-2 sm:gap-x-4">
             <x-topbar-item>

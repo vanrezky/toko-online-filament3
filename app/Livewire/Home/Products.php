@@ -7,6 +7,8 @@ use Livewire\Component;
 class Products extends Component
 {
     public $products;
+    public $blockid = '';
+
 
     public function render()
     {

@@ -6,7 +6,7 @@
     {{-- start flash sales product --}}
     @if ($flashSales->count() > 0)
         <x-home-card title="Today's" subtitle="Best Selling Products" link="/products/?status=flashsales" :flashsales="true">
-            <livewire:home.products :products="$flashSales" lazy />
+            <livewire:home.products :products="$flashSales" lazy blockid="flashsales-glider" />
         </x-home-card>
     @endif
     {{-- end flash sales product --}}

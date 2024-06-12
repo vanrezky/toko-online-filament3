@@ -1,4 +1,4 @@
-    <a {{ $attributes }} class="home-card-item-square" title="{{ $product->name }}">
+    <div {{ $attributes }} class="home-card-item-square" title="{{ $product->name }}">
         @if ($isSalePrice)
             <div class="discount">
                 {{ $product->discount_percentace }}% OFF
@@ -20,4 +20,4 @@
                 <p class="save-price">Save - {{ $product->save_price_currency }}</p>
             @endif
         </div>
-    </a>
+    </div>

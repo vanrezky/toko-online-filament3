@@ -12,7 +12,7 @@ class HomePage extends Component
     {
         return view('livewire.home-page', [
             'sliders' => Slider::active()->get(),
-            'flashSales' => Product::inRandomOrder()->take(5)->get(),
+            'flashSales' => Product::inRandomOrder()->take(7)->get(),
             'bestSelling' => Product::inRandomOrder()->take(5)->get(),
             'products' => Product::inRandomOrder()->take(10)->get(),
         ]);
