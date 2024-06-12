@@ -12,7 +12,7 @@
     }
 
     .container-content {
-        @apply mx-auto mt-12 max-w-[85rem] sm:mt-[120px];
+        @apply mx-auto mt-12 max-w-[85rem] sm:mt-[70px];
     }
 
     .separator {

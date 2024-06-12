@@ -30,21 +30,41 @@
             <div class="hidden lg:block">
                 <x-navbar-search />
             </div>
-            <a href="/cart" wire:navigate class="inline-flex items-center gap-2">
-                <x-tabler-shopping-cart class="stroke-primary" />
-                <span class="hidden font-semibold text-text sm:block ">Cart</span>
-                <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-primary rounded-full">5</span>
-            </a>
-            <div class="h-6 border-l border-border"></div> <!-- Separator -->
-            @if (!auth()->guard('customer')->check())
-                <a href="/login" class="inline-flex items-center gap-2" wire:navigate>
-                    <x-tabler-user class="stroke-primary" />
-                    <span class="hidden font-semibold text-text sm:block hover:text-light">Sign In/Sign Up</span>
-                </a>
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                    <div class="indicator">
+                        <x-tabler-shopping-cart class="stroke-text" />
+                        <span class="badge badge-sm indicator-item">8</span>
+                    </div>
+                </div>
+                <div tabindex="0" class="mt-3 z-[1] card card-compact dropdown-content w-52 bg-base-100 shadow">
+                    <div class="card-body">
+                        <span class="font-bold text-lg">8 Items</span>
+                        <span class="text-info">Subtotal: $999</span>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-block">View cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (auth()->guard('customer')->check())
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                        <div class="w-10 rounded-full">
+
+                            <img alt="Tailwind CSS Navbar component" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                        </div>
+                    </div>
+                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a href="">Profile</a></li>
+                        <li><a>Settings</a></li>
+                        <li> <livewire:button.logout-button /></li>
+                    </ul>
+                </div>
             @else
-                <a href="/profile" class="inline-flex items-center gap-2" wire:navigate>
-                    <x-tabler-user class="stroke-primary" />
-                    <span class="hidden font-semibold text-text sm:block hover:text-light">Profile</span>
+                <a href="/login" class="inline-flex items-center gap-1 hover:bg-gray-100 rounded-lg px-2 py-3" wire:navigate>
+                    <x-tabler-user class="stroke-text" />
+                    <span class="hidden font-semibold text-text sm:block ">Sign In/Sign Up</span>
                 </a>
             @endif
 

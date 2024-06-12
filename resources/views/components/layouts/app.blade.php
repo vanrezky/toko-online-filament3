@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Glory:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glider-js@1/glider.min.css">
+
+    @stack('styles')
 
     @vite('resources/css/app.css')
     @livewireStyles
@@ -23,6 +26,9 @@
     </main>
     <x-toaster-hub />
     @livewire('partials.footer')
+
+    <script src="https://cdn.jsdelivr.net/npm/glider-js@1/glider.min.js"></script>
+    @stack('scripts')
     @vite('resources/js/app.js')
     @livewireScripts
 </body>

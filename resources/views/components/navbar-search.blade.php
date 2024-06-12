@@ -1,7 +1,7 @@
 @props(['mobile' => false])
 
 @php
-    $claseses = $mobile ? 'w-full h-[48px]' : 'lg:w-[250px] xl:w-[507px] h-[48px]';
+    $claseses = $mobile ? 'w-full h-[48px]' : 'lg:w-[250px] xl:w-[350px] h-[48px]';
 @endphp
 
 <div class="relative w-full">

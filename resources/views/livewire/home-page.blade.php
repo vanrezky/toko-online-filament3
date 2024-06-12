@@ -1,10 +1,6 @@
-<div class="app-container">
+<div class="app-container -mt-5">
     {{-- start slider --}}
-    <x-sliders :$sliders>
-        @foreach ($sliders as $slider)
-            <x-slider-item :slider="$slider->image" />
-        @endforeach
-    </x-sliders>
+    <x-sliders :$sliders />
     {{-- end slider --}}
 
     {{-- start flash sales product --}}
@@ -223,5 +219,4 @@
     </div>
     <!-- End Icon Blocks -->
     {{-- end icon sections --}}
-
 </div>

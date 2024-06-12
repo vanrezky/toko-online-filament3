@@ -1,3 +1,2 @@
 import "./bootstrap";
-import "preline";
-import "../../vendor/masmerise/livewire-toaster/resources/js"; // 👈
+import "../../vendor/masmerise/livewire-toaster/resources/js";

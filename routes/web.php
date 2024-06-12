@@ -16,6 +16,7 @@ use App\Livewire\ProductsPage;
 use App\Livewire\SuccessPage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Livewire\Component;
 
 /*
 |--------------------------------------------------------------------------

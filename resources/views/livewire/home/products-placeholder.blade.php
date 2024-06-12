@@ -1,10 +1,8 @@
 <div class="home-card">
-    <p class="h-4 bg-gray-200 rounded-full dark:bg-neutral-700" style="width: 40%;"></p>
-
-    <ul class="mt-5 space-y-3">
-        <li class="w-full h-4 bg-gray-200 rounded-full dark:bg-neutral-700"></li>
-        <li class="w-full h-4 bg-gray-200 rounded-full dark:bg-neutral-700"></li>
-        <li class="w-full h-4 bg-gray-200 rounded-full dark:bg-neutral-700"></li>
-        <li class="w-full h-4 bg-gray-200 rounded-full dark:bg-neutral-700"></li>
-    </ul>
+    <div class="flex flex-col gap-4 w-full">
+        <div class="skeleton h-32 w-full"></div>
+        <div class="skeleton h-4 w-28"></div>
+        <div class="skeleton h-4 w-full"></div>
+        <div class="skeleton h-4 w-full"></div>
+    </div>
 </div>

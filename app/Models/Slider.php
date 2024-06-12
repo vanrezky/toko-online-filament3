@@ -13,12 +13,11 @@ class Slider extends Model
 
     protected $fillable = ['description', 'image', 'is_active', 'target_link', 'target_anchor', 'start_at', 'end_at'];
 
-    protected function image(): Attribute
+    public function getImageUrlAttribute(): string
     {
-        return Attribute::make(
-            get: fn (string $value) => $value ? asset('/storage/' .  $value) : null
-        );
+        return $this->image ? getUrlImage($this->image) : '';
     }
+
 
     public function scopeActive($condition)
     {
