@@ -9,9 +9,8 @@
     <title>{{ !empty($title) ? $title . ' - ' . settings('site_name') : settings('site_name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Glory:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glider-js@1/glider.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     @stack('styles')
 
@@ -19,18 +18,20 @@
     @livewireStyles
 </head>
 
-<body class="flex flex-col min-h-screen">
-    @livewire('partials.navbar')
+<body class="flex flex-col min-h-screen bg-BG">
+    @livewire('partials.header')
     <main class="flex-grow">
         {{ $slot }}
     </main>
     <x-toaster-hub />
     @livewire('partials.footer')
 
-    <script src="https://cdn.jsdelivr.net/npm/glider-js@1/glider.min.js"></script>
-    @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     @vite('resources/js/app.js')
+    @stack('scripts')
     @livewireScripts
+
+
 </body>
 
 </html>

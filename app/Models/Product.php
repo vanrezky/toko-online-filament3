@@ -72,10 +72,8 @@ class Product extends Model
 
     protected function discountPercentace(): Attribute
     {
-        return Attribute::make(get: fn (mixed $value, array $attributes) => round(($attributes['sale_price'] - $attributes['price']) / $attributes['price'] * 100));
+        return Attribute::make(get: fn (mixed $value, array $attributes) => round(($attributes['sale_price'] - $attributes['price']) / $attributes['sale_price'] * 100));
     }
-
-
 
     public function category(): BelongsTo
     {
@@ -105,5 +103,10 @@ class Product extends Model
     public function wholesales(): HasMany
     {
         return $this->hasMany(ProductWholesale::class);
+    }
+
+    public function faqs()
+    {
+        return $this->hasMany(ProductFaq::class);
     }
 }

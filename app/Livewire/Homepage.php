@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Slider;
 use Livewire\Component;
@@ -15,6 +16,7 @@ class HomePage extends Component
             'flashSales' => Product::inRandomOrder()->take(7)->get(),
             'bestSelling' => Product::inRandomOrder()->take(5)->get(),
             'products' => Product::inRandomOrder()->take(10)->get(),
+            'categories' => Category::homepage()->get()
         ]);
     }
 }

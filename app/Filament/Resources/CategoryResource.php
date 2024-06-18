@@ -52,7 +52,7 @@ class CategoryResource extends Resource
                 Group::make([
                     Forms\Components\FileUpload::make('image')
                         ->label(__('Category Image'))
-                        ->rules(['required', 'mimes:png,jpg,jpeg', 'max:1024'])
+                        ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:1024'])
                         ->image()
                         ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
                         ->imageEditorAspectRatios([null, '1:1'])

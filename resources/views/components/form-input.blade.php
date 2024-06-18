@@ -9,7 +9,7 @@
         <label for="{{ $attributes['name'] }}" class="block text-gray-700 mb-2">{{ $label }}</label>
 @endif
 
-<input {{ $attributes->merge(['class' => 'form-primary block w-full text-base font-light border rounded-lg px-4 py-2 disabled:opacity-50 disabled:pointer-events-none']) }}>
+<input {{ $attributes->merge(['class' => 'focus:outline-secondary2 block w-full text-base font-light border rounded-lg px-4 py-2 disabled:opacity-50 disabled:pointer-events-none']) }}>
 <div>
     @error($attributes['name'])
         <span class="text-red-500 text-sm ">{{ $message }}</span>

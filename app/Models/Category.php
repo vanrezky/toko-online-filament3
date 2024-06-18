@@ -21,9 +21,18 @@ class Category extends Model
         return $query->where('is_featured', true);
     }
 
+    public function getImageUrlAttribute(): string
+    {
+        return getUrlImage($this->image);
+    }
 
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function scopeHomepage($query)
+    {
+        return $query->active()->featured()->whereNotNull('image');
     }
 }

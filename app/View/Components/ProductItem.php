@@ -22,7 +22,7 @@ class ProductItem extends Component
         $this->product = $product;
         $this->saveprice = $saveprice;
         $this->isSalePrice = $product->sale_price > 0;
-        $this->product->name_short = Str::limit($this->product->name, 24, '..');
+        $this->product->name_short = Str::limit($this->product->name, 50, '..');
     }
 
     /**

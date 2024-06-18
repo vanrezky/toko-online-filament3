@@ -288,7 +288,29 @@ class ProductResource extends Resource
                                 ])
                         ])
 
-                        ->compact()->collapsible()->collapsed()
+                        ->compact()->collapsible()->collapsed(),
+
+                    Forms\Components\Section::make('FAQs')
+                        ->description(__('Set general questions and answers of product'))
+                        ->schema([
+                            Forms\Components\Repeater::make('faqs')
+                                ->relationship('faqs')
+                                ->reorderable(true)
+                                ->hiddenLabel()
+                                ->defaultItems(0)
+                                ->schema([
+                                    Forms\Components\TextInput::make('question')
+                                        ->label(__('Question'))
+                                        ->required(),
+                                    Forms\Components\Textarea::make('answer')
+                                        ->label(__('Answer'))
+                                        ->required(),
+                                ])
+
+                        ])
+
+                        ->compact()->collapsible()->collapsed(),
+
                 ])->columnSpan(2),
 
                 Group::make([

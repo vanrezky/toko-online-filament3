@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 @layer components {
-    .app-container {
-        @apply w-full px-4 lg:px-[120px];
+    .margin-content {
+        @apply px-4 py-3 sm:py-5 lg:px-[135px];
     }
 
-    .btn-primary {
-        @apply rounded bg-primary px-4 py-2 font-bold text-white;
+    .app-container {
+        @apply w-full px-4 lg:px-[135px];
     }
 
     .container-content {
@@ -16,62 +16,59 @@
     }
 
     .separator {
-        @apply my-1 border-b border-border sm:my-2;
+        @apply my-1 border-b border-gray-200 sm:my-2;
     }
 
-    .home-card {
+    .product-container {
         @apply mx-auto mt-10 max-w-7xl;
     }
 
-    .home-card > .home-card-item-square {
-        @apply relative overflow-hidden rounded border bg-white font-glory text-heading transition duration-150 hover:border-primary hover:shadow-md;
+    .product-item {
+        @apply shadow;
     }
 
-    .home-card > .home-card-item-square > .discount {
-        @apply absolute right-0 flex max-w-[45px] overflow-hidden text-wrap rounded-bl-xl bg-primary p-2 text-center text-xs font-bold text-white;
+    .product-item .product-name {
+        @apply text-xs font-semibold sm:text-sm;
     }
 
-    .home-card > .home-card-item-square > .image {
-        @apply flex h-52 items-center justify-center bg-background1;
+    .product-item .product-price {
+        @apply font-semibold text-secondary2;
+    }
+    .product-item .product-price-sale {
+        @apply text-xs text-gray-400 line-through;
     }
 
-    .home-card > .home-card-item-square > .image > img {
-        @apply max-h-full object-cover;
+    .product-item .discount {
+        @apply absolute left-2 top-2 flex overflow-hidden rounded-lg bg-secondary2 px-2 py-1 text-center text-xs text-text;
     }
 
-    .home-card > .home-card-item-square > .description {
-        @apply mt-3 px-4 pb-1 sm:pb-3;
+    .slider-home {
+        @apply relative h-[10rem] w-full overflow-hidden rounded-xl md:h-[15rem] lg:h-[344px];
     }
 
-    .home-card > .home-card-item-square > .description > .product-name {
-        @apply font-sans text-sm font-semibold sm:text-base;
-    }
-    .home-card > .home-card-item-square > .description > .price-detail {
-        @apply flex items-baseline space-x-2;
-    }
-    .home-card
-        > .home-card-item-square
-        > .description
-        > .price-detail
-        > .price {
-        @apply text-sm font-semibold text-red-500 sm:text-base;
-    }
-    .home-card
-        > .home-card-item-square
-        > .description
-        > .price-detail
-        > .discount-price {
-        @apply text-xs text-gray-500 line-through sm:text-sm;
-    }
-    .home-card > .home-card-item-square > .description > .save-price {
-        @apply text-xs font-semibold text-green-600 sm:text-sm;
+    .slider-home-wrapper > .slider-slide {
+        @apply flex justify-center bg-gray-100 text-center;
     }
 
-    input.form-primary {
-        @apply focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary;
+    .slider-home-wrapper > .slider-slide > img {
+        @apply block h-full w-full object-cover;
     }
 
-    .btn-primary {
-        @apply bg-primary hover:bg-blue-500;
+    /* Additional CSS to position the pagination inside the slider */
+    .swiper-pagination {
+        @apply absolute bottom-[3%] left-[50%] flex justify-center md:bottom-[4%] lg:bottom-[5%];
+        transform: translateX(-50%);
+    }
+
+    .swiper-pagination-bullet {
+        @apply mx-1 h-2.5 w-2.5 rounded-full bg-white opacity-75;
+    }
+
+    .swiper-pagination-bullet-active {
+        @apply bg-blue-500;
+    }
+
+    .btn-general {
+        @apply bg-button2 text-text hover:border-hoverbutton hover:bg-hoverbutton;
     }
 }
