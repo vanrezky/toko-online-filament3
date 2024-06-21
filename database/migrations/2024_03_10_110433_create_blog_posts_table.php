@@ -22,7 +22,6 @@ return new class extends Migration
             $table->boolean('is_status')->default(true);
             $table->string('image')->nullable();
             $table->unsignedBigInteger('views')->default(0);
-            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

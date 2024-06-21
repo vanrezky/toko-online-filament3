@@ -21,7 +21,6 @@ return new class extends Migration
             $table->unsignedInteger('order');
             $table->boolean('is_status')->default(true);
             $table->date('published_at');
-            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
