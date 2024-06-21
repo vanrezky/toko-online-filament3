@@ -33,7 +33,7 @@
                 </figure>
                 <div class="card-body">
                     <div class="flex justify-center text-center">
-                        <h2 class="text-xs font-semibold sm:text-sm">{{ $category->name }}</h2>
+                        <h2 class="text-xs font-semibold sm:text-sm tracking-wide leading-relaxed">{{ $category->name }}</h2>
                     </div>
                 </div>
             </a>

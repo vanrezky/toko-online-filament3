@@ -1,5 +1,5 @@
-<div class="app-container">
-    <div class="flex flex-wrap mb-24 -mx-3">
+<x-app-container>
+    <div class="container-content flex flex-wrap mb-24 -mx-3">
         <div class="w-full pr-2 lg:w-1/5 lg:block">
             <x-products-card-filter title="Categories">
                 <ul>
@@ -133,5 +133,4 @@
             <!-- pagination end -->
         </div>
     </div>
-
-</div>
+</x-app-container>

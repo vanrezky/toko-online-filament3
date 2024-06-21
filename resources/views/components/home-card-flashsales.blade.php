@@ -3,31 +3,36 @@
 <div class="container-content">
     <div class="flex items-center sm:mb-5">
         <div class="w-4 mr-2 rounded bg-secondary2 h-7"></div>
-        <div class="font-semibold text-secondary2">{{ $title }}</div>
+        <div class="font-semibold text-secondary2 tracking-wide">{{ $title }}</div>
     </div>
 
     <div class="flex items-center justify-between py-2">
         <div class="flex items-center space-x-2 sm:space-x-8">
-            <div class="text-2xl font-bold sm:text-[30px] text-text2">{{ $subtitle }}</div>
-            <div class="flex items-center justify-start space-x-1 ">
-                <div class="text-center">
-                    <div class="text-xs sm:text-sm text-gray-500">Days</div>
-                    <div class="text-sm sm:text-lg font-bold">03</div>
+            <div class="text-2xl font-semibold sm:text-[30px] text-text2 tracking-wide">{{ $subtitle }}</div>
+            <div class=" grid grid-flow-col gap-2 md:gap-5 text-center auto-cols-max">
+                <div class="flex flex-col">
+                    <span class="countdown font-mono text-sm sm:text-lg">
+                        <span style="--value:15;"></span>
+                    </span>
+                    <span class="text-xs sm:text-sm">days</span>
                 </div>
-                <div class="text-sm sm:text-lg font-bold text-secondary2">:</div>
-                <div class="text-center">
-                    <div class="text-xs sm:text-sm text-gray-500">Hours</div>
-                    <div class="text-sm sm:text-lg font-bold">23</div>
+                <div class="flex flex-col">
+                    <span class="countdown font-mono text-sm sm:text-lg">
+                        <span style="--value:10;"></span>
+                    </span>
+                    <span class="text-xs sm:text-sm">hours</span>
                 </div>
-                <div class="text-sm sm:text-lg font-bold text-secondary2">:</div>
-                <div class="text-center">
-                    <div class="text-xs sm:text-sm text-gray-500">Minutes</div>
-                    <div class="text-sm sm:text-lg font-bold">19</div>
+                <div class="flex flex-col">
+                    <span class="countdown font-mono text-sm sm:text-lg">
+                        <span style="--value:24;"></span>
+                    </span>
+                    <span class="text-xs sm:text-sm">min</span>
                 </div>
-                <div class="text-sm sm:text-lg font-bold text-secondary2">:</div>
-                <div class="text-center">
-                    <div class="text-xs sm:text-sm text-gray-500">Seconds</div>
-                    <div class="text-sm sm:text-lg font-bold">56</div>
+                <div class="flex flex-col">
+                    <span class="countdown font-mono text-sm sm:text-lg">
+                        <span style="--value:38;"></span>
+                    </span>
+                    <span class="text-xs sm:text-sm">sec</span>
                 </div>
             </div>
         </div>
