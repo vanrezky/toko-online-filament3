@@ -6,6 +6,8 @@ use App\Constants\UploadPath;
 use App\Enums\BlogPostStatus;
 use App\Filament\Resources\BlogPostResource\Pages;
 use App\Filament\Resources\BlogPostResource\RelationManagers;
+use App\Filament\Resources\Schema\MetaSchema;
+use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\BlogPost;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -57,9 +59,8 @@ class BlogPostResource extends Resource
                     ->schema([
                         Tab::make('Title & Content')
                             ->schema([
-                                TextInput::make('title')
+                                TitleSchema::title()
                                     ->autofocus()
-                                    ->label(__('Post title'))
                                     ->hiddenLabel()
                                     ->placeholder(__('Post title'))
                                     ->minLength(5)
@@ -67,19 +68,7 @@ class BlogPostResource extends Resource
                                     ->maxLength(255)
                                     ->columnSpanFull()
                                     ->id('post-title')
-                                    ->live(onBlur: true)
-                                    ->extraInputAttributes(['class' => 'column-title'], true)
-                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
-
-                                        if ($operation == 'edit') {
-                                            return;
-                                        }
-                                        if (!$get('is_slug_changed_manually') && filled($state)) {
-                                            $set('slug', Str::slug($state));
-                                        }
-
-                                        $set('slug', Str::slug($state));
-                                    }),
+                                    ->extraInputAttributes(['class' => 'column-title'], true),
                                 RichEditor::make('content')
                                     ->hiddenLabel()
                                     ->placeholder('Post Content')
@@ -93,24 +82,17 @@ class BlogPostResource extends Resource
                                     ->required(),
                             ]),
                         Tab::make('SEO')
-                            ->schema([
-                                Textarea::make('description')
-                                    ->label(__('Description'))
-                                    ->hint(__('Write an excerpt for your post')),
-                                TextInput::make('slug')
-                                    ->label(__('Post Slug'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->rules(['alpha_dash'])
-                                    ->unique(ignoreRecord: true)
-                                    ->afterStateUpdated(function (Set $set) {
-                                        $set('is_slug_changed_manually', true);
-                                    })
-                                    ->required()->columnSpanFull(),
-                                Hidden::make('is_slug_changed_manually')
-                                    ->default(false)
-                                    ->dehydrated(false),
-                            ]),
+                            ->schema(
+                                [
+                                    TitleSchema::slug()
+                                        ->label(__('Post Slug'))
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->columnSpanFull(),
+                                    TitleSchema::hidden(),
+                                    MetaSchema::get(),
+                                ]
+                            ),
                         Tab::make('Tags')
                             ->schema([
                                 SpatieTagsInput::make('tags')

@@ -4,17 +4,19 @@ namespace App\Models;
 
 use App\Constants\UploadPath;
 use App\Enums\ProductActiveStatus;
+use App\Traits\HasMeta;
 use App\Traits\HasUuidTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
 
 class Product extends Model
 {
-    use HasFactory, HasUuidTrait;
+    use HasFactory, HasUuidTrait, HasMeta;
 
     protected $fillable = ['name', 'slug', 'warehouse_id', 'category_id', 'digital', 'digital_url', 'description', 'code', 'images', 'weight', 'stock', 'price', 'sale_price', 'afiliate_price', 'min_order', 'variant', 'sub_variant', 'user_id', 'security_stock'];
 
@@ -105,7 +107,7 @@ class Product extends Model
         return $this->hasMany(ProductWholesale::class);
     }
 
-    public function faqs()
+    public function faqs(): HasMany
     {
         return $this->hasMany(ProductFaq::class);
     }

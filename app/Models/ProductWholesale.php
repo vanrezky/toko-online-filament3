@@ -10,7 +10,7 @@ class ProductWholesale extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id', 'reseller_id', 'min_qty', 'max_qty', 'price'];
+    protected $fillable = ['product_id', 'reseller_id', 'min_qty', 'price'];
 
     public function product(): BelongsTo
     {

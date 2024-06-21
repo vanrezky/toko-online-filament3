@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use App\Enums\BlogPostStatus;
+use App\Traits\HasMeta;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Spatie\Tags\HasTags;
 
 class BlogPost extends Model
 {
-    use HasFactory, HasTags;
+    use HasFactory, HasTags, HasMeta;
 
     protected $fillable = ['title', 'slug', 'content', 'published_at', 'blog_category_id', 'image', 'is_status', 'user_id'];
 

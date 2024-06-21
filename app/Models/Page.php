@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use App\Enums\BlogPostStatus;
+use App\Traits\HasMeta;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Page extends Model
 {
-    use HasFactory;
+    use HasFactory, HasMeta;
 
     protected $fillable = ['title', 'content', 'image', 'is_status', 'slug', 'order', 'published_at', 'parent_id'];
     protected $casts = [

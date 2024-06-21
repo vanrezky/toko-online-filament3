@@ -7,6 +7,8 @@ use App\Constants\UploadPath;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Filament\Resources\ProductResource\RelationManagers\ProductVariantRelationManager;
+use App\Filament\Resources\Schema\MetaSchema;
+use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\Reseller;
 use App\Models\Product;
 use App\Policies\ProductPolicy;
@@ -18,6 +20,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
 use Filament\Forms\FormsComponent;
@@ -73,42 +76,44 @@ class ProductResource extends Resource
                             ->optimize('webp')
                             ->panelLayout('grid'),
                     ])->collapsible()->collapsed(fn (string $context): bool => $context === 'edit'),
-                Forms\Components\Section::make('Name & Description Product')
+                Tabs::make()
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('Product Name'))
-                            ->hiddenLabel()
-                            ->placeholder('Product Name')
-                            ->helperText(__('Product name of at least 15 letters/characters.'))
-                            ->minLength(5)
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpanFull()
-                            ->id('product-name')
-                            ->live(onBlur: true)
-                            ->extraInputAttributes(['class' => 'column-title'], true)
-                            ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
-
-                                if ($operation == 'edit') {
-                                    return;
-                                }
-                                if (!$get('is_slug_changed_manually') && filled($state)) {
-                                    $set('slug', Str::slug($state));
-                                }
-
-                                $set('slug', Str::slug($state));
-                            }),
-                        Forms\Components\RichEditor::make('description')
-                            ->hiddenLabel()
-                            ->placeholder('Product Description')
-                            ->helperText(__('Add product descriptions to make it easier for buyers to understand the products being sold.'))
-                            ->required()
-                            ->string()
-                            ->disableToolbarButtons([
-                                'attachFiles',
+                        Tabs\Tab::make('Name & Description')
+                            ->schema([
+                                TitleSchema::title('name')
+                                    ->label(__('Product Name'))
+                                    ->hiddenLabel()
+                                    ->placeholder('Product Name')
+                                    ->helperText(__('Product name of at least 15 letters/characters.'))
+                                    ->minLength(5)
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpanFull()
+                                    ->id('product-name')
+                                    ->extraInputAttributes(['class' => 'column-title'], true),
+                                Forms\Components\RichEditor::make('description')
+                                    ->hiddenLabel()
+                                    ->placeholder('Product Description')
+                                    ->helperText(__('Add product descriptions to make it easier for buyers to understand the products being sold.'))
+                                    ->required()
+                                    ->string()
+                                    ->disableToolbarButtons([
+                                        'attachFiles',
+                                    ])
+                                    ->columnSpanFull(),
+                            ]),
+                        Tabs\Tab::make('SEO')
+                            ->schema([
+                                TitleSchema::slug()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->required()
+                                    ->columnSpanFull(),
+                                TitleSchema::hidden(),
+                                MetaSchema::get(),
                             ])
-                            ->columnSpanFull(),
-                    ]),
+                    ])->columnSpanFull(),
+
                 Group::make([
 
                     Forms\Components\Section::make(__('Code & Product Category'))
@@ -119,7 +124,9 @@ class ProductResource extends Resource
                                     ->helperText(__('Enter the unique code for the product and make sure it is not the same as another product.'))
                                     ->required()
                                     ->maxLength(20)
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->unique(column: 'code', ignoreRecord: true)
+                                    ->maxLength('20'),
                                 Forms\Components\Select::make('category_id')
                                     ->label(__('Product Category'))
                                     ->helperText(__('Select the category that corresponds to the product.'))
@@ -316,18 +323,6 @@ class ProductResource extends Resource
                 Group::make([
                     Forms\Components\Section::make('Other Settings Product')
                         ->schema([
-                            Forms\Components\TextInput::make('slug')
-                                ->required()
-                                ->maxLength(255)
-                                ->rules(['alpha_dash'])
-                                ->unique(ignoreRecord: true)
-                                ->afterStateUpdated(function (Set $set) {
-                                    $set('is_slug_changed_manually', true);
-                                })
-                                ->required()->columnSpanFull(),
-                            Forms\Components\Hidden::make('is_slug_changed_manually')
-                                ->default(false)
-                                ->dehydrated(false),
                             Forms\Components\TagsInput::make('tags')
                                 ->label('Product Tags')
                                 ->placeholder('e.g: electronics, phone, laptop')
@@ -379,7 +374,9 @@ class ProductResource extends Resource
                     ->limitedRemainingText(size: 'lg')
                     ->extraImgAttributes(['loading' => 'lazy']),
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    // ->limit('50')
+                    ->extraAttributes(['class' => 'text-wrap']),
                 Tables\Columns\TextColumn::make('category.name')
                     ->numeric()
                     ->sortable(),
@@ -475,8 +472,11 @@ class ProductResource extends Resource
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -511,12 +511,8 @@ class ProductResource extends Resource
                 ->required()
                 ->default(0)
                 ->distinct(),
-            Forms\Components\TextInput::make('max_qty')
-                ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
-                ->required()
-                ->default(0)
-                ->distinct(),
             Forms\Components\TextInput::make('price')
+                ->label(__('Price per item'))
                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
                 ->required()
                 ->default(0)
@@ -537,7 +533,6 @@ class ProductResource extends Resource
                     'reseller_id' => $record->reseller_id,
                     'product_id' => $record->product_id,
                     'min_qty' => $who['min_qty'],
-                    'max_qty' => $who['max_qty'],
                     'price' => $who['price'],
                 ];
             }

@@ -5,10 +5,13 @@ namespace App\Filament\Resources;
 use App\Enums\StatusType;
 use App\Filament\Resources\BlogCategoryResource\Pages;
 use App\Filament\Resources\BlogCategoryResource\RelationManagers;
+use App\Filament\Resources\Schema\MetaSchema;
+use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\BlogCategory;
 use Filament\Forms;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -44,34 +47,31 @@ class BlogCategoryResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
+                Tabs::make()
+                    ->schema([
+                        Tabs\Tab::make('Main')
+                            ->schema([
+                                TitleSchema::title('name')
+                                    ->required()
+                                    ->autofocus()
+                                    ->minLength(3)
+                                    ->maxLength(255),
+                                RichEditor::make('description')->columnSpanFull(),
+                                Toggle::make('is_visible')
+                                    ->label('Visible to customers')
+                                    ->default(true)
 
-                        if ($operation == 'edit') {
-                            return;
-                        }
-                        if (!$get('is_slug_changed_manually') && filled($state)) {
-                            $set('slug', Str::slug($state));
-                        }
+                            ]),
+                        Tabs\Tab::make('SEO')
+                            ->schema([
+                                TitleSchema::slug(),
+                                TitleSchema::hidden(),
+                                MetaSchema::get(),
+                            ])
+                    ])->columnSpanFull()
 
-                        $set('slug', Str::slug($state));
-                    })
-                    ->required()
-                    ->autofocus()
-                    ->minLength(3)
-                    ->maxLength(255),
-                TextInput::make('slug')
-                    ->unique(ignoreRecord: true)
-                    ->readOnly()
-                    ->required(),
-                RichEditor::make('description')->columnSpanFull(),
-                Toggle::make('is_visible')
-                    ->label('Visible to customers')
-                    ->default(true)
-                    ->columnSpanFull()
 
-            ])->columns(2);
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -135,8 +135,8 @@ class BlogCategoryResource extends Resource
     {
         return [
             'index' => Pages\ListBlogCategories::route('/'),
-            // 'create' => Pages\CreateBlogCategory::route('/create'),
-            // 'edit' => Pages\EditBlogCategory::route('/{record}/edit'),
+            'create' => Pages\CreateBlogCategory::route('/create'),
+            'edit' => Pages\EditBlogCategory::route('/{record}/edit'),
         ];
     }
 }

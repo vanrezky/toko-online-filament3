@@ -6,6 +6,8 @@ use App\Constants\UploadPath;
 use App\Enums\BlogPostStatus;
 use App\Filament\Resources\PageResource\Pages;
 use App\Filament\Resources\PageResource\RelationManagers;
+use App\Filament\Resources\Schema\MetaSchema;
+use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\Page;
 use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
@@ -49,28 +51,15 @@ class PageResource extends Resource
                     ->schema([
                         Tab::make('Title & Content')
                             ->schema([
-                                TextInput::make('title')
+                                TitleSchema::title('title')
                                     ->autofocus()
-                                    ->label(__('Page title'))
                                     ->hiddenLabel()
                                     ->placeholder(__('Page title'))
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpanFull()
                                     ->id('page-title')
-                                    ->live(onBlur: true)
-                                    ->extraInputAttributes(['class' => 'column-title'], true)
-                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation) {
-
-                                        if ($operation == 'edit') {
-                                            return;
-                                        }
-                                        if (!$get('is_slug_changed_manually') && filled($state)) {
-                                            $set('slug', Str::slug($state));
-                                        }
-
-                                        $set('slug', Str::slug($state));
-                                    }),
+                                    ->extraInputAttributes(['class' => 'column-title'], true),
                                 RichEditor::make('content')
                                     ->hiddenLabel()
                                     ->placeholder('Page Content')
@@ -81,30 +70,19 @@ class PageResource extends Resource
 
                         Tab::make('SEO')
                             ->schema([
-                                Textarea::make('description')
-                                    ->label(__('Description'))
-                                    ->hint(__('Write an excerpt for your page')),
-                                TextInput::make('slug')
-                                    ->label(__('Page Slug'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->rules(['alpha_dash'])
-                                    ->unique(ignoreRecord: true)
-                                    ->afterStateUpdated(function (Set $set) {
-                                        $set('is_slug_changed_manually', true);
-                                    })
-                                    ->required()->columnSpanFull(),
-                                Hidden::make('is_slug_changed_manually')
-                                    ->default(false)
-                                    ->dehydrated(false),
+                                TitleSchema::slug()->required()->maxLength(255),
+                                TitleSchema::hidden(),
+                                MetaSchema::get(),
+                            ]),
+                        Tab::make('Visibility')
+                            ->schema([
                                 Select::make('parent_id')
                                     ->label(__('Parent Page'))
                                     ->options(function (?string $operation, ?string $state) {
                                         if ($operation === 'create') {
                                             return Page::all()->pluck('title', 'id');
                                         }
-
-                                        $page = Page::where('id', '!=', $state)->get()->pluck('title', 'id');
+                                        return  Page::where('id', '!=', $state)->get()->pluck('title', 'id');
                                     })
                                     ->searchable()
                                     ->preload(),
@@ -112,9 +90,6 @@ class PageResource extends Resource
                                     ->required()
                                     ->default(1)
                                     ->numeric(),
-                            ]),
-                        Tab::make('Visibility')
-                            ->schema([
                                 Select::make('is_status')
                                     ->label(__('Page Status'))
                                     ->helperText(__('Publish the page or save it as a draft.'))
@@ -146,7 +121,8 @@ class PageResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
+                    ->searchable()
+                    ->extraCellAttributes(['class' => 'text-wrap']),
 
                 Tables\Columns\TextColumn::make('is_status')
                     ->label(__('Status'))

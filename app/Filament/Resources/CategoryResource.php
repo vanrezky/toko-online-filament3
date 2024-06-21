@@ -5,11 +5,14 @@ namespace App\Filament\Resources;
 use App\Constants\UploadPath;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Resources\CategoryResource\RelationManagers;
+use App\Filament\Resources\Schema\MetaSchema;
+use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Split;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -39,29 +42,33 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->minLength(3)
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('slug')
-                    ->unique(ignoreRecord: true)
-                    ->required()
-                    ->columnSpanFull(),
-                Group::make([
-                    Forms\Components\FileUpload::make('image')
-                        ->label(__('Category Image'))
-                        ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:1024'])
-                        ->image()
-                        ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
-                        ->imageEditorAspectRatios([null, '1:1'])
-                        ->hint(__('Ratio Is 1:1. Maximum size is 1MB')),
-                    Forms\Components\Toggle::make('is_active')
-                        ->default(fn (): bool => true),
-                    Forms\Components\Toggle::make('is_featured')
-                        ->default(fn (): bool => true)
-                ])->columnSpanFull(),
+                Tabs::make()
+                    ->schema([
+                        Tabs\Tab::make('Main')
+                            ->schema([
+                                TitleSchema::title('name')
+                                    ->required()
+                                    ->minLength(3)
+                                    ->columnSpanFull(),
+                                Group::make([
+                                    Forms\Components\FileUpload::make('image')
+                                        ->label(__('Category Image'))
+                                        ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:1024'])
+                                        ->image()
+                                        ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
+                                        ->imageEditorAspectRatios([null, '1:1'])
+                                        ->hint(__('Ratio Is 1:1. Maximum size is 1MB')),
+                                    Forms\Components\Toggle::make('is_active'),
+                                    Forms\Components\Toggle::make('is_featured')
+                                ])->columnSpanFull(),
+                            ]),
+                        Tabs\Tab::make('SEO')
+                            ->schema([
+                                TitleSchema::slug(),
+                                TitleSchema::hidden(),
+                                MetaSchema::get(),
+                            ])
+                    ])->columnSpanFull()
 
             ]);
     }
@@ -133,8 +140,6 @@ class CategoryResource extends Resource
                             ->warning()
                             ->send();
                     }
-
-                    return $records->each(fn ($record) => $record->delete());
                 }),
             ]);
     }
