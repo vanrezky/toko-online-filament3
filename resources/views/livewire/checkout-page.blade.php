@@ -42,10 +42,10 @@
                         </input>
                     </div>
                     <div class="mt-4">
-                        <label class="block text-gray-700 dark:text-white mb-1" for="city">
-                            City
+                        <label class="block text-gray-700 dark:text-white mb-1" for="district">
+                            District
                         </label>
-                        <input class="w-full rounded-lg border py-2 px-3 dark:bg-gray-700 dark:text-white dark:border-none" id="city" type="text">
+                        <input class="w-full rounded-lg border py-2 px-3 dark:bg-gray-700 dark:text-white dark:border-none" id="district" type="text">
                         </input>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('sub_districts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('city_id')->references('id')->on('cities')->onDelete('cascade');
+            $table->foreignId('district_id')->references('id')->on('districts')->onDelete('cascade');
             $table->string('name');
             $table->string('rajaongkir', 50);
             $table->string('postal_code', 10);

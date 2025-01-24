@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('country_id')->references('id')->on('countries')->onDelete('cascade');
             $table->string('name');
-            $table->string('rajaongkir');
+            $table->string('rajaongkir', 50);
             $table->timestamps();
         });
     }

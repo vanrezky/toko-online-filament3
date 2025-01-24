@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cities', function (Blueprint $table) {
+        Schema::create('districts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('province_id')->references('id')->on('provinces')->onDelete('cascade');
-            $table->string('type', 50)->comment('kabupaten/kota');
+            $table->foreignId('province_id')->references('id')->on('provinces')->noActionOnDelete();
+            $table->string('type', 50)->comment('district/city');
             $table->string('name');
-            $table->string('rajaongkir', 10);
+            $table->string('rajaongkir', 20);
+            $table->string('postal_code')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cities');
+        Schema::dropIfExists('districts');
     }
 };

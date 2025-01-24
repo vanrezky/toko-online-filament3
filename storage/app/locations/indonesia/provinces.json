@@ -1,0 +1,172 @@
+[
+  {
+    "id": 1,
+    "name": "Bali",
+    "rajaongkir": 1
+  },
+  {
+    "id": 2,
+    "name": "Bangka Belitung",
+    "rajaongkir": 2
+  },
+  {
+    "id": 3,
+    "name": "Banten",
+    "rajaongkir": 3
+  },
+  {
+    "id": 4,
+    "name": "Bengkulu",
+    "rajaongkir": 4
+  },
+  {
+    "id": 5,
+    "name": "DI Yogyakarta",
+    "rajaongkir": 5
+  },
+  {
+    "id": 6,
+    "name": "DKI Jakarta",
+    "rajaongkir": 6
+  },
+  {
+    "id": 7,
+    "name": "Gorontalo",
+    "rajaongkir": 7
+  },
+  {
+    "id": 8,
+    "name": "Jambi",
+    "rajaongkir": 8
+  },
+  {
+    "id": 9,
+    "name": "Jawa Barat",
+    "rajaongkir": 9
+  },
+  {
+    "id": 10,
+    "name": "Jawa Tengah",
+    "rajaongkir": 10
+  },
+  {
+    "id": 11,
+    "name": "Jawa Timur",
+    "rajaongkir": 11
+  },
+  {
+    "id": 12,
+    "name": "Kalimantan Barat",
+    "rajaongkir": 12
+  },
+  {
+    "id": 13,
+    "name": "Kalimantan Selatan",
+    "rajaongkir": 13
+  },
+  {
+    "id": 14,
+    "name": "Kalimantan Tengah",
+    "rajaongkir": 14
+  },
+  {
+    "id": 15,
+    "name": "Kalimantan Timur",
+    "rajaongkir": 15
+  },
+  {
+    "id": 16,
+    "name": "Kalimantan Utara",
+    "rajaongkir": 16
+  },
+  {
+    "id": 17,
+    "name": "Kepulauan Riau",
+    "rajaongkir": 17
+  },
+  {
+    "id": 18,
+    "name": "Lampung",
+    "rajaongkir": 18
+  },
+  {
+    "id": 19,
+    "name": "Maluku",
+    "rajaongkir": 19
+  },
+  {
+    "id": 20,
+    "name": "Maluku Utara",
+    "rajaongkir": 20
+  },
+  {
+    "id": 21,
+    "name": "Nanggroe Aceh Darussalam (NAD)",
+    "rajaongkir": 21
+  },
+  {
+    "id": 22,
+    "name": "Nusa Tenggara Barat (NTB)",
+    "rajaongkir": 22
+  },
+  {
+    "id": 23,
+    "name": "Nusa Tenggara Timur (NTT)",
+    "rajaongkir": 23
+  },
+  {
+    "id": 24,
+    "name": "Papua",
+    "rajaongkir": 24
+  },
+  {
+    "id": 25,
+    "name": "Papua Barat",
+    "rajaongkir": 25
+  },
+  {
+    "id": 26,
+    "name": "Riau",
+    "rajaongkir": 26
+  },
+  {
+    "id": 27,
+    "name": "Sulawesi Barat",
+    "rajaongkir": 27
+  },
+  {
+    "id": 28,
+    "name": "Sulawesi Selatan",
+    "rajaongkir": 28
+  },
+  {
+    "id": 29,
+    "name": "Sulawesi Tengah",
+    "rajaongkir": 29
+  },
+  {
+    "id": 30,
+    "name": "Sulawesi Tenggara",
+    "rajaongkir": 30
+  },
+  {
+    "id": 31,
+    "name": "Sulawesi Utara",
+    "rajaongkir": 31
+  },
+  {
+    "id": 32,
+    "name": "Sumatera Barat",
+    "rajaongkir": 32
+  },
+  {
+    "id": 33,
+    "name": "Sumatera Selatan",
+    "rajaongkir": 33
+  },
+  {
+    "id": 34,
+    "name": "Sumatera Utara",
+    "rajaongkir": 34
+  }
+]

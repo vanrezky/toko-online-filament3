@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->references('id')->on('customers')->onDelete('cascade');
             $table->foreignId('province_id')->references('id')->on('provinces')->onDelete('cascade');
-            $table->foreignId('city_id')->references('id')->on('cities')->onDelete('cascade');
+            $table->foreignId('district_id')->references('id')->on('districts')->onDelete('cascade');
             $table->foreignId('sub_district_id')->references('id')->on('sub_districts')->onDelete('cascade');
             $table->string('name');
             $table->string('phone');

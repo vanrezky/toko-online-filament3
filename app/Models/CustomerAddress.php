@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CustomerAddress extends Model
 {
     use HasFactory, HasModelTrait;
-    protected $fillable = ['customer_id', 'is_active', 'province_id', 'city_id', 'sub_district_id', 'name', 'phone', 'address', 'postal_code'];
+    protected $fillable = ['customer_id', 'is_active', 'province_id', 'district_id', 'sub_district_id', 'name', 'phone', 'address', 'postal_code'];
 
 
     public function customer(): BelongsTo
@@ -23,9 +23,9 @@ class CustomerAddress extends Model
         return $this->belongsTo(Province::class);
     }
 
-    public function city(): BelongsTo
+    public function district(): BelongsTo
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(District::class);
     }
 
     public function subDistrict(): BelongsTo

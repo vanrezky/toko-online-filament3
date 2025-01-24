@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\CustomerResource\RelationManagers;
 
-use App\Models\City;
+use App\Models\District;
 use App\Models\Province;
 use App\Models\SubDistrict;
 use Filament\Forms;
@@ -36,14 +36,14 @@ class CustomerAddressRelationManager extends RelationManager
                     ->preload()
                     ->live()
                     ->afterStateUpdated(function (Set $set) {
-                        $set('city', null);
+                        $set('district', null);
                         $set('sub_district_id', null);
                     })
                     ->required(),
-                Forms\Components\Select::make('city_id')
-                    ->label(__('City'))
+                Forms\Components\Select::make('district_id')
+                    ->label(__('District'))
                     ->options(function (Get $get, string $operation): Collection {
-                        return City::where('province_id', $get('province_id'))->get()->pluck('name', 'id');
+                        return District::where('province_id', $get('province_id'))->get()->pluck('name', 'id');
                     })
                     ->searchable()
                     ->preload()
@@ -55,7 +55,7 @@ class CustomerAddressRelationManager extends RelationManager
                 Forms\Components\Select::make('sub_district_id')
                     ->label(__('Subdistrict'))
                     ->options(function (Get $get, string $operation, ?string $state): Collection {
-                        return SubDistrict::where('city_id', $get('city_id'))->get()->pluck('name', 'id');
+                        return SubDistrict::where('district_id', $get('district_id'))->get()->pluck('name', 'id');
                     })
                     ->searchable()->preload()
                     ->required(),
@@ -87,8 +87,8 @@ class CustomerAddressRelationManager extends RelationManager
                     ->label(__('Phone')),
                 Tables\Columns\TextColumn::make('province.name')
                     ->label(__('Province')),
-                Tables\Columns\TextColumn::make('city.name')
-                    ->label(__('City')),
+                Tables\Columns\TextColumn::make('district.name')
+                    ->label(__('District')),
                 Tables\Columns\TextColumn::make('subDistrict.name')
                     ->label(__('Sub District')),
                 Tables\Columns\TextColumn::make('postal_code')

@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->foreignId('flashsale_id')->constrained('flashsales')->cascadeOnDelete();
-            $table->dateTime('start_time');
-            $table->dateTime('end_time');
             $table->decimal('discount_percentage', 5, 2);
             $table->unsignedInteger('stock');
             $table->timestamps();

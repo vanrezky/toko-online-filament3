@@ -10,10 +10,10 @@ class SubDistrict extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'postal_code', 'rajaongkir'];
+    protected $fillable = ['district_id', 'name', 'postal_code', 'rajaongkir', 'postal_code'];
 
-    public function city(): BelongsTo
+    public function district(): BelongsTo
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(District::class);
     }
 }

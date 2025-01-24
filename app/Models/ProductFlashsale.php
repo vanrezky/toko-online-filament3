@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class ProductFlashsale extends Model
 {
     use HasFactory;
-    protected $fillable = ['product_id', 'flashsale_id', 'start_time', 'end_time', 'discount_percentage', 'stock'];
+    protected $fillable = ['product_id', 'flashsale_id', 'discount_percentage', 'stock'];
 
     public function product(): HasOne
     {

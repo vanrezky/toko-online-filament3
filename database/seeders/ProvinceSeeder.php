@@ -6,7 +6,9 @@ use App\Models\Country;
 use App\Models\Province;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class ProvinceSeeder extends Seeder
 {
@@ -15,31 +17,18 @@ class ProvinceSeeder extends Seeder
      */
     public function run(): void
     {
-        $countryId = Country::where('iso', 'ID')->first();
-        $provinceCreate = Province::create([
-            'country_id' => $countryId->id,
-            'name' => 'Riau',
-            'rajaongkir' => 0,
-        ]);
+        $country = Country::where('iso', 'ID')->first();
 
-        $responseCities = Http::get("https://vanrezky.github.io/api-wilayah-indonesia/api/regencies/14.json")->collect();
+        // get provinces
 
-        $responseCities->each(function ($city) use ($provinceCreate) {
-            $cityCreate = $provinceCreate->cities()->create([
-                'name' => $city['name'],
-                'rajaongkir' => 0,
-                'type' => 'regency',
-            ]);
+        $fileContent = Storage::get('locations/indonesia/provinces.json');
+        $provinces = json_decode($fileContent, true);
 
-            $responseSubDistricts = Http::get("https://vanrezky.github.io/api-wilayah-indonesia/api/districts/{$city['id']}.json")->collect();
 
-            $responseSubDistricts->each(function ($subDistrict) use ($cityCreate) {
-                $cityCreate->subDistricts()->create([
-                    'name' => $subDistrict['name'],
-                    'rajaongkir' => 0,
-                    'postal_code' => rand(10000, 99999),
-                ]);
-            });
-        });
+        foreach ($provinces as $key => $prov) {
+            $provinces[$key]['country_id'] = $country->id;
+        }
+
+        DB::table('provinces')->upsert($provinces, ['id'], ['id', 'name', 'rajaongkir', 'country_id']);
     }
 }

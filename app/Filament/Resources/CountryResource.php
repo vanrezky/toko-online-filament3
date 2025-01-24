@@ -27,6 +27,11 @@ class CountryResource extends Resource
     protected static ?string $slug = 'master-data/country';
     protected static ?int $navigationSort = 90;
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -69,23 +74,23 @@ class CountryResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title('Country deleted')
-                            ->body('The country has been deleted successfully.'),
-                    )
+                // Tables\Actions\EditAction::make(),
+                // Tables\Actions\DeleteAction::make()
+                //     ->successNotification(
+                //         Notification::make()
+                //             ->success()
+                //             ->title('Country deleted')
+                //             ->body('The country has been deleted successfully.'),
+                //     )
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->successNotification(Notification::make()
-                            ->success()
-                            ->title('Country deleted')
-                            ->body('The country has been deleted successfully.')),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make()
+                //         ->successNotification(Notification::make()
+                //             ->success()
+                //             ->title('Country deleted')
+                //             ->body('The country has been deleted successfully.')),
+                // ]),
             ]);
     }
 
@@ -100,8 +105,8 @@ class CountryResource extends Resource
     {
         return [
             'index' => Pages\ListCountries::route('/'),
-            'create' => Pages\CreateCountry::route('/create'),
-            'edit' => Pages\EditCountry::route('/{record}/edit'),
+            // 'create' => Pages\CreateCountry::route('/create'),
+            // 'edit' => Pages\EditCountry::route('/{record}/edit'),
         ];
     }
 }

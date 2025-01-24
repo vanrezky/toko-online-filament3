@@ -30,6 +30,11 @@ class ProvinceResource extends Resource
     protected static ?string $slug = 'Province';
     protected static ?int $navigationSort = 91;
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -99,29 +104,27 @@ class ProvinceResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                // Tables\Actions\EditAction::make(),
+                // Tables\Actions\DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            CitiesRelationManager::class,
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListProvinces::route('/'),
-            'create' => Pages\CreateProvince::route('/create'),
-            'edit' => Pages\EditProvince::route('/{record}/edit'),
+            // 'create' => Pages\CreateProvince::route('/create'),
+            // 'edit' => Pages\EditProvince::route('/{record}/edit'),
         ];
     }
 }

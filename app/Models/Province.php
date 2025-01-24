@@ -26,8 +26,8 @@ class Province extends Model
         return $this->belongsTo(Country::class);
     }
 
-    public function cities(): HasMany
+    public function district(): HasMany
     {
-        return $this->hasMany(City::class);
+        return $this->hasMany(District::class);
     }
 }

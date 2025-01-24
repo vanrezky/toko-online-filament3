@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SubDistrictResource\Pages;
-use App\Filament\Resources\SubDistrictResource\RelationManagers;
-use App\Models\SubDistrict;
+use App\Filament\Resources\DistrictResource\Pages;
+use App\Filament\Resources\DistrictResource\RelationManagers;
+use App\Models\District;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
@@ -16,17 +16,16 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-use function Laravel\Prompts\search;
-
-class SubDistrictResource extends Resource
+class DistrictResource extends Resource
 {
-    protected static ?string $model = SubDistrict::class;
+    protected static ?string $model = District::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
-    protected static ?string $navigationLabel = 'Sub District';
-    protected static ?string $modelLabel = 'Master Sub District';
+    protected static ?string $navigationLabel = 'District';
+    protected static ?string $modelLabel = 'Master District';
     protected static ?string $navigationGroup = 'Master Management';
-    protected static ?string $slug = 'master-data/sub-district';
-    protected static ?int $navigationSort = 93;
+    protected static ?string $slug = 'master-data/district';
+    protected static ?int $navigationSort = 92;
 
     public static function canCreate(): bool
     {
@@ -37,22 +36,20 @@ class SubDistrictResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Sub District Information')
-                    ->schema([
-                        Forms\Components\Select::make('district_id')
-                            ->relationship('district', titleAttribute: 'name')
-                            ->searchable()
-                            ->required(),
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('rajaongkir')
-                            ->required()
-                            ->maxLength(50),
-                        Forms\Components\TextInput::make('postal_code')
-                            ->required()
-                            ->maxLength(10),
-                    ])->columns(2)
+                Forms\Components\TextInput::make('province_id')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('type')
+                    ->required()
+                    ->maxLength(50),
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('rajaongkir')
+                    ->required()
+                    ->maxLength(20),
+                Forms\Components\TextInput::make('postal_code')
+                    ->maxLength(255),
             ]);
     }
 
@@ -60,10 +57,11 @@ class SubDistrictResource extends Resource
     {
         return $infolist
             ->schema([
-                Section::make('Subdistrict Information')
+                Section::make('District Information')
                     ->schema([
-                        TextEntry::make('district.name')->label('District'),
-                        TextEntry::make('name')->label('Subdistrict name'),
+                        TextEntry::make('province.name')->label('Province'),
+                        TextEntry::make('name')->label('District'),
+                        TextEntry::make('type'),
                         TextEntry::make('postal_code'),
                         TextEntry::make('rajaongkir')->label('Rajaongkir code'),
                     ])->columns(2)
@@ -74,15 +72,15 @@ class SubDistrictResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('district.name')
-
+                Tables\Columns\TextColumn::make('province.name')
+                    ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('type')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('rajaongkir')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('postal_code')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -95,16 +93,11 @@ class SubDistrictResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('district_id')
-                    ->label('District')
-                    ->relationship('district', titleAttribute: 'name')
-                    ->searchable()
-                    ->preload()
+                //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 // Tables\Actions\EditAction::make(),
-                // Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
@@ -123,9 +116,9 @@ class SubDistrictResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSubDistricts::route('/'),
-            // 'create' => Pages\CreateSubDistrict::route('/create'),
-            // 'edit' => Pages\EditSubDistrict::route('/{record}/edit'),
+            'index' => Pages\ListDistricts::route('/'),
+            // 'create' => Pages\CreateDistrict::route('/create'),
+            // 'edit' => Pages\EditDistrict::route('/{record}/edit'),
         ];
     }
 }
