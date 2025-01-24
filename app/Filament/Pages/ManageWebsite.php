@@ -17,9 +17,12 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
 use Illuminate\Support\HtmlString;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class ManageWebsite extends SettingsPage
 {
+    use HasPageShield;
+
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
     protected static ?string $navigationGroup = 'Setting';
     protected static ?int $navigationSort = 5;

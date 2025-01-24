@@ -29,7 +29,7 @@ return new class extends SettingsMigration
         $this->migrator->add('general.mail_host', 'smtp.gmail.com');
         $this->migrator->add('general.mail_port', '567');
         $this->migrator->add('general.mail_encryption', 'tls');
-        $this->migrator->add('general.mail_username', 'admin@gmail.com');
+        $this->migrator->add('general.mail_username', 'admin@example.com');
         $this->migrator->add('general.mail_password', 'password');
         $this->migrator->add('general.force_sll', 0);
         $this->migrator->add('general.secure_password', 0);

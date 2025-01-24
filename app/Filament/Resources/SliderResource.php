@@ -45,9 +45,7 @@ class SliderResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('target_link')
                             ->label('Link')
-                            ->required()
-                            ->nullable()
-                            ->url()
+                            ->rules('nullable|url')
                             ->maxLength(255),
                         Forms\Components\Select::make('target_anchor')
                             ->label('Target')

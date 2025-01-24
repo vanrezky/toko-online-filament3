@@ -1,4 +1,4 @@
-@props(['link' => '#', 'subtitle' => '', 'title' => '', 'products', 'sliderkey' => null])
+@props(['link' => '#', 'subtitle' => '', 'title' => '', 'sliderkey' => null])
 
 <div class="container-content">
     <div class="flex items-center sm:mb-5">
@@ -48,5 +48,5 @@
         @endif
     </div>
     <div class="separator"></div>
-    <livewire:home.product-flashsales :$products lazy :$sliderkey />
+    {{ $slot }}
 </div>

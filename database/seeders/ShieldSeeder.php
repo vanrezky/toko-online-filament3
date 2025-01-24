@@ -12,7 +12,7 @@ class ShieldSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $rolesWithPermissions = '[{"name":"super_admin","guard_name":"web","permissions":[]}]';
+        $rolesWithPermissions = '[{"name":"admin","guard_name":"web","permissions":[]}]';
         $directPermissions = '[]';
 
         static::makeRolesWithPermissions($rolesWithPermissions);
@@ -29,15 +29,17 @@ class ShieldSeeder extends Seeder
             /** @var Model $permissionModel */
             $permissionModel = Utils::getPermissionModel();
 
+
             foreach ($rolePlusPermissions as $rolePlusPermission) {
                 $role = $roleModel::firstOrCreate([
                     'name' => $rolePlusPermission['name'],
                     'guard_name' => $rolePlusPermission['guard_name'],
                 ]);
 
+
                 if (! blank($rolePlusPermission['permissions'])) {
                     $permissionModels = collect($rolePlusPermission['permissions'])
-                        ->map(fn ($permission) => $permissionModel::firstOrCreate([
+                        ->map(fn($permission) => $permissionModel::firstOrCreate([
                             'name' => $permission,
                             'guard_name' => $rolePlusPermission['guard_name'],
                         ]))

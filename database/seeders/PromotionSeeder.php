@@ -17,7 +17,7 @@ class PromotionSeeder extends Seeder
                 'position' => 'top',
                 'title' => 'Promotion 1',
                 'description' => 'Promotion 1 description',
-                'image' => 'https://via.placeholder.com/800x400.png?text=Promotion+1',
+                'image' => 'https://placehold.co/800x400?text=Promotion+1',
                 'is_active' => true,
                 'start_at' => now(),
                 'end_at' => now()->addDays(7),
@@ -28,7 +28,7 @@ class PromotionSeeder extends Seeder
                 'position' => 'top',
                 'title' => 'Promotion 2',
                 'description' => 'Promotion 2 description',
-                'image' => 'https://via.placeholder.com/800x400.png?text=Promotion+2',
+                'image' => 'placehold.co/800x400?text=Promotion+2',
                 'is_active' => true,
                 'start_at' => now(),
                 'end_at' => now()->addDays(7),
@@ -37,6 +37,6 @@ class PromotionSeeder extends Seeder
             ]
         ]);
 
-        $promotions->each(fn ($promotion) => \App\Models\Promotion::create($promotion));
+        $promotions->each(fn($promotion) => \App\Models\Promotion::create($promotion));
     }
 }

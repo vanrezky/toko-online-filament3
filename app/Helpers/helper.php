@@ -47,6 +47,12 @@ function isSuperUser(): bool
 
 function getUrlImage($image): string
 {
+    if (filter_var($image, FILTER_VALIDATE_URL)) {
+        // Jika $image adalah URL eksternal, kembalikan langsung
+        return $image;
+    }
+
+    // Jika bukan URL eksternal, gunakan asset dari penyimpanan lokal
     return asset('/storage/' . $image);
 }
 

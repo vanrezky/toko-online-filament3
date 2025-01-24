@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 class UserSeeder extends Seeder
 {
@@ -15,11 +16,21 @@ class UserSeeder extends Seeder
     {
 
         User::create([
-            'email' => 'admin@gmail.com',
+            'email' => 'admin@example.com',
             'password' => bcrypt('admin123'),
             'name' => 'Admin',
             'username' => 'admin',
+        ]);
+        $su = User::create([
+            'email' => 'superadmin@example.com',
+            'password' => bcrypt('admin123'),
+            'name' => 'Admin',
+            'username' => 'superadmin',
             'is_super_user' => 1
+        ]);
+
+        Artisan::call('shield:super-admin', [
+            '--user' => $su->id
         ]);
 
         User::factory(5)->create();

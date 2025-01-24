@@ -4,10 +4,12 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 
+use App\Models\User;
 use App\Policies\ActivityPolicy;
 use App\Policies\ExceptionPolicy;
 use BezhanSalleh\FilamentExceptions\Models\Exception;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Activitylog\Models\Activity;
 
 
@@ -30,5 +32,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // $this->registerPolicies();
+        Gate::before(function (User $user, $ability) {
+            return $user->is_super_user ? true : null;  // Pastikan mengembalikan null jika bukan superuser
+        });
     }
 }

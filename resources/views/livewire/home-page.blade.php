@@ -4,7 +4,7 @@
         <div class="hidden w-1/5 lg:flex flex-shrink-0">
             <nav class="-mt-2">
                 @foreach ($categories->take(10) as $category)
-                    <a href="#" class="block py-2  px-4 text-text2 hover:underline underline-offset-4 hover:bg-white">{{ $category->name }}</a>
+                    <a href="/products?category={{ $category->slug }}" class="block py-2  px-4 text-text2 hover:underline underline-offset-4 hover:bg-white">{{ $category->name }}</a>
                 @endforeach
             </nav>
         </div>
@@ -20,7 +20,9 @@
 
     {{-- start flash sales product --}}
     @if ($flashSales->count() > 0)
-        <x-home-card-flashsales title="Today's" subtitle="Flashsales" link="/products/?status=flashsales" sliderkey="flashsales" :products="$flashSales" />
+        <x-home-card-flashsales title="Today's" subtitle="Flashsales" link="/products/?status=flashsales" sliderkey="flashsales">
+            <livewire:home.product-flashsales :products="$flashSales" lazy sliderkey="flashsales" />
+        </x-home-card-flashsales>
     @endif
     {{-- end flash sales product --}}
 

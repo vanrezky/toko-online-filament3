@@ -75,7 +75,7 @@ class ProductResource extends Resource
                             ->directory(UploadPath::IMAGES_UPLOAD_PATH)
                             ->optimize('webp')
                             ->panelLayout('grid'),
-                    ])->collapsible()->collapsed(fn (string $context): bool => $context === 'edit'),
+                    ])->collapsible()->collapsed(fn(string $context): bool => $context === 'edit'),
                 Tabs::make()
                     ->schema([
                         Tabs\Tab::make('Name & Description')
@@ -130,7 +130,7 @@ class ProductResource extends Resource
                                 Forms\Components\Select::make('category_id')
                                     ->label(__('Product Category'))
                                     ->helperText(__('Select the category that corresponds to the product.'))
-                                    ->relationship('category', 'name', fn (Builder $query): Builder => $query->active())
+                                    ->relationship('category', 'name', fn(Builder $query): Builder => $query->active())
                                     ->searchable()
                                     ->preload()
                                     ->required()
@@ -151,8 +151,8 @@ class ProductResource extends Resource
                                     ->placeholder('https://urlweb.com/path/to/file/download.zip')
                                     ->helperText(__('Enter the URL address for product access for buyers, such as the file download URL if the product is in the form of a file and the like.'))
                                     ->columnSpanFull()
-                                    ->visible(fn (Get $get): bool => $get('digital'))
-                                    ->required(fn (Get $get): bool => $get('digital'))
+                                    ->visible(fn(Get $get): bool => $get('digital'))
+                                    ->required(fn(Get $get): bool => $get('digital'))
                                     ->url()
                                     ->columnSpanFull()
                             ]
@@ -165,17 +165,17 @@ class ProductResource extends Resource
                                     ->rules('nullable|numeric')
                                     ->label(__('Product Weight (Gram)'))
                                     ->helperText(__('Only enter numbers. e.g: 1000'))
-                                    ->visible(fn (Get $get): bool => !$get('digital'))
-                                    ->required(fn (Get $get): bool => !$get('digital'))
+                                    ->visible(fn(Get $get): bool => !$get('digital'))
+                                    ->required(fn(Get $get): bool => !$get('digital'))
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                                 Forms\Components\Select::make('warehouse_id')
                                     ->label(__('Shipping Warehouse'))
                                     ->helperText(str('Select the warehouse where the product will be shipped from, to change the warehouse can be seen in the **<a href="/admin/setting/warehouse" target="_blank">Warehouse Location</a>** menu.')->inlineMarkdown()->toHtmlString())
-                                    ->relationship('warehouse', 'name', fn (Builder $query): Builder => $query->active())
+                                    ->relationship('warehouse', 'name', fn(Builder $query): Builder => $query->active())
                                     ->searchable()
                                     ->preload()
-                                    ->visible(fn (Get $get): bool => !$get('digital'))
-                                    ->required(fn (Get $get): bool => !$get('digital'))
+                                    ->visible(fn(Get $get): bool => !$get('digital'))
+                                    ->required(fn(Get $get): bool => !$get('digital'))
                                     ->columnSpanFull(),
                                 Forms\Components\TextInput::make('stock')
                                     ->rules('nullable|numeric')
@@ -189,7 +189,7 @@ class ProductResource extends Resource
                                     ->helperText(__('The safety stock is the limit stock for your products which alerts you if the product stock will soon be out of stock.'))
                                     ->required()
                                     ->default(0)
-                                    ->maxValue(fn (Get $get) => $get('stock'))
+                                    ->maxValue(fn(Get $get) => $get('stock'))
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                             ])->inlineLabel(),
                     ]),
@@ -204,7 +204,7 @@ class ProductResource extends Resource
                                 ->required()
                                 ->default(1)
                                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
-                                ->maxValue(fn (Get $get) => $get('stock')),
+                                ->maxValue(fn(Get $get) => $get('stock')),
                             Forms\Components\TextInput::make('sale_price')
                                 ->rules('nullable|numeric')
                                 ->label(__('Price Before Discount'))
@@ -261,8 +261,8 @@ class ProductResource extends Resource
                                                         ->grid(2)
 
                                                 ])
-                                                ->action(fn (array $data, $record) => self::setActionWholesales($data, $record))
-                                                ->visible(fn ($record): bool => !empty($record))
+                                                ->action(fn(array $data, $record) => self::setActionWholesales($data, $record))
+                                                ->visible(fn($record): bool => !empty($record))
                                         ),
 
                                     Forms\Components\TextInput::make('price')
@@ -280,12 +280,12 @@ class ProductResource extends Resource
                         ->description(__('Set prices based on wholesale prices'))
                         ->schema([
                             Forms\Components\Repeater::make('wholesales')
-                                ->relationship('wholesales', fn (Builder $query): Builder => $query->whereNull('reseller_id'))
+                                ->relationship('wholesales', fn(Builder $query): Builder => $query->whereNull('reseller_id'))
                                 ->reorderable(false)
                                 ->hiddenLabel()
                                 // ->collapsible()
                                 ->deleteAction(
-                                    fn (Action $action) => $action->requiresConfirmation(),
+                                    fn(Action $action) => $action->requiresConfirmation(),
                                 )
                                 ->cloneable()
                                 ->defaultItems(0)
@@ -350,11 +350,20 @@ class ProductResource extends Resource
                             Forms\Components\TextInput::make('sub_variant')->placeholder('e.g: Size')->label(__('Sub Variant Title'))
                         ])->columns(2),
                         Forms\Components\TagsInput::make('variants')->suggestions([
-                            'Blue', 'Red', 'Cyan', 'Black', 'White'
+                            'Blue',
+                            'Red',
+                            'Cyan',
+                            'Black',
+                            'White'
                         ])->inlineLabel()->label('Variant Item')
                             ->placeholder('variants'),
                         Forms\Components\TagsInput::make('sub_variants')->suggestions([
-                            'S', 'M', 'L', 'XL', 'XXL', 'XXXL'
+                            'S',
+                            'M',
+                            'L',
+                            'XL',
+                            'XXL',
+                            'XXXL'
                         ])->inlineLabel()->label(__('Sub Variant Item'))
                             ->placeholder(__('sub variants')),
 
@@ -462,11 +471,11 @@ class ProductResource extends Resource
                         return $query
                             ->when(
                                 $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     })
 

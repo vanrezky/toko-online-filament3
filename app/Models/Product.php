@@ -49,7 +49,7 @@ class Product extends Model
                 if (!empty($attributes['images'])) {
 
                     $images = json_decode($attributes['images'], true);
-                    return getUrlImage($images[0]);
+                    return getUrlImage($images[0] ?? null);
                 }
 
                 return null;

@@ -3,7 +3,7 @@
 return [
     'shield_resource' => [
         'should_register_navigation' => true,
-        'slug' => 'setting/roles',
+        'slug' => 'shield/roles',
         'navigation_sort' => -1,
         'navigation_badge' => true,
         'navigation_group' => true,
@@ -12,6 +12,8 @@ return [
         'is_scoped_to_tenant' => true,
         'cluster' => null,
     ],
+
+    'tenant_model' => null,
 
     'auth_provider_model' => [
         'fqcn' => 'App\\Models\\User',
@@ -66,16 +68,14 @@ return [
         'enabled' => true,
 
         'pages' => [
-            'Dashboard', 'ManageWebsite'
+            'Dashboard',
         ],
 
         'widgets' => [
             'AccountWidget', 'FilamentInfoWidget',
         ],
 
-        'resources' => [
-            'ActivityResource', 'RoleResource', 'ExceptionResource'
-        ],
+        'resources' => [],
     ],
 
     'discovery' => [

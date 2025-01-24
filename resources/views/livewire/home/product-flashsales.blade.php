@@ -29,8 +29,8 @@
     });" x-ref="swiperflash">
         <div class="swiper-wrapper">
             @foreach ($products as $product)
-                <div class="swiper-slide">
-                    <x-product-item :$product href="/products/{{ $product->slug }}" wire:navigate />
+                <div class="swiper-slide" wire:navigate>
+                    <x-product-item :$product href="/products/{{ $product->slug }}" />
                 </div>
             @endforeach
         </div>
