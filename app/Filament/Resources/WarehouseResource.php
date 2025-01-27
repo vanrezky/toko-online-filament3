@@ -83,13 +83,7 @@ class WarehouseResource extends Resource
                 Tables\Columns\TextColumn::make('courier')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\ToggleColumn::make('is_active')
-                    ->afterStateUpdated(function ($record, $state) {
-                        return Notification::make()
-                            ->title('Featured status updated successfully')
-                            ->success()
-                            ->send();
-                    })->disabled(!auth()->user()->can('update_warehouse')),
+                self::getIsActiveColumn(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -131,5 +125,21 @@ class WarehouseResource extends Resource
             'create' => Pages\CreateWarehouse::route('/create'),
             'edit' => Pages\EditWarehouse::route('/{record}/edit'),
         ];
+    }
+
+    public static function getIsActiveColumn()
+    {
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_active')
+                ->afterStateUpdated(fn() => notification(__('Activation status updated successfully'), 'success'))
+                ->label(__('Active'));
+        }
+
+        return Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('Active'));
+    }
+
+    public static function shouldCanUpdate(): bool
+    {
+        return auth()->user()->can('update_warehouse');
     }
 }

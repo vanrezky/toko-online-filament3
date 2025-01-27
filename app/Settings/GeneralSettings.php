@@ -52,9 +52,7 @@ class GeneralSettings extends Settings
     public function getLogo()
     {
         if ($this->logo) {
-            $__logo = '/storage/' . $this->logo;
-            // checking file exists
-            return Storage::exists($__logo) ? asset($__logo) : $__logo;
+            return getUrlImage($this->logo);
         }
 
         return null;
@@ -63,9 +61,7 @@ class GeneralSettings extends Settings
     public function getFavicon()
     {
         if ($this->favicon) {
-            $__fav = '/storage/' . $this->favicon;
-            // checking file exists
-            return Storage::exists($__fav) ? asset($__fav) : $__fav;
+            return getUrlImage($this->favicon);
         }
 
         return asset('assets/images/favicon.ico');

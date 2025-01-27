@@ -8,6 +8,7 @@ use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Filament\Resources\Schema\MetaSchema;
 use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\Category;
+use App\Tables\Components\GeneralToogleInfoColumn;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
@@ -26,6 +27,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
+use GeneralToogleTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
@@ -64,7 +66,7 @@ class CategoryResource extends Resource
                                     ->imageCropAspectRatio('1:1')
                                     ->imagePreviewHeight(250)
                                     ->helperText(__('Ratio Is 1:1. Maximum size is 1MB'))
-                                    ->conversion('thumb') // create thumbnail
+                                    ->disk(getActiveDisk())
                             ])->columns(2),
                         Tabs\Tab::make('SEO')
                             ->schema([
@@ -93,11 +95,8 @@ class CategoryResource extends Resource
                     ->label(__('Total Product'))
                     ->color('danger')
                     ->sortable(),
-                Tables\Columns\ToggleColumn::make('is_active')
-                    ->afterStateUpdated(fn() => notification(__('Activation status updated successfully')))
-                    ->disabled(self::canInlineUpdate()),
-                Tables\Columns\ToggleColumn::make('is_featured')
-                    ->afterStateUpdated(fn() => notification(__('Featured status updated successfully')))->disabled(self::canInlineUpdate()),
+                self::getIsActiveColumn(),
+                self::getIsFeaturedColumn(),
             ])
             ->filters([
                 //
@@ -147,8 +146,26 @@ class CategoryResource extends Resource
         ];
     }
 
-    public static function canInlineUpdate(): bool
+    public static function getIsActiveColumn()
     {
-        return !auth()->user()->can('update_category');
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_active')
+                ->afterStateUpdated(fn() => notification(__('Activation status updated successfully')))->label(__('Active'));
+        }
+        return Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('Active'));
+    }
+
+    public static function getIsFeaturedColumn()
+    {
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_featured')
+                ->afterStateUpdated(fn() => notification(__('Featured status updated successfully')))->label(__('Featured'));
+        }
+        return Tables\Columns\IconColumn::make('is_featured')->boolean()->label(__('Featured'));
+    }
+
+    public static function shouldCanUpdate(): bool
+    {
+        return auth()->user()->can('update_category');
     }
 }

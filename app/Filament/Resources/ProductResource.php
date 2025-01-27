@@ -452,12 +452,7 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('subvariation')
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\ToggleColumn::make('is_active')
-                    ->label('Published')
-                    ->afterStateUpdated(
-                        fn() => notification(__('Published status updated successfully'), 'success')
-                    )
-                    ->disabled(!auth()->user()->can('update_product')),
+                self::getIsFeaturedColumn(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -536,10 +531,25 @@ class ProductResource extends Resource
         ];
     }
 
+    public static function getIsFeaturedColumn()
+    {
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_active')
+                ->label(__('Published'))
+                ->afterStateUpdated(fn() => notification(__('Published status updated successfully'), 'success'));
+        };
+
+        return Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('Published'));
+    }
+
+    public static function shouldCanUpdate(): bool
+    {
+        return auth()->user()->can('update_product');
+    }
+
     public static function getwholesalesSchema(): array
     {
         return [
-
             Forms\Components\TextInput::make('min_qty')
                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
                 ->required()

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Constants\Status;
+use App\Constants\UploadPath;
 use App\Enums\VoucherDiscountType;
 use App\Enums\VoucherProductType;
 use App\Enums\VoucherType;
@@ -132,7 +132,8 @@ class VoucherResource extends Resource
                                 ->columnSpanFull()
                                 ->imageCropAspectRatio('1:1')
                                 ->helperText(__('Ratio Is 1:1. Maximum size is 1MB'))
-                                ->conversion('thumb'), // create thumbnail,
+                                ->directory(UploadPath::VOUCHER_UPLOAD_PATH)
+                                ->disk(getActiveDisk()),
                             Forms\Components\Select::make('category_id')
                                 ->placeholder(__('All Category'))
                                 ->relationship('category', 'name')
@@ -191,13 +192,7 @@ class VoucherResource extends Resource
                     ->sortable(
                         query: fn(string $direction, $query) => $query->orderBy('start_at', $direction)
                     ),
-                Tables\Columns\ToggleColumn::make('is_active')
-                    ->afterStateUpdated(function ($record, $state) {
-                        return Notification::make()
-                            ->title(__('Activation status updated successfully'))
-                            ->success()
-                            ->send();
-                    })->disabled(!auth()->user()->can('update_voucher')),
+                self::getIsActiveColumn(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -235,5 +230,21 @@ class VoucherResource extends Resource
             'create' => Pages\CreateVoucher::route('/create'),
             'edit' => Pages\EditVoucher::route('/{record}/edit'),
         ];
+    }
+
+    public static function getIsActiveColumn()
+    {
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_active')
+                ->afterStateUpdated(fn() => notification(__('Activation status updated successfully'), 'success'))
+                ->label(__('Active'));
+        }
+
+        return Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('Active'));
+    }
+
+    public static function shouldCanUpdate(): bool
+    {
+        return auth()->user()->can('update_voucher');
     }
 }

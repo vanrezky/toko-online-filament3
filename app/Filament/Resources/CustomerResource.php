@@ -121,7 +121,7 @@ class CustomerResource extends Resource
                         ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                     Forms\Components\TextInput::make('password')
                         ->password()
-                        ->rules([secure_password()])
+                        ->rules([securePassword()])
                         ->required()
                         ->same('confirm_password')
                         ->minLength(8)

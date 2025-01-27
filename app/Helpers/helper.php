@@ -33,31 +33,57 @@ function settings(string $key, $default = null)
  * @param int $minLength the minimum length of the password (default is 8)
  * @return Illuminate\Validation\Rules\Password the generated secure password
  */
-function secure_password(int $minLength = 8)
-{
-    return settings('secure_password') ? Illuminate\Validation\Rules\Password::min(8)->symbols()->numbers()->letters() : Illuminate\Validation\Rules\Password::min(8);
-}
+if (!function_exists('securePassword')) {
 
-
-function isSuperUser(): bool
-{
-    return auth()->user()->is_super_user ?? false;
-}
-
-
-function getUrlImage($image): string
-{
-    if (filter_var($image, FILTER_VALIDATE_URL)) {
-        // Jika $image adalah URL eksternal, kembalikan langsung
-        return $image;
+    function securePassword(int $minLength = 8)
+    {
+        return settings('secure_password') ?
+            Illuminate\Validation\Rules\Password::min($minLength)->symbols()->numbers()->letters() :
+            Illuminate\Validation\Rules\Password::min($minLength);
     }
-
-    // Jika bukan URL eksternal, gunakan asset dari penyimpanan lokal
-    return asset('/storage/' . $image);
 }
 
-function toMoney($price): string
-{
-    return \Akaunting\Money\Money::IDR($price);
+
+
+if (!function_exists('isSuperUser')) {
+    function isSuperUser(): bool
+    {
+        return auth()->user()->is_super_user ?? false;
+    }
 }
 
+
+if (!function_exists('getUrlImage')) {
+    function getUrlImage($image): string
+    {
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            // Jika $image adalah URL eksternal, kembalikan langsung
+            return $image;
+        }
+
+        // Jika bukan URL eksternal, gunakan asset dari penyimpanan lokal
+        return asset('/storage/' . $image);
+    }
+}
+
+if (!function_exists('toMoney')) {
+    function toMoney($price): string
+    {
+        return \Akaunting\Money\Money::IDR($price);
+    }
+}
+
+if (!function_exists('getActiveDisk')) {
+    function getActiveDisk(): string
+    {
+        return 'public';
+    }
+}
+
+if (!function_exists('noImage')) {
+    function noImage(): string
+    {
+        dd(asset('assets/images/noimage.jpg'));
+        return asset('assets/images/noimage.jpg');
+    }
+}

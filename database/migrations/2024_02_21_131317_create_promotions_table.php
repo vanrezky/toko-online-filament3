@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->tinyText('description')->nullable();
-            $table->tinyText('image')->nullable();
             $table->boolean('is_active')->default(true);
             $table->dateTime('start_at')->nullable();
             $table->dateTime('end_at')->nullable();

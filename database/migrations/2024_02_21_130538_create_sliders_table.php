@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->tinyText('target_link')->nullable();
             $table->enum('target_anchor', ['_self', '_blank'])->default('_self');
-            $table->tinyText('image');
             $table->boolean('is_active')->default(true);
             $table->dateTime('start_at')->nullable();
             $table->dateTime('end_at')->nullable();

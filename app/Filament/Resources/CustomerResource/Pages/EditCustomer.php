@@ -84,7 +84,7 @@ class EditCustomer extends EditRecord
                     ->schema([
                         FormsComponents\TextInput::make('password')
                             ->password()
-                            ->rules([secure_password()])
+                            ->rules([securePassword()])
                             ->same('confirm_password')
                             ->minLength(8)
                             ->maxLength(20),

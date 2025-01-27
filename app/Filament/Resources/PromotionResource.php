@@ -10,11 +10,13 @@ use App\Models\Promotion;
 use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
 use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -45,10 +47,15 @@ class PromotionResource extends Resource
                             ->maxLength(255)
                             ->string()
                             ->columnSpanFull(),
-                        Forms\Components\FileUpload::make('image')
+                        SpatieMediaLibraryFileUpload::make('image')
                             ->image()
                             ->imageEditor()
-                            ->directory(UploadPath::IMAGES_UPLOAD_PATH)
+                            ->imagePreviewHeight(250)
+                            ->maxSize(2048)
+                            ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:2048'])
+                            ->directory(UploadPath::PROMOTION_UPLOAD_PATH)
+                            ->hint(__('Maximum size is 2MB'))
+                            ->disk(getActiveDisk())
                             ->columnSpanFull(),
                         Forms\Components\DatePicker::make('start_at')->native(false),
                         Forms\Components\DatePicker::make('end_at')->native(false),
@@ -75,7 +82,7 @@ class PromotionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('image'),
+                SpatieMediaLibraryImageColumn::make('image')->conversion('thumb'),
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('start_at')
@@ -86,13 +93,7 @@ class PromotionResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('position')
                     ->searchable(),
-                Tables\Columns\ToggleColumn::make('is_active')
-                    ->afterStateUpdated(function ($record, $state) {
-                        Notification::make()
-                            ->title('Activation status updated successfully')
-                            ->success()
-                            ->send();
-                    })->disabled(!auth()->user()->can('update_promotion')),
+                self::getIsActiveColumn(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -130,5 +131,21 @@ class PromotionResource extends Resource
             'create' => Pages\CreatePromotion::route('/create'),
             'edit' => Pages\EditPromotion::route('/{record}/edit'),
         ];
+    }
+
+    public static function getIsActiveColumn()
+    {
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_active')
+                ->afterStateUpdated(fn() => notification(__('Activation status updated successfully'), 'success'))
+                ->label(__('Active'));
+        }
+
+        return Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('Active'));
+    }
+
+    public static function shouldCanUpdate(): bool
+    {
+        return auth()->user()->can('update_promotion');
     }
 }

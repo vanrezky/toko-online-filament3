@@ -80,14 +80,7 @@ class BlogCategoryResource extends Resource
             ->columns([
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('slug')->searchable()->sortable(),
-                ToggleColumn::make('is_visible')->sortable()
-                    ->label(__('Visibility'))
-                    ->afterStateUpdated(function ($record, $state) {
-                        return Notification::make()
-                            ->title('Visibility status updated successfully')
-                            ->success()
-                            ->send();
-                    })->disabled(!auth()->user()->can('update_blog::category')),
+                self::getIsVisibleColumn(),
                 TextColumn::make('updated_at')
                     ->label(__('Last Updated'))
                     ->dateTime()
@@ -138,5 +131,21 @@ class BlogCategoryResource extends Resource
             'create' => Pages\CreateBlogCategory::route('/create'),
             'edit' => Pages\EditBlogCategory::route('/{record}/edit'),
         ];
+    }
+
+    public static function getIsVisibleColumn()
+    {
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_visible')
+                ->afterStateUpdated(fn() => notification(__('Visibility status updated successfully'), 'success'))
+                ->label(__('Visibility'));
+        }
+
+        return Tables\Columns\IconColumn::make('is_visible')->boolean()->label(__('Visibility'));
+    }
+
+    public static function shouldCanUpdate(): bool
+    {
+        return auth()->user()->can('update_blog::category');
     }
 }

@@ -61,20 +61,23 @@ class ManageWebsite extends SettingsPage
                             ->schema([
                                 FileUpload::make('logo')
                                     ->image()
+                                    ->maxSize(1024)
                                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
-                                    ->directory(UploadPath::IMAGE_CONFIG_PATH)
-                                    ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB')
+                                    ->directory(UploadPath::CONFIG_UPLOAD_PATH)
+                                    ->helperText(__('Supported files: jpeg, jpg, png. Maximum file size 1MB'))
                                     ->imageEditor(),
                                 FileUpload::make('favicon')
                                     ->image()
+                                    ->maxSize(1024)
                                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
-                                    ->directory(UploadPath::IMAGE_CONFIG_PATH)
-                                    ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB'),
+                                    ->directory(UploadPath::CONFIG_UPLOAD_PATH)
+                                    ->helperText(__('Supported files: jpeg, jpg, png. Maximum file size 1MB')),
                                 FileUpload::make('login_logo')
                                     ->image()
+                                    ->maxSize(1024)
                                     ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
-                                    ->directory(UploadPath::IMAGE_CONFIG_PATH)
-                                    ->helperText('Supported files: jpeg, jpg, png. Maximum file size 1MB'),
+                                    ->directory(UploadPath::CONFIG_UPLOAD_PATH)
+                                    ->helperText(__('Supported files: jpeg, jpg, png. Maximum file size 1MB')),
                             ])->columns(2),
                         Tab::make('SEO')
                             ->icon('heroicon-o-magnifying-glass')
@@ -89,7 +92,7 @@ class ManageWebsite extends SettingsPage
                                     ->imageResizeTargetHeight('600'),
                                 Group::make([
                                     Textarea::make('site_description')->maxLength(300),
-                                    TextInput::make('site_keywords')->helperText('Separated by comma'),
+                                    TextInput::make('site_keywords')->helperText(__('Separated by comma')),
                                     TextInput::make('social_title'),
                                     TextInput::make('social_description'),
                                 ])->columnSpan(2)
@@ -97,8 +100,8 @@ class ManageWebsite extends SettingsPage
                         Tab::make('Contact & Social Media')
                             ->icon('heroicon-o-rss')
                             ->schema([
-                                TextInput::make('phone')->label('Phone Number')->tel(),
-                                TextInput::make('wa_phone')->label('Whatsapp Number')->tel(),
+                                TextInput::make('phone')->label(__('Phone Number'))->tel(),
+                                TextInput::make('wa_phone')->label(__('Whatsapp Number'))->tel(),
                                 TextInput::make('instagram')->url()->maxLength(255),
                                 TextInput::make('facebook')->url()->maxLength(255),
                                 TextInput::make('twitter')->url()->maxLength(255),

@@ -69,13 +69,7 @@ class ResellerResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('level')
                     ->searchable(),
-                Tables\Columns\ToggleColumn::make('is_active')
-                    ->afterStateUpdated(function ($record, $state) {
-                        return Notification::make()
-                            ->title('Activation status updated successfully')
-                            ->success()
-                            ->send();
-                    })->disabled(!auth()->user()->can('update_reseller')),
+                self::getIsActiveColumn(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -92,17 +86,11 @@ class ResellerResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()->action(function ($record) {
                     if ($record->customers()->count()) {
-                        return Notification::make()
-                            ->title('Reseller Level cannot be deleted')
-                            ->warning()
-                            ->send();
+                        return notification(__('Reseller Level cannot be deleted'), 'warning');
                     }
 
                     $record->delete();
-                    return Notification::make()
-                        ->title('Deleted')
-                        ->success()
-                        ->send();
+                    return notification(__('Reseller Level cannot be deleted'), 'success');
                 }),
             ])
             ->bulkActions([
@@ -126,5 +114,21 @@ class ResellerResource extends Resource
             'create' => Pages\CreateReseller::route('/create'),
             'edit' => Pages\EditReseller::route('/{record}/edit'),
         ];
+    }
+
+    public static function getIsActiveColumn()
+    {
+        if (self::shouldCanUpdate()) {
+            return Tables\Columns\ToggleColumn::make('is_active')
+                ->afterStateUpdated(fn() => notification(__('Activation status updated successfully'), 'success'))
+                ->label(__('Active'));
+        }
+
+        return Tables\Columns\IconColumn::make('is_active')->boolean()->label(__('Active'));
+    }
+
+    public static function shouldCanUpdate(): bool
+    {
+        return auth()->user()->can('update_reseller');
     }
 }
