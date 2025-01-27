@@ -11,6 +11,7 @@ use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
@@ -20,10 +21,10 @@ use Filament\Forms\Set;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -46,22 +47,25 @@ class CategoryResource extends Resource
                     ->schema([
                         Tabs\Tab::make('Main')
                             ->schema([
-                                TitleSchema::title('name')
-                                    ->required()
-                                    ->minLength(3)
-                                    ->columnSpanFull(),
                                 Group::make([
-                                    Forms\Components\FileUpload::make('image')
-                                        ->label(__('Category Image'))
-                                        ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:1024'])
-                                        ->image()
-                                        ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
-                                        ->imageEditorAspectRatios([null, '1:1'])
-                                        ->hint(__('Ratio Is 1:1. Maximum size is 1MB')),
+                                    TitleSchema::title('name')
+                                        ->required()
+                                        ->minLength(3),
                                     Forms\Components\Toggle::make('is_active'),
                                     Forms\Components\Toggle::make('is_featured')
-                                ])->columnSpanFull(),
-                            ]),
+                                ]),
+
+                                SpatieMediaLibraryFileUpload::make('image')
+                                    ->label(__('Image'))
+                                    ->maxSize(1024)
+                                    ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:1024'])
+                                    ->image()
+                                    ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
+                                    ->imageEditorAspectRatios(['1:1'])
+                                    ->imagePreviewHeight(250)
+                                    ->helperText(__('Ratio Is 1:1. Maximum size is 1MB'))
+                                    ->conversion('thumb') // create thumbnail
+                            ])->columns(2),
                         Tabs\Tab::make('SEO')
                             ->schema([
                                 TitleSchema::slug(),
@@ -69,7 +73,6 @@ class CategoryResource extends Resource
                                 MetaSchema::get(),
                             ])
                     ])->columnSpanFull()
-
             ]);
     }
 
@@ -77,8 +80,7 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-
-                Tables\Columns\ImageColumn::make('image')
+                SpatieMediaLibraryImageColumn::make('image')->conversion('thumb')
                     ->square(),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('Category Name'))
@@ -92,19 +94,10 @@ class CategoryResource extends Resource
                     ->color('danger')
                     ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_active')
-                    ->afterStateUpdated(function ($record, $state) {
-                        return Notification::make()
-                            ->title('Activation status updated successfully')
-                            ->success()
-                            ->send();
-                    })->disabled(!auth()->user()->can('update_category')),
+                    ->afterStateUpdated(fn() => notification(__('Activation status updated successfully')))
+                    ->disabled(self::canInlineUpdate()),
                 Tables\Columns\ToggleColumn::make('is_featured')
-                    ->afterStateUpdated(function ($record, $state) {
-                        return Notification::make()
-                            ->title('Featured status updated successfully')
-                            ->success()
-                            ->send();
-                    })->disabled(!auth()->user()->can('update_category')),
+                    ->afterStateUpdated(fn() => notification(__('Featured status updated successfully')))->disabled(self::canInlineUpdate()),
             ])
             ->filters([
                 //
@@ -114,10 +107,7 @@ class CategoryResource extends Resource
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()->action(function ($record) {
                         if ($record->products()->count()) {
-                            return Notification::make()
-                                ->title('Category cannot be deleted')
-                                ->warning()
-                                ->send();
+                            notification(__('Category cannot be deleted'), 'warning');
                         }
 
                         return $record->delete();
@@ -135,10 +125,7 @@ class CategoryResource extends Resource
                     }
 
                     if (!$delete) {
-                        return Notification::make()
-                            ->title('There are categories that cannot be deleted')
-                            ->warning()
-                            ->send();
+                        notification(__('There are categories that cannot be deleted'), 'warning');
                     }
                 }),
             ]);
@@ -158,5 +145,10 @@ class CategoryResource extends Resource
             // 'create' => Pages\CreateCategory::route('/create'),
             // 'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
+    }
+
+    public static function canInlineUpdate(): bool
+    {
+        return !auth()->user()->can('update_category');
     }
 }
