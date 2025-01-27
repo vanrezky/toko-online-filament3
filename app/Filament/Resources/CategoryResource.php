@@ -61,7 +61,7 @@ class CategoryResource extends Resource
                                     ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:1024'])
                                     ->image()
                                     ->directory(UploadPath::CATEGORY_UPLOAD_PATH)
-                                    ->imageEditorAspectRatios(['1:1'])
+                                    ->imageCropAspectRatio('1:1')
                                     ->imagePreviewHeight(250)
                                     ->helperText(__('Ratio Is 1:1. Maximum size is 1MB'))
                                     ->conversion('thumb') // create thumbnail

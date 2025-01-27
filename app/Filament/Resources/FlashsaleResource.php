@@ -6,12 +6,14 @@ use App\Filament\Resources\FlashsaleResource\Pages;
 use App\Filament\Resources\FlashsaleResource\RelationManagers;
 use App\Filament\Resources\FlashsaleResource\RelationManagers\ProductsRelationManager;
 use App\Models\Flashsale;
+use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -43,9 +45,16 @@ class FlashsaleResource extends Resource
                         Group::make(
                             [
                                 Forms\Components\DateTimePicker::make('start_time')
-                                    ->required(),
+                                    ->required()
+                                    ->minDate(function (string $context, ?string $state) {
+                                        if ($context === 'create') {
+                                            return Carbon::now()->format('Y-m-d H:i:s');
+                                        }
+                                        return Carbon::parse($state)->format('Y-m-d H:i:s');
+                                    }),
                                 Forms\Components\DateTimePicker::make('end_time')
-                                    ->required(),
+                                    ->required()
+                                    ->minDate(fn(Get $get) => $get('start_time')),
                             ]
                         )->columns(2)
                     ])
@@ -80,7 +89,7 @@ class FlashsaleResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('Products')
-                        ->action(fn (Flashsale $record) => $record->products)
+                        ->action(fn(Flashsale $record) => $record->products)
                         ->icon('heroicon-o-squares-2x2'),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),

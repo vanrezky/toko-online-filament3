@@ -10,6 +10,7 @@ use App\Filament\Resources\VoucherResource\Pages;
 use App\Filament\Resources\VoucherResource\RelationManagers;
 use App\Models\Voucher;
 use Filament\Forms;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -73,7 +74,7 @@ class VoucherResource extends Resource
                                         VoucherProductType::DIGITAL_PRODUCT->value => __('Digital Product'),
                                     ])
                                     ->default(VoucherProductType::ALL_PRODUCT->value)
-                                    ->disabled(fn (Get $get) => $get('voucher_type') == VoucherType::SHIPPING_COST->value)
+                                    ->disabled(fn(Get $get) => $get('voucher_type') == VoucherType::SHIPPING_COST->value)
                                     ->required(),
                             ])->columns(3),
                             Forms\Components\TextInput::make('code')
@@ -87,14 +88,14 @@ class VoucherResource extends Resource
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
 
                                 Forms\Components\TextInput::make('discount')
-                                    ->label(fn (Get $get) => $get('discount_type') == VoucherDiscountType::FIXED->value ? __('Discount/Price Cut Value') : __('Discount Percentage'))
+                                    ->label(fn(Get $get) => $get('discount_type') == VoucherDiscountType::FIXED->value ? __('Discount/Price Cut Value') : __('Discount Percentage'))
                                     ->required()
                                     ->rules('numeric')
-                                    ->maxLength(fn (Get $get) => $get('discount_type') == VoucherDiscountType::PERCENTAGE->value ? 100 : null)
+                                    ->maxLength(fn(Get $get) => $get('discount_type') == VoucherDiscountType::PERCENTAGE->value ? 100 : null)
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                                 Forms\Components\TextInput::make('discount_max')
-                                    ->required(fn (Get $get): bool => $get('discount_type') == VoucherDiscountType::PERCENTAGE->value)
-                                    ->visible(fn (Get $get): bool => $get('discount_type') == VoucherDiscountType::PERCENTAGE->value)
+                                    ->required(fn(Get $get): bool => $get('discount_type') == VoucherDiscountType::PERCENTAGE->value)
+                                    ->visible(fn(Get $get): bool => $get('discount_type') == VoucherDiscountType::PERCENTAGE->value)
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                             ])->columns(3)
                         ]),
@@ -119,17 +120,19 @@ class VoucherResource extends Resource
                             Forms\Components\DatePicker::make('end_at')
                                 ->required()
                                 ->native(false)
-                                ->minDate(fn (Get $get): ?string => $get('start_at')),
+                                ->minDate(fn(Get $get): ?string => $get('start_at')),
                         ]),
                     Forms\Components\Section::make(__('Other Information'))
                         ->schema([
-                            Forms\Components\FileUpload::make('image')
+                            SpatieMediaLibraryFileUpload::make('image')
                                 ->label(__('Voucher Image'))
                                 ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
+                                ->maxSize(1024)
                                 ->image()
                                 ->columnSpanFull()
                                 ->imageCropAspectRatio('1:1')
-                                ->helperText(__('Ratio Is 1:1. Maximum size is 1MB')),
+                                ->helperText(__('Ratio Is 1:1. Maximum size is 1MB'))
+                                ->conversion('thumb'), // create thumbnail,
                             Forms\Components\Select::make('category_id')
                                 ->placeholder(__('All Category'))
                                 ->relationship('category', 'name')
@@ -151,10 +154,6 @@ class VoucherResource extends Resource
 
                         ]),
                 ])->columnSpan(1),
-
-                Forms\Components\Hidden::make('user_id')->default(auth()->user()->id)->dehydrated(),
-
-
             ])->columns(3);
     }
 
@@ -162,16 +161,10 @@ class VoucherResource extends Resource
     {
         return $table
             ->columns([
-                // Tables\Columns\TextColumn::make('category.name')
-                //     ->numeric()
-                //     ->sortable(),
-                // Tables\Columns\TextColumn::make('user.name')
-                //     ->numeric()
-                //     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('Voucher Name'))
-                    ->icon(fn (Voucher $record): string => $record->is_public ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
-                    ->iconColor(fn (Voucher $record): string => $record->is_public ? 'success' : 'warning')
+                    ->icon(fn(Voucher $record): string => $record->is_public ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
+                    ->iconColor(fn(Voucher $record): string => $record->is_public ? 'success' : 'warning')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('code')
@@ -188,15 +181,15 @@ class VoucherResource extends Resource
                 Tables\Columns\TextColumn::make('discount')
                     ->money(currency: '   ')
                     ->badge()
-                    ->icon(fn (Voucher $record): string => match ($record->discount_type) {
+                    ->icon(fn(Voucher $record): string => match ($record->discount_type) {
                         VoucherDiscountType::FIXED => 'heroicon-o-tag',
                         VoucherDiscountType::PERCENTAGE => 'heroicon-o-receipt-percent',
                     })
-                    ->color(fn (Voucher $record): string => $record->discount_type->value == VoucherDiscountType::FIXED->value ? 'success' : 'warning')
+                    ->color(fn(Voucher $record): string => $record->discount_type->value == VoucherDiscountType::FIXED->value ? 'success' : 'warning')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('validity_period')
                     ->sortable(
-                        query: fn (string $direction, $query) => $query->orderBy('start_at', $direction)
+                        query: fn(string $direction, $query) => $query->orderBy('start_at', $direction)
                     ),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->afterStateUpdated(function ($record, $state) {

@@ -6,7 +6,6 @@ use App\Traits\HasMeta;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -16,7 +15,7 @@ class Category extends Model implements HasMedia
 {
     use HasFactory, HasMeta, InteractsWithMedia;
 
-    protected $fillable = ['name', 'slug', 'image', 'is_active', 'is_featured'];
+    protected $fillable = ['name', 'slug', 'is_active', 'is_featured'];
 
     public function scopeActive($query)
     {
@@ -29,7 +28,7 @@ class Category extends Model implements HasMedia
 
     public function getImageUrlAttribute(): string
     {
-        $media = $this->getFirstMediaUrl() ?? asset('no-image');
+        return $this->getFirstMediaUrl();
     }
 
     public function products(): HasMany
@@ -45,7 +44,7 @@ class Category extends Model implements HasMedia
     public function registerAllMediaConversions(?Media $media = null): void
     {
         $this
-            ->addMediaConversion('preview')
+            ->addMediaConversion('thumb')
             ->fit(Fit::Contain, 300, 300)
             ->nonQueued();
     }
