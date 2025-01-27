@@ -52,17 +52,11 @@ class Profile extends ViewRecord
             $record->balances()->create($data);
 
             DB::commit();
-
-            return Notification::make()
-                ->title($text)
-                ->success()
-                ->send();
+            return notification($text);
         } catch (\Exception $e) {
             dump($e->getMessage());
             DB::rollBack();
-            return Notification::make()
-                ->title(__('Balance added failed'))
-                ->danger();
+            return notification(__('Balance added failed'), 'danger');
         }
     }
 
@@ -109,7 +103,7 @@ class Profile extends ViewRecord
                         ->icon('heroicon-o-briefcase')
                         ->iconColor('primary')
                         ->extraAttributes(['class' => 'font-bold'])
-                        ->visible(fn (Customer $record): bool => !empty($record->reseller_id))
+                        ->visible(fn(Customer $record): bool => !empty($record->reseller_id))
                         ->alignEnd(),
                 ])
                     ->columnSpan(1),
@@ -120,13 +114,13 @@ class Profile extends ViewRecord
                         TextEntry::make('first_name'),
                         TextEntry::make('last_name'),
                         TextEntry::make('email')
-                            ->icon(fn ($record): string => match ($record->has_verified_email) {
+                            ->icon(fn($record): string => match ($record->has_verified_email) {
                                 true => 'heroicon-o-check-badge',
                                 false => 'heroicon-o-x-circle',
                             })
-                            ->iconColor(fn (Customer $record): string => $record->has_verified_email ? 'success' : 'danger')
+                            ->iconColor(fn(Customer $record): string => $record->has_verified_email ? 'success' : 'danger')
                             ->iconPosition('after')
-                            ->tooltip(fn (Customer $record): string => $record->has_verified_email ? __('Email Verified') : __('Email Unverified')),
+                            ->tooltip(fn(Customer $record): string => $record->has_verified_email ? __('Email Verified') : __('Email Unverified')),
                         TextEntry::make('username')->default('-'),
                         TextEntry::make('phone'),
                         TextEntry::make('balance')->numeric(decimalPlaces: 2)

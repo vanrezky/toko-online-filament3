@@ -126,12 +126,12 @@ class CustomerResource extends Resource
                         ->same('confirm_password')
                         ->minLength(8)
                         ->maxLength(20)
-                        ->visible(fn (string $operation): bool  => $operation === 'create'),
+                        ->visible(fn(string $operation): bool  => $operation === 'create'),
                     Forms\Components\TextInput::make('confirm_password')
                         ->password()
                         ->required()
                         ->maxLength(255)
-                        ->visible(fn (string $operation): bool  => $operation === 'create'),
+                        ->visible(fn(string $operation): bool  => $operation === 'create'),
                 ])->columnSpanFull(),
 
                 Forms\Components\Hidden::make('email_verified_at')
@@ -155,8 +155,8 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('last_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->icon(fn (Customer $record): string => $record->email_verified_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
-                    ->iconColor(fn (Customer $record): string => $record->email_verified_at ? 'success' : 'warning')
+                    ->icon(fn(Customer $record): string => $record->email_verified_at ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->iconColor(fn(Customer $record): string => $record->email_verified_at ? 'success' : 'warning')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
@@ -197,13 +197,10 @@ class CustomerResource extends Resource
                         ->requiresConfirmation()
                         ->action(function (Customer $record) {
                             $record->update(['email_verified_at' => now()]);
-                            return Notification::make()
-                                ->title(__('Email has been verified  successfully'))
-                                ->success()
-                                ->send();
+                            return notification(__('Email has been verified  successfully'));
                         })
                         ->color('danger')
-                        ->visible(fn (Customer $record): bool => $record->email_verified_at === null),
+                        ->visible(fn(Customer $record): bool => $record->email_verified_at === null),
                     Tables\Actions\ViewAction::make()->label('Profile')
                         ->color('info'),
                     Tables\Actions\EditAction::make(),

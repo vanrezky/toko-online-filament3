@@ -13,9 +13,6 @@ class CreateCountry extends CreateRecord
 
     protected function getCreatedNotification(): ?Notification
     {
-        return Notification::make()
-            ->title('Country Created')
-            ->body('The Country created successfully')
-            ->success();
+        return notification(__('Country created successfully'));
     }
 }

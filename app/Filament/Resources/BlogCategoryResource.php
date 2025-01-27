@@ -105,13 +105,11 @@ class BlogCategoryResource extends Resource
                             }
 
                             if (!$delete) {
-                                return Notification::make()
-                                    ->title('There are categories that cannot be deleted')
-                                    ->warning()
-                                    ->send();
+                                return notification(__('There are categories that cannot be deleted'), 'warning');
                             }
 
                             $records->each->delete();
+                            return notification(__('Categories deleted successfully'));
                         }),
                 ]),
             ]);

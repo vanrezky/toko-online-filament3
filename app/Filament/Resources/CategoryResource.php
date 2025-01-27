@@ -106,7 +106,7 @@ class CategoryResource extends Resource
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()->action(function ($record) {
                         if ($record->products()->count()) {
-                            notification(__('Category cannot be deleted'), 'warning');
+                            return notification(__('Category cannot be deleted'), 'warning');
                         }
 
                         return $record->delete();
@@ -124,7 +124,7 @@ class CategoryResource extends Resource
                     }
 
                     if (!$delete) {
-                        notification(__('There are categories that cannot be deleted'), 'warning');
+                        return notification(__('There are categories that cannot be deleted'), 'warning');
                     }
                 }),
             ]);

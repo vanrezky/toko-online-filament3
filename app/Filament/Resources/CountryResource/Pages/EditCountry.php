@@ -20,9 +20,6 @@ class EditCountry extends EditRecord
 
     protected function getSavedNotification(): ?Notification
     {
-        return Notification::make()
-            ->title('Country updated')
-            ->body('The Country updated successfully')
-            ->success();
+        return notification(__('Country updated successfully'));
     }
 }
