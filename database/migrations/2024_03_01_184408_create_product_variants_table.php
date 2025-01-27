@@ -14,11 +14,14 @@ return new class extends Migration
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->string('code')->nullable();
-            $table->string('variant')->nullable();
-            $table->string('sub_varian')->nullable();
-            $table->unsignedInteger('stock')->nullable();
-            $table->double('price', 15, 2)->nullable();
+            $table->string('variant_name')->comment('Red - XL');
+            $table->string('sku', 100)->unique();
+            $table->decimal('price', 15, 2);
+            $table->unsignedInteger('stock')->default(0);
+            $table->unsignedInteger('weight')->nullable();
+            $table->string('dimensions')->nullable();
+            $table->boolean('status')->default(true);
+            $table->text('image')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('variants');
+        Schema::dropIfExists('product_variants');
     }
 };

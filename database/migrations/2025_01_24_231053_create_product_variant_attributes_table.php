@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('carts', function (Blueprint $table) {
+        Schema::create('product_variant_attributes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->references('id')->on('customers')->cascadeOnDelete();
-            $table->enum('status', ['active', 'checked_out', 'abandoned'])->default('active')->index();
+            $table->foreignId('product_variant_id')->constrained('product_variants')->cascadeOnDelete();
+            $table->string('attribute_name');
+            $table->string('attribute_value');
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carts');
+        Schema::dropIfExists('product_variant_attributes');
     }
 };

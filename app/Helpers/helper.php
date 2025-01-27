@@ -60,3 +60,4 @@ function toMoney($price): string
 {
     return \Akaunting\Money\Money::IDR($price);
 }
+
