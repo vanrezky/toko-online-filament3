@@ -17,7 +17,6 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         Product::create([
-            'images' => ['https://placehold.co/600x400?text=product+1'],
             'name' => 'product first on web',
             'slug' => 'product-first-on-web',
             'category_id' => Category::active()->first()->id,

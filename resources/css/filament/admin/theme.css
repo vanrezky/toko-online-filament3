@@ -4,11 +4,11 @@
 
 @layer components {
     .fi-active {
-        @apply text-primary  !important;
+        @apply text-primary !important;
     }
 
     .column-title {
-        @apply font-bold py-2 text-xl !important;
+        @apply py-2 text-xl font-bold !important;
     }
     /* Section widget */
     .fi-section {
@@ -27,11 +27,15 @@
 
     /* sidebar */
     .fi-sidebar-nav {
-        @apply shadow bg-white dark:bg-slate-950 !important;
+        @apply bg-white shadow dark:bg-slate-950 !important;
+    }
+
+    .fi-sidebar-nav-groups {
+        @apply gap-y-3 !important;
     }
 
     .fi-sidebar-group {
-        @apply rounded-3xl rounded-tl-none border dark:border-slate-800 p-2 bg-gray-100/30 dark:bg-slate-900 shadow-md !important;
+        @apply rounded-3xl rounded-tl-none border bg-gray-100/30 p-2 shadow-md dark:border-slate-800 dark:bg-slate-900 !important;
     }
 
     .fi-sidebar-item-active .fi-sidebar-item-label {

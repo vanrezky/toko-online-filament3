@@ -7,20 +7,16 @@ use App\Enums\VoucherDiscountType;
 use App\Enums\VoucherProductType;
 use App\Enums\VoucherType;
 use App\Filament\Resources\VoucherResource\Pages;
-use App\Filament\Resources\VoucherResource\RelationManagers;
 use App\Models\Voucher;
 use Filament\Forms;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class VoucherResource extends Resource
 {
@@ -28,9 +24,9 @@ class VoucherResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-scissors';
     protected static ?string $navigationLabel = 'Vouchers';
-    protected static ?string $navigationGroup = 'Shop';
-    protected static ?string $slug = 'shop/vouchers';
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Promo';
+    protected static ?string $slug = 'vouchers';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

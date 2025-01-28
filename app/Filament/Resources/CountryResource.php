@@ -7,24 +7,16 @@ use App\Filament\Resources\CountryResource\RelationManagers\ProvincesRelationMan
 use App\Models\Country;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';
-    protected static ?string $navigationLabel = 'Country';
-    protected static ?string $modelLabel = 'Master Country';
-    protected static ?string $navigationGroup = 'Master Management';
-    protected static ?string $slug = 'master-data/country';
+    protected static ?string $navigationGroup = 'Master';
     protected static ?int $navigationSort = 90;
 
     public static function canCreate(): bool

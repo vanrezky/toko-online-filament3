@@ -4,32 +4,24 @@ namespace App\Filament\Resources;
 
 use App\Constants\UploadPath;
 use App\Filament\Resources\PromotionResource\Pages;
-use App\Filament\Resources\PromotionResource\RelationManagers;
-use App\Filament\Resources\SliderResource\Pages\ListSliders;
 use App\Models\Promotion;
-use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
-use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PromotionResource extends Resource
 {
     protected static ?string $model = Promotion::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Promotion';
-    protected static ?string $slug = 'promotion/promotions';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = 'Promo';
+    protected static ?string $slug = 'promotions';
+    protected static ?int $navigationSort = 3;
     public Promotion $record;
 
     public static function form(Form $form): Form

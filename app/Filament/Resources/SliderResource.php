@@ -4,19 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Constants\UploadPath;
 use App\Filament\Resources\SliderResource\Pages;
-use App\Filament\Resources\SliderResource\RelationManagers;
 use App\Models\Slider;
 use Filament\Forms;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SliderResource extends Resource
 {
@@ -24,8 +20,8 @@ class SliderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-photo';
     protected static ?string $navigationLabel = 'Home Slider';
-    protected static ?string $navigationGroup = 'Promotion';
-    protected static ?string $slug = 'promotions/sliders';
+    protected static ?string $navigationGroup = 'Promo';
+    protected static ?string $slug = 'sliders';
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form

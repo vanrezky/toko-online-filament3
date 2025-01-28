@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FaqResource\Pages;
-use App\Filament\Resources\FaqResource\RelationManagers;
 use App\Models\Faq;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -12,9 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FaqResource extends Resource
 {
@@ -22,11 +18,11 @@ class FaqResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-sparkles';
 
-    protected static ?string $navigationGroup = 'Setting';
+    protected static ?string $navigationGroup = 'Master';
     protected static ?string $navigationLabel = 'FAQs';
     protected static ?string $modelLabel = 'Frequenly Asked Questions';
-    protected static ?int $navigationSort = 4;
-    protected static ?string $slug = 'setting/faqs';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $slug = 'faqs';
 
 
     public static function getNavigationBadge(): ?string

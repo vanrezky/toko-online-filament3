@@ -4,41 +4,29 @@ namespace App\Filament\Resources;
 
 use App\Constants\UploadPath;
 use App\Filament\Resources\CategoryResource\Pages;
-use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Filament\Resources\Schema\MetaSchema;
 use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\Category;
-use App\Tables\Components\GeneralToogleInfoColumn;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
-use GeneralToogleTable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
-    protected static ?string $navigationLabel = 'Categories';
-    protected static ?string $navigationGroup = 'Shop';
-    protected static ?string $slug = 'shop/categories';
+    protected static ?string $navigationLabel = 'Product Categories';
+    protected static ?string $navigationGroup = 'Product';
+    protected static ?string $slug = 'categories';
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
@@ -167,5 +155,13 @@ class CategoryResource extends Resource
     public static function shouldCanUpdate(): bool
     {
         return auth()->user()->can('update_category');
+    }
+
+    public function registerAllMediaConversions(?Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('thumb')
+            ->fit(Fit::Contain, 300, 300)
+            ->nonQueued();
     }
 }

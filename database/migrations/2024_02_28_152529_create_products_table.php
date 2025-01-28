@@ -23,7 +23,6 @@ return new class extends Migration
             $table->tinyText('digital_url')->nullable();
             $table->text('description');
             $table->string('code');
-            $table->text('images');
             $table->unsignedInteger('stock')->default(0);
             $table->unsignedBigInteger('security_stock')->default(0);
             $table->unsignedInteger('weight')->nullable();

@@ -21,7 +21,6 @@ return new class extends Migration
             $table->unsignedInteger('weight')->nullable();
             $table->string('dimensions')->nullable();
             $table->boolean('status')->default(true);
-            $table->text('image')->nullable();
             $table->timestamps();
         });
     }

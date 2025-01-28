@@ -3,31 +3,22 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProvinceResource\Pages;
-use App\Filament\Resources\ProvinceResource\RelationManagers;
-use App\Filament\Resources\ProvinceResource\RelationManagers\CitiesRelationManager;
-use App\Models\Country;
 use App\Models\Province;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ProvinceResource extends Resource
 {
     protected static ?string $model = Province::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
-    protected static ?string $navigationLabel = 'Province';
-    protected static ?string $navigationGroup = 'Master Management';
-    protected static ?string $modelLabel = 'Master Province';
-    protected static ?string $slug = 'Province';
+    protected static ?string $navigationGroup = 'Master';
     protected static ?int $navigationSort = 91;
 
     public static function canCreate(): bool

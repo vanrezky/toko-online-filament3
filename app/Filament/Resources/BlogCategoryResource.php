@@ -4,28 +4,17 @@ namespace App\Filament\Resources;
 
 use App\Enums\StatusType;
 use App\Filament\Resources\BlogCategoryResource\Pages;
-use App\Filament\Resources\BlogCategoryResource\RelationManagers;
 use App\Filament\Resources\Schema\MetaSchema;
 use App\Filament\Resources\Schema\TitleSchema;
 use App\Models\BlogCategory;
-use Filament\Forms;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Str;
 
 class BlogCategoryResource extends Resource
 {
@@ -34,7 +23,7 @@ class BlogCategoryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationGroup = 'Blog';
-    protected static ?string $navigationLabel = 'Categories';
+    protected static ?string $navigationLabel = 'Post Categories';
     protected static ?int $navigationSort = 2;
     protected static ?string $slug = 'blog/categories';
 

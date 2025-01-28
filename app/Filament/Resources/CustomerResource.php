@@ -4,31 +4,24 @@ namespace App\Filament\Resources;
 
 use App\Constants\UploadPath;
 use App\Filament\Resources\CustomerResource\Pages;
-use App\Filament\Resources\CustomerResource\Pages\Profile;
-use App\Filament\Resources\CustomerResource\RelationManagers;
 use App\Filament\Resources\CustomerResource\RelationManagers\BalancesRelationManager;
 use App\Filament\Resources\CustomerResource\RelationManagers\CustomerAddressRelationManager;
 use App\Models\Customer;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CustomerResource extends Resource
 {
     protected static ?string $model = Customer::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationGroup = 'Shop';
-    protected static ?string $slug = 'shop/customers';
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationGroup = 'Customer';
+    protected static ?string $slug = 'customers';
+    protected static ?int $navigationSort = 1;
 
     public Customer $record;
 

@@ -15,7 +15,6 @@ class SliderSeeder extends Seeder
         $sliders = collect([
             [
                 'description' => 'Slider 1 description',
-                'image' => 'https://placehold.co/800x400?text=Slider+1',
                 'is_active' => true,
                 'start_at' => now(),
                 'end_at' => now()->addDays(7),
@@ -24,7 +23,6 @@ class SliderSeeder extends Seeder
             ],
             [
                 'description' => 'Slider 2 description',
-                'image' => 'https://placehold.co/800x400?text=Slider+2',
                 'is_active' => true,
                 'start_at' => now(),
                 'end_at' => now()->addDays(7),
@@ -33,6 +31,6 @@ class SliderSeeder extends Seeder
             ]
         ]);
 
-        $sliders->each(fn ($slider) => \App\Models\Slider::create($slider));
+        $sliders->each(fn($slider) => \App\Models\Slider::create($slider));
     }
 }

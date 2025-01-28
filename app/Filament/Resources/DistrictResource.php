@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DistrictResource\Pages;
-use App\Filament\Resources\DistrictResource\RelationManagers;
 use App\Models\District;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,18 +12,16 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DistrictResource extends Resource
 {
     protected static ?string $model = District::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
-    protected static ?string $navigationLabel = 'District';
-    protected static ?string $modelLabel = 'Master District';
-    protected static ?string $navigationGroup = 'Master Management';
-    protected static ?string $slug = 'master-data/district';
+    // protected static ?string $navigationLabel = 'District';
+    // protected static ?string $modelLabel = 'Master District';
+    protected static ?string $navigationGroup = 'Master';
+    // protected static ?string $slug = 'district';
     protected static ?int $navigationSort = 92;
 
     public static function canCreate(): bool

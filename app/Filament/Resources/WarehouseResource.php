@@ -3,16 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WarehouseResource\Pages;
-use App\Filament\Resources\WarehouseResource\RelationManagers;
 use App\Models\Warehouse;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class WarehouseResource extends Resource
 {
@@ -20,8 +16,7 @@ class WarehouseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
     protected static ?string $navigationLabel = 'Warehouse Location';
-    protected static ?string $navigationGroup = 'Setting';
-    protected static ?string $slug = 'setting/warehouse';
+    protected static ?string $navigationGroup = 'Master';
     protected static ?int $navigationSort = 3;
 
     public static function getNavigationBadge(): ?string

@@ -3,13 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FlashsaleResource\Pages;
-use App\Filament\Resources\FlashsaleResource\RelationManagers;
 use App\Filament\Resources\FlashsaleResource\RelationManagers\ProductsRelationManager;
 use App\Models\Flashsale;
 use Carbon\Carbon;
-use Filament\Actions\ActionGroup;
 use Filament\Forms;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -17,8 +14,6 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FlashsaleResource extends Resource
 {
@@ -27,8 +22,8 @@ class FlashsaleResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationLabel = 'Flashsales';
-    protected static ?string $navigationGroup = 'Shop';
-    protected static ?string $slug = 'shop/flashsales';
+    protected static ?string $navigationGroup = 'Promo';
+    protected static ?string $slug = 'flashsales';
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form

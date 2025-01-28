@@ -15,11 +15,6 @@ class CreateProduct extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = auth()->id();
-
-        // Simpan product_variants ke session
-        session()->put('product_variants', $data['product_variants'] ?? []);
-        // Hindari penyimpanan otomatis oleh Filament
-        unset($data['product_variants']);
         return $data;
     }
 
