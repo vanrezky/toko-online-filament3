@@ -100,4 +100,9 @@ class Product extends Model implements HasMedia
             ->fit(Fit::Contain, 300, 300)
             ->nonQueued();
     }
+
+    public function produtAttributes(): HasMany
+    {
+        return $this->hasMany(ProductAttribute::class);
+    }
 }
