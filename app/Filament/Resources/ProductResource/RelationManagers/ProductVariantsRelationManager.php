@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ProductResource\RelationManagers;
 
+use App\Constants\UploadPath;
 use App\Models\ProductAttribute;
 use App\Models\ProductAttributeOption;
 use App\Models\ProductVariant;
@@ -16,12 +17,12 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductVariantsRelationManager extends RelationManager
 {
@@ -38,12 +39,13 @@ class ProductVariantsRelationManager extends RelationManager
                     ->schema([
                         Select::make('product_attribute_id')
                             ->label(__('Attribute'))
-                            ->options(fn() => $this->getAttribute())
+                            ->options(fn(): array => $this->getProductAttributes())
                             ->required()
                             ->fixIndistinctState()
                             ->searchable()
                             ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                             ->afterStateUpdated(fn(Set $set) => $set('product_attribute_options', []))
+                            ->disabledOn('edit')
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->label(__('Attribute'))
@@ -56,7 +58,7 @@ class ProductVariantsRelationManager extends RelationManager
                             ->simple(
                                 Select::make('product_attribute_option_id')
                                     ->label(__('Options'))
-                                    ->options(fn(Get $get) => self::getAttributeOption($get('../../product_attribute_id')))
+                                    ->options(fn(Get $get, string $context, ?string $state): array => self::getProductAttributeOptions($get('../../product_attribute_id'), $context, $state))
                                     ->fixIndistinctState()
                                     ->required()
                                     ->searchable()
@@ -71,10 +73,15 @@ class ProductVariantsRelationManager extends RelationManager
                                     })
                             )
                             ->minItems(1)
+                            ->disabledOn('edit')
+                            ->deletable(fn(string $context): bool => $context === 'create')
+                            ->reorderable(fn(string $context): bool => $context === 'create')
+                            ->addable(fn(string $context): bool => $context === 'create'),
                     ])
                     ->columnSpanFull()
                     ->minItems(1)
                     ->maxItems(2)
+                    ->deletable(fn(string $context): bool => $context === 'create')
                     ->label(__('Variant'))
                     ->reorderable(false),
                 TextInput::make('price')
@@ -86,6 +93,24 @@ class ProductVariantsRelationManager extends RelationManager
                     ->label(__('Stock'))
                     ->numeric()
                     ->required(),
+                SpatieMediaLibraryFileUpload::make('image')
+                    ->hiddenOn('create')
+                    ->image()
+                    ->imageEditor()
+                    ->required()
+                    ->multiple()
+                    ->reorderable()
+                    ->imageCropAspectRatio('1:1')
+                    ->imageEditorAspectRatios([
+                        '1:1'
+                    ])
+                    ->optimize('webp')
+                    ->disk(getActiveDisk())
+                    ->rules(['required', 'mimes:png,jpg,jpeg,webp,gif', 'max:1024'])
+                    ->maxSize(1024)
+                    ->helperText(__('Ratio Is 1:1. Maximum size is 1MB'))
+                    ->directory(UploadPath::PRODUCT_UPLOAD_PATH)
+                    ->columnSpanFull()
             ]);
     }
 
@@ -94,6 +119,8 @@ class ProductVariantsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('Variants')
             ->columns([
+                SpatieMediaLibraryImageColumn::make('image')->conversion('thumb')
+                    ->square(),
                 Tables\Columns\TextColumn::make('attributes.productAttribute.name')
                     ->getStateUsing(function ($record) {
                         $attributeNames = [];
@@ -133,7 +160,17 @@ class ProductVariantsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->mutateRecordDataUsing(function (array $data, $record): array {
+                        $data['variant_attributes'] = [];
+                        foreach ($record->attributes as $key => $attribute) {
+                            $data['variant_attributes'][] = [
+                                'product_attribute_id' => $attribute->product_attribute_id,
+                                'product_attribute_options' => [$attribute->product_attribute_option_id],
+                            ];
+                        }
+                        return $data;
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -143,7 +180,7 @@ class ProductVariantsRelationManager extends RelationManager
             ]);
     }
 
-    private function getAttribute(): array
+    private function getProductAttributes(): array
     {
         $productId = $this->getOwnerRecord()->id;
         return ProductAttribute::where(function ($query) use ($productId) {
@@ -159,19 +196,28 @@ class ProductVariantsRelationManager extends RelationManager
             ->toArray();
     }
 
-    private function getAttributeOption(?string $id): array
+    private function getProductAttributeOptions(?string $attributeId, string $context, ?string $currentOptionId): array
     {
-        if (!$id) {
+        if (!$attributeId) {
             return [];
         }
 
+        Log::info("current option id: {$currentOptionId}");
+
         $productId = $this->getOwnerRecord()->id;
-        return ProductAttributeOption::where('product_attribute_id', $id)
+        return ProductAttributeOption::where('product_attribute_id', $attributeId)
             ->where(function ($query) use ($productId) {
-                $query->where('is_global', true) // Ambil opsi global
-                    ->orWhere('product_id', $productId); // Ambil opsi yang spesifik untuk produk ini
+                $query->where('is_global', true)
+                    ->orWhere('product_id', $productId);
             })
-            ->where('status', 'approved') // Hanya ambil opsi yang telah disetujui
+            ->approved()
+            ->when($context === 'edit', function ($query) use ($productId, $currentOptionId) {
+                // ignored the option has been selected
+                $query->whereDoesntHave('productVariantAttributeOption.productVariant', function ($q) use ($productId) {
+                    $q->where('product_id', $productId);
+                })
+                    ->orWhere('id', $currentOptionId);
+            })
             ->pluck('name', 'id')
             ->toArray();
     }
@@ -274,21 +320,5 @@ class ProductVariantsRelationManager extends RelationManager
         }
 
         return $result;
-    }
-
-    protected function getAttributeColor(string $attributeName): string
-    {
-        return $this->attributeColorMapping[$attributeName] ?? 'gray';
-    }
-
-    protected function getAttributeValueColor($attributeName)
-    {
-        return $this->attributeColorMapping[$attributeName] ?? 'gray';
-    }
-
-
-    protected function getAttributeOptionColor(string $attributeName, string $optionName): string
-    {
-        return $this->getAttributeColor($attributeName);
     }
 }

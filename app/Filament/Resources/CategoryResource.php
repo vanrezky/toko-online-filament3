@@ -17,8 +17,6 @@ use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
-use Spatie\Image\Enums\Fit;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class CategoryResource extends Resource
 {
@@ -155,13 +153,5 @@ class CategoryResource extends Resource
     public static function shouldCanUpdate(): bool
     {
         return auth()->user()->can('update_category');
-    }
-
-    public function registerAllMediaConversions(?Media $media = null): void
-    {
-        $this
-            ->addMediaConversion('thumb')
-            ->fit(Fit::Contain, 300, 300)
-            ->nonQueued();
     }
 }

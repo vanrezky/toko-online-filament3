@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductAttributeOption extends Model
 {
@@ -14,4 +16,19 @@ class ProductAttributeOption extends Model
     protected $casts  = [
         'is_global' => 'boolean',
     ];
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function productVariantAttributeOption(): HasMany
+    {
+        return $this->hasMany(ProductVariantAttribute::class);
+    }
 }

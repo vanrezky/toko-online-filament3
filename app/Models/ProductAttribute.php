@@ -16,6 +16,11 @@ class ProductAttribute extends Model
         'is_global' => 'boolean',
     ];
 
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
     public function options(): HasMany
     {
         return $this->hasMany(ProductAttributeOption::class);

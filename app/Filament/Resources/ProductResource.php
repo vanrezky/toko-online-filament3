@@ -191,7 +191,6 @@ class ProductResource extends Resource
                                         '1:1'
                                     ])
                                     ->downloadable()
-                                    ->directory(UploadPath::IMAGES_UPLOAD_PATH)
                                     ->optimize('webp')
                                     ->panelLayout('grid')
                                     ->disk(getActiveDisk())
