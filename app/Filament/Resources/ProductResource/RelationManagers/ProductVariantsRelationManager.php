@@ -7,6 +7,7 @@ use App\Models\ProductAttribute;
 use App\Models\ProductAttributeOption;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantAttribute;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -27,7 +28,6 @@ use Illuminate\Support\Facades\Log;
 class ProductVariantsRelationManager extends RelationManager
 {
     protected static string $relationship = 'productVariants';
-    // protected static ?string $recordTitleAttribute = 'sku';
 
     public function form(Form $form): Form
     {
@@ -49,7 +49,20 @@ class ProductVariantsRelationManager extends RelationManager
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->label(__('Attribute'))
-                                    ->required(),
+                                    ->required()
+                                    ->maxLength(100)
+                                    ->rules([
+                                        fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                                            $productId = $this->getOwnerRecord()->id;
+                                            $exists = ProductAttribute::where(fn($query) => $query->where('product_id', $productId)->where('name', $value))
+                                                ->orWhere(fn($query) => $query->where('product_id', null)->where('name', $value)->where('is_global', true))
+                                                ->exists();
+
+                                            if ($exists) {
+                                                $fail(__('This attribute has already been created.'));
+                                            }
+                                        },
+                                    ]),
                             ])->createOptionUsing(fn(array $data): int => $this->createAttribute($data)),
 
                         Repeater::make('product_attribute_options')
@@ -66,11 +79,26 @@ class ProductVariantsRelationManager extends RelationManager
                                     ->createOptionForm([
                                         Forms\Components\TextInput::make('name')
                                             ->label(__('Option'))
-                                            ->required(),
+                                            ->required()
+                                            ->maxLength(100)
+                                            ->rules([
+                                                fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                                                    $productId = $this->getOwnerRecord()->id;
+                                                    $value = strtolower($value);
+                                                    $exists = ProductAttributeOption::where(fn($query) => $query->where('product_id', $productId)->where('name', $value))
+                                                        ->orWhere(fn($query) => $query->where('product_id', null)->where('name', $value)->where('is_global', true))
+                                                        ->exists();
+
+                                                    if ($exists) {
+                                                        $fail(__('This attribute has already been created.'));
+                                                    }
+                                                },
+                                            ]),
                                     ])
                                     ->createOptionUsing(function (array $data, Get $get): int {
                                         return self::createAttributeOption($data, $get('../../product_attribute_id'));
                                     })
+
                             )
                             ->minItems(1)
                             ->disabledOn('edit')
@@ -122,25 +150,9 @@ class ProductVariantsRelationManager extends RelationManager
                 SpatieMediaLibraryImageColumn::make('image')->conversion('thumb')
                     ->square(),
                 Tables\Columns\TextColumn::make('attributes.productAttribute.name')
-                    ->getStateUsing(function ($record) {
-                        $attributeNames = [];
-                        $record->loadMissing('attributes.productAttribute');
-                        foreach ($record->attributes as $key => $attribute) {
-                            $attributeNames[] = $attribute->productAttribute->name;
-                        }
-                        return !empty($attributeNames) ? $attributeNames : __('Not specified');
-                    })
                     ->badge()
                     ->color('success'),
                 Tables\Columns\TextColumn::make('attributes.productAttributeOption.name')
-                    ->getStateUsing(function ($record) {
-                        $attributeNames = [];
-                        $record->loadMissing('attributes.productAttributeOption');
-                        foreach ($record->attributes as $key => $attribute) {
-                            $attributeNames[] = $attribute->productAttributeOption->name;
-                        }
-                        return !empty($attributeNames) ? $attributeNames : __('Not specified');
-                    })
                     ->badge()
                     ->color('info'),
                 Tables\Columns\TextColumn::make('sku'),
@@ -157,18 +169,21 @@ class ProductVariantsRelationManager extends RelationManager
                     })
                     ->after(function () {
                         $this->getOwnerRecord()->productVariants()->whereNull('sku')->delete();
+                        $this->deleteUnusedAttributesAndOptions();
                     }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->mutateRecordDataUsing(function (array $data, $record): array {
-                        $data['variant_attributes'] = [];
-                        foreach ($record->attributes as $key => $attribute) {
-                            $data['variant_attributes'][] = [
-                                'product_attribute_id' => $attribute->product_attribute_id,
-                                'product_attribute_options' => [$attribute->product_attribute_option_id],
-                            ];
-                        }
+                        $data['variant_attributes'] = $record->attributes
+                            ->map(function ($attribute) {
+                                return [
+                                    'product_attribute_id' => $attribute->product_attribute_id,
+                                    'product_attribute_options' => [$attribute->product_attribute_option_id],
+                                ];
+                            })
+                            ->toArray();
+
                         return $data;
                     }),
                 Tables\Actions\DeleteAction::make(),
@@ -202,8 +217,6 @@ class ProductVariantsRelationManager extends RelationManager
             return [];
         }
 
-        Log::info("current option id: {$currentOptionId}");
-
         $productId = $this->getOwnerRecord()->id;
         return ProductAttributeOption::where('product_attribute_id', $attributeId)
             ->where(function ($query) use ($productId) {
@@ -224,9 +237,11 @@ class ProductVariantsRelationManager extends RelationManager
 
     private function createAttribute(?array  $data): int
     {
+        $productId = $this->getOwnerRecord()->id;
+
         return ProductAttribute::create([
             'name' => $data['name'],
-            'product_id' => $this->getOwnerRecord()->id,
+            'product_id' => $productId,
             'user_id' => auth()->id(),
             'status' => 'approved',
         ])->getKey();
@@ -320,5 +335,43 @@ class ProductVariantsRelationManager extends RelationManager
         }
 
         return $result;
+    }
+
+    private function deleteUnusedAttributesAndOptions(): void
+    {
+        $productId = $this->getOwnerRecord()->id;
+        $productVariants = ProductVariant::with('attributes')->where('product_id', $productId)->get();
+
+        // Extract product attribute IDs and product attribute option IDs using collections
+        $productAttributeIds = $productVariants
+            ->pluck('attributes')
+            ->flatten()
+            ->pluck('product_attribute_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $productAttributeOptionIds = $productVariants
+            ->pluck('attributes')
+            ->flatten()
+            ->pluck('product_attribute_option_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Perform deletions within a transaction
+        DB::transaction(function () use ($productId, $productAttributeIds, $productAttributeOptionIds) {
+            // Delete unused product attributes
+            ProductAttribute::where('product_id', $productId)
+                ->when(!empty($productAttributeIds), fn($query) => $query->whereNotIn('id', $productAttributeIds))
+                ->delete();
+
+            // Delete unused product attribute options
+            ProductAttributeOption::where('product_id', $productId)
+                ->when(!empty($productAttributeOptionIds), fn($query) => $query->whereNotIn('id', $productAttributeOptionIds))
+                ->delete();
+        });
     }
 }
