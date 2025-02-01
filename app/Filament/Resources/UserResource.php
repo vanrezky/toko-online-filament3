@@ -44,7 +44,7 @@ class UserResource extends Resource
                             ->maxLength(50)
                             ->unique(ignoreRecord: true),
                         Forms\Components\Select::make('roles')
-                            ->relationship('roles', titleAttribute: 'name'),
+                            ->relationship('roles', titleAttribute: 'name', modifyQueryUsing: fn($query) => $query->whereNot('name', 'super_admin')),
                         Forms\Components\TextInput::make('password')
                             ->password()
                             ->rules([securePassword()])
@@ -67,7 +67,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->superUser(false))
+            ->modifyQueryUsing(fn(Builder $query): Builder => $query->superUser(false))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -87,7 +87,7 @@ class UserResource extends Resource
             ])
             ->filters([
                 Tables\Filters\Filter::make('verified')
-                    ->query(fn (Builder $query): Builder => $query->whereNotNull('email_verified_at'))
+                    ->query(fn(Builder $query): Builder => $query->whereNotNull('email_verified_at'))
             ])
             ->actions([
                 ActionGroup::make([
