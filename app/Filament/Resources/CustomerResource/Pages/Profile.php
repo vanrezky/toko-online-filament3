@@ -3,22 +3,16 @@
 namespace App\Filament\Resources\CustomerResource\Pages;
 
 use App\Filament\Resources\CustomerResource;
-use App\Filament\Resources\CustomerResource\RelationManagers\BalanceRelationManager;
-use App\Filament\Resources\CustomerResource\Widgets\TotalBalanceWidget;
 use App\Models\Balance;
 use App\Models\Customer;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Filament\Actions as Act;
 use Livewire\Component;
 
@@ -26,37 +20,37 @@ class Profile extends ViewRecord
 {
     protected static string $resource = CustomerResource::class;
 
-
     public function balance($data, $record, string $trx_type)
     {
         DB::beginTransaction();
         try {
-
+            // Determine the new balance based on the transaction type
             if ($trx_type === '+') {
-                $balance = $record->balance + $data['balance'];
-                $record->fill(['balance' => $balance]);
-                $record->save();
-
-                $data = (new Balance)->addBalance(customer_id: $record->id, amount: $data['balance'], charge: 0, post_balance: $balance, trx_type: '+', notes: $data['notes']);
-
+                $record->increment('balance', $data['balance']);
                 $text = __('Balance added successfully');
             } else {
-
                 $record->decrement('balance', $data['balance']);
-
-                $data = (new Balance)->reduceBalance(customer_id: $record->id, amount: $data['balance'], charge: 0, post_balance: $record->balance, notes: $data['notes']);
-
-                $text = __('Balance reduce successfully');
+                $text = __('Balance reduced successfully');
             }
 
+            // Use the updateBalance function to generate the transaction data
+            $data = (new Balance)->updateBalance(
+                customer_id: $record->id,
+                amount: $data['balance'],
+                charge: 0,
+                post_balance: $record->balance,
+                trx_type: $trx_type,
+                notes: $data['notes'] ?? null
+            );
+
+            // Create the balance record
             $record->balances()->create($data);
 
             DB::commit();
             return notification($text);
         } catch (\Exception $e) {
-            dump($e->getMessage());
             DB::rollBack();
-            return notification(__('Balance added failed'), 'danger');
+            return notification(__('Balance update failed'), 'danger');
         }
     }
 
