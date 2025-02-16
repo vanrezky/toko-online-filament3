@@ -38,7 +38,7 @@ class Category extends Model implements HasMedia
 
     public function scopeHomepage($query)
     {
-        return $query->active()->featured()->whereNotNull('image');
+        return $query->active()->featured();
     }
 
     public function registerAllMediaConversions(?Media $media = null): void

@@ -15,7 +15,7 @@ class Customer extends Authenticatable
 {
     use HasFactory, HasProfilePictureTrait, Notifiable;
 
-    protected $fillable = ['first_name', 'last_name', 'email', 'email_verified_at', 'username', 'password', 'phone', 'balance', 'image', 'is_active'];
+    protected $fillable = ['first_name', 'last_name', 'email', 'email_verified_at', 'username', 'password', 'phone', 'balance', 'image', 'is_active', 'is_guest'];
 
     protected $hidden = [
         'username',

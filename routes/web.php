@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Frontend\HomeController;
 use App\Livewire\AboutPage;
 use App\Livewire\Auth\ForgotPage;
 use App\Livewire\Auth\LoginPage;
@@ -32,28 +33,31 @@ use Livewire\Component;
 |
 */
 
-Route::get('/', HomePage::class)->name('home');
-Route::get('/products', ProductsPage::class);
-Route::get('/products/{product}', ProductDetailPage::class);
 
-Route::get('/checkout', CheckoutPage::class);
-Route::get('/my-orders', MyOrderPage::class);
-Route::get('my-orders/{order}', OrderDetailPage::class);
+Route::get('/', [HomeController::class, 'index']);
 
-Route::get('/contact', ContactPage::class);
-Route::get('/about', AboutPage::class);
-Route::get('/blog', BlogPage::class);
+// Route::get('/', HomePage::class)->name('home');
+// Route::get('/products', ProductsPage::class);
+// Route::get('/products/{product}', ProductDetailPage::class);
 
-Route::group(['middleware' => 'auth.customer.guest'], function () {
-    Route::get('/login', LoginPage::class)->name('login');
-    Route::get('/register', RegisterPage::class);
-    Route::get('/reset', ResetPage::class);
-    Route::get('/forgot', ForgotPage::class);
-});
+// Route::get('/checkout', CheckoutPage::class);
+// Route::get('/my-orders', MyOrderPage::class);
+// Route::get('my-orders/{order}', OrderDetailPage::class);
 
-Route::group(['middleware' => 'auth.customer'], function () {
-    Route::get('/cart', CartPage::class);
-    Route::get('/order/success', SuccessPage::class);
-    Route::get('/order/cancel', CancelPage::class);
-    Route::get('/profile', ProfilePage::class);
-});
+// Route::get('/contact', ContactPage::class);
+// Route::get('/about', AboutPage::class);
+// Route::get('/blog', BlogPage::class);
+
+// Route::group(['middleware' => 'auth.customer.guest'], function () {
+//     Route::get('/login', LoginPage::class)->name('login');
+//     Route::get('/register', RegisterPage::class);
+//     Route::get('/reset', ResetPage::class);
+//     Route::get('/forgot', ForgotPage::class);
+// });
+
+// Route::group(['middleware' => 'auth.customer'], function () {
+//     Route::get('/cart', CartPage::class);
+//     Route::get('/order/success', SuccessPage::class);
+//     Route::get('/order/cancel', CancelPage::class);
+//     Route::get('/profile', ProfilePage::class);
+// });

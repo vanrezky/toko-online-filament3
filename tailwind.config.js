@@ -1,19 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: [
-        "./resources/**/*.blade.php",
-        "./resources/**/*.js",
-        "./resources/**/*.vue",
-        "node_modules/preline/dist/*.js",
-        "./vendor/masmerise/livewire-toaster/resources/views/*.blade.php",
-    ],
+    content: ["./resources/**/*.blade.php", "./resources/**/*.js", "./resources/**/*.vue"],
     theme: {
         extend: {
             fontFamily: {
                 sans: ['"Outfit"', "system-ui", "sans-serif"],
+                frontend: ['"Open Sans"', "system-ui", "sans-serif"],
             },
             colors: {
-                primary: "#FFFFFF",
+                primary: "#ff4500",
                 primary1: "#363738",
                 secondary: "#F5F5F5",
                 secondary1: "#FEFAF1",
@@ -40,5 +35,5 @@ export default {
             },
         },
     },
-    plugins: [require("daisyui")],
+    // plugins: [require("shadcn/ui")],
 };
