@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->font('Karla')
-            ->navigationGroups(['Product', 'Promo', 'Customer', 'Blog', 'Master', 'Setting', 'Logs'])
+            ->navigationGroups(['Product', 'Promo', 'Customer',  'Master', 'Transaction', 'Report', 'Blog', 'Setting', 'Logs'])
             ->favicon(settings('favicon'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

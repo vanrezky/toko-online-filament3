@@ -19,8 +19,8 @@ class CustomerOverview extends BaseWidget
 
         return [
             Stat::make('New Customers', Customer::query()
-                ->when($startDate, fn (Builder $query) => $query->whereDate('created_at', '>=', $startDate))
-                ->when($endDate, fn (Builder $query) => $query->whereDate('created_at', '<=', $endDate))
+                ->when($startDate, fn(Builder $query) => $query->whereDate('created_at', '>=', $startDate))
+                ->when($endDate, fn(Builder $query) => $query->whereDate('created_at', '<=', $endDate))
                 ->count()),
             // ->chart([7, 2, 10, 3, 15, 4, 17])
             // ->color('success'),

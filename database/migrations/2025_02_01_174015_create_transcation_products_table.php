@@ -13,8 +13,22 @@ return new class extends Migration
     {
         Schema::create('transcation_products', function (Blueprint $table) {
             $table->id();
-            $table->
+            $table->foreignId('transaction_id')->constrained('transactions')->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->boolean('is_digital')->default(false)->index();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('warehouse_id')->constrained('warehouses')->noActionOnDelete();
+            $table->unsignedBigInteger('quantity')->default(1);
+            $table->decimal('price', 15, 2)->default(0);
+            $table->decimal('discount', 15, 2)->default(0);
+            $table->string('description')->nullable();
+
             $table->timestamps();
+
+            $table->index('transaction_id');
+            $table->index('product_id');
+            $table->index('warehouse_id');
+            $table->index(['created_at']);
         });
     }
 

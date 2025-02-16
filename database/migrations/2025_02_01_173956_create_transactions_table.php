@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transcations', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
             $table->foreignId('customer_id')->constrained('customers')->noActionOnDelete();
@@ -19,9 +19,9 @@ return new class extends Migration
             $table->foreignId('customer_address_id')->constrained('customer_addresses')->noActionOnDelete();
             $table->unsignedBigInteger('weight')->default(0);
             $table->decimal('shipping_cost', 15, 2)->default(0);
-            $table->foreignId('courier_id')->constrained('couriers')->noActionOnDelete();
-            $table->foreignId('from_district_id')->constrained('from_districts')->noActionOnDelete();
-            $table->foreignId('to_district_id')->constrained('to_districts')->noActionOnDelete();
+            $table->unsignedBigInteger('courier_id');
+            $table->foreignId('from_district_id')->constrained('districts')->noActionOnDelete();
+            $table->foreignId('to_district_id')->constrained('districts')->noActionOnDelete();
             $table->boolean('cod')->default(false);
             $table->decimal('cod_fee', 15, 2)->default(0);
             $table->string('receipt_code')->nullable();
@@ -50,6 +50,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transcations');
+        Schema::dropIfExists('transactions');
     }
 };

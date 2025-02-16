@@ -5,6 +5,7 @@ import AppHead from "../AppHead.vue";
 import Topbar from "../../Layouts/Topbar.vue";
 import { computed } from "vue";
 import { PhEnvelopeSimple, PhMagnifyingGlass, PhPhone, PhSignOut, PhUser, PhUserCircle, PhUserPlus } from "@phosphor-icons/vue";
+import { Button } from "@shadcn-vue/ui";
 const props = defineProps({
     products: {
         type: Object,
@@ -54,6 +55,11 @@ const settings = computed(() => usePage().props.settings);
                                     <PhEnvelopeSimple class="size-5" />
                                     Mail
                                 </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex min-h-screen items-center justify-center bg-gray-100">
+                                <Button variant="default" size="lg">Hello from shadcn-vue!</Button>
                             </div>
                         </div>
                     </div>

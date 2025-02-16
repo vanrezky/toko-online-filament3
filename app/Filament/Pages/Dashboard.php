@@ -3,6 +3,9 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\CustomerOverview;
+use App\Filament\Widgets\CustomerWidget;
+use App\Filament\Widgets\EarningStatisticWidget;
+use App\Filament\Widgets\Revenue;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
@@ -33,9 +36,6 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public function getWidgetData(): array
     {
-        return [
-            CustomerOverview::class,
-            AccountWidget::class,
-        ];
+        return [];
     }
 }
