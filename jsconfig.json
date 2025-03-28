@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@frontend/*": ["./resources/js/frontend/*"],
+            "@styles/*": ["./resources/css/*"]
+        }
+    }
+}

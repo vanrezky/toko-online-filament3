@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\CategoryResource;
+use App\Models\Category;
 use App\Settings\GeneralSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -51,7 +53,10 @@ class HandleInertiaRequests extends Middleware
                 'Contact',
                 'About',
                 'Blogs',
-            ]
+            ],
+            'categories' => CategoryResource::collection(
+                Category::homepage()->with('media')->get()
+            )
             //
         ]);
     }
