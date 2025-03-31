@@ -17,7 +17,8 @@ class CategoryResource extends JsonResource
         return [
             'name' => $this->name,
             'slug' => $this->slug,
-            'image' => $this->getFirstMediaUrl(),
+            'image_url' => $this->getFirstMediaUrl(),
+            'products_count' => $this->when($this->products_count, $this->products_count, 0)
         ];
     }
 }

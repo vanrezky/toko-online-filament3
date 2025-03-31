@@ -1,5 +1,4 @@
 <script setup>
-import { PhHeart, PhShoppingCart, PhTrash } from "@phosphor-icons/vue";
 import Container from "./Container.vue";
 import { navigationMenuTriggerStyle } from "./ui/navigation-menu";
 import NavigationMenu from "./ui/navigation-menu/NavigationMenu.vue";
@@ -8,9 +7,8 @@ import NavigationMenuItem from "./ui/navigation-menu/NavigationMenuItem.vue";
 import NavigationMenuLink from "./ui/navigation-menu/NavigationMenuLink.vue";
 import NavigationMenuList from "./ui/navigation-menu/NavigationMenuList.vue";
 import NavigationMenuTrigger from "./ui/navigation-menu/NavigationMenuTrigger.vue";
-import { computed, ref } from "vue";
-import Button from "./ui/button/Button.vue";
-import { Link, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
+import { usePage } from "@inertiajs/vue3";
 
 const page = usePage();
 
@@ -40,25 +38,6 @@ const components = [
         name: "Menu 3",
     },
 ];
-
-const showCart = ref(false);
-
-const cartItems = [
-    { id: 1, name: "Swim Suit", price: "$20", image: "https://placehold.co/40", qty: 2, category: "Electorics" },
-    { id: 2, name: "Beach Hat", price: "$15", image: "https://placehold.co/40", qty: 1, category: "Bike" },
-    { id: 3, name: "Sunglasses", price: "$10", image: "https://placehold.co/40", qty: 1, category: "Women Clothing" },
-];
-
-const hideCart = () => {
-    setTimeout(() => {
-        showCart.value = false;
-    }, 300);
-};
-
-const removeFromCart = (id) => {
-    cartItems = this.cartItems.filter((item) => item.id !== id);
-};
-const cartCount = computed(() => cartItems.length);
 </script>
 
 <template>
@@ -69,7 +48,7 @@ const cartCount = computed(() => cartItems.length);
             <NavigationMenu class="hidden lg:flex">
                 <NavigationMenuList>
                     <NavigationMenuItem>
-                        <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
+                        <NavigationMenuTrigger class="font-semibold uppercase tracking-wider">Categories</NavigationMenuTrigger>
                         <NavigationMenuContent>
                             <ul class="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[minmax(0,.75fr)_minmax(0,1fr)]">
                                 <li class="row-span-3">
@@ -103,7 +82,7 @@ const cartCount = computed(() => cartItems.length);
                         </NavigationMenuContent>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuTrigger>Components</NavigationMenuTrigger>
+                        <NavigationMenuTrigger class="font-semibold uppercase tracking-wider">Components</NavigationMenuTrigger>
                         <NavigationMenuContent>
                             <ul class="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                                 <li v-for="component in components" :key="component.name">
@@ -123,57 +102,20 @@ const cartCount = computed(() => cartItems.length);
                         </NavigationMenuContent>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink href="/docs/introduction" :class="navigationMenuTriggerStyle()"> Documentation </NavigationMenuLink>
+                        <NavigationMenuLink
+                            href="/docs/introduction"
+                            :class="navigationMenuTriggerStyle()"
+                            class="font-semibold uppercase tracking-wider"
+                        >
+                            Documentation
+                        </NavigationMenuLink>
                     </NavigationMenuItem>
                 </NavigationMenuList>
             </NavigationMenu>
             <!-- end navigation -->
             <!-- start cart -->
             <NavigationMenu class="z-10">
-                <NavigationMenuList>
-                    <NavigationMenuItem>
-                        <NavigationMenuLink href="/docs/introduction" :class="navigationMenuTriggerStyle()">
-                            <PhHeart class="size-5" />
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem class="ml-auto">
-                        <NavigationMenuTrigger class="relative">
-                            <PhShoppingCart class="size-5" />
-                            <span
-                                v-if="cartCount > 0"
-                                class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white"
-                            >
-                                {{ cartCount }}
-                            </span>
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                            <ul class="grid w-[300px] space-y-2 overflow-y-auto p-2">
-                                <li v-for="item in cartItems" :key="item.id" class="flex items-center justify-between rounded border p-2">
-                                    <Link href="/" class="flex items-center gap-2">
-                                        <img :src="item.image" alt="product" class="h-10 w-10" />
-                                        <div>
-                                            <p class="text-sm hover:underline">{{ item.name }}</p>
-                                            <p class="text-xs text-gray-500">
-                                                <span>{{ item.qty }} x</span>
-                                                {{ item.price }}
-                                            </p>
-                                        </div>
-                                    </Link>
-
-                                    <Button @click="removeFromCart(item.id)" variant="ghost">
-                                        <PhTrash class="size-4 text-black hover:bg-primary" />
-                                    </Button>
-                                </li>
-                                <li class="mx-4 my-2">
-                                    <div class="flex flex-col gap-2">
-                                        <Button class="w-full">Proceed To Checkout</Button>
-                                        <Button class="w-full border" variant="ghost">View Cart</Button>
-                                    </div>
-                                </li>
-                            </ul>
-                        </NavigationMenuContent>
-                    </NavigationMenuItem>
-                </NavigationMenuList>
+                <NavigationMenuList> </NavigationMenuList>
             </NavigationMenu>
             <!-- end cart -->
         </div>

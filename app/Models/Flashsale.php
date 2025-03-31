@@ -12,6 +12,12 @@ class Flashsale extends Model
 
     protected $fillable = ['name', 'description', 'start_time', 'end_time'];
 
+    public function scopeActive($condition)
+    {
+        $now = now()->format('Y-m-d H:i:s');
+        $condition->whereRaw("'{$now}' between start_time and end_time");
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(ProductFlashsale::class);

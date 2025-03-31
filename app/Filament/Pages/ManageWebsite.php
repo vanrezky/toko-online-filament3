@@ -69,7 +69,7 @@ class ManageWebsite extends SettingsPage
                                 FileUpload::make('favicon')
                                     ->image()
                                     ->maxSize(1024)
-                                    ->rules(['nullable', 'mimes:png,jpg,jpeg', 'max:1024'])
+                                    ->rules(['nullable', 'mimes:png,jpg,jpeg,ico', 'max:1024'])
                                     ->directory(UploadPath::CONFIG_UPLOAD_PATH)
                                     ->helperText(__('Supported files: jpeg, jpg, png. Maximum file size 1MB')),
                                 FileUpload::make('login_logo')

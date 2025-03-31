@@ -6,16 +6,20 @@ import CarouselContent from "@frontend/Components/ui/carousel/CarouselContent.vu
 import CarouselPrevious from "@frontend/Components/ui/carousel/CarouselPrevious.vue";
 import CarouselNext from "@frontend/Components/ui/carousel/CarouselNext.vue";
 import CarouselItem from "@frontend/Components/ui/carousel/CarouselItem.vue";
-import { ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import Button from "@frontend/Components/ui/button/Button.vue";
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
-// import { Card, CardContent } from "@frontend/Component";
+import Product from "@frontend/Components/Product.vue";
 const props = defineProps({
     products: {
         type: Object,
         default: () => ({}),
     },
-    categories: {
+    flashsales: {
+        type: Object,
+        default: () => ({}),
+    },
+    featuredCategories: {
         type: Object,
         default: () => ({}),
     },
@@ -24,30 +28,45 @@ const props = defineProps({
         default: () => ({}),
     },
 });
-const products = ref([
-    { name: "Product 1", price: "Rp 100.000", image: "https://via.placeholder.com/150" },
-    { name: "Product 2", price: "Rp 150.000", image: "https://via.placeholder.com/150" },
-    { name: "Product 3", price: "Rp 200.000", image: "https://via.placeholder.com/150" },
-    { name: "Product 4", price: "Rp 250.000", image: "https://via.placeholder.com/150" },
-    { name: "Product 5", price: "Rp 300.000", image: "https://via.placeholder.com/150" },
-    { name: "Product 6", price: "Rp 350.000", image: "https://via.placeholder.com/150" },
-]);
 
-const carouselRef = ref(null);
+const currentIndex = ref(0);
+const itemsPerPage = ref(6);
 
-const nextSlide = () => {
-    if (carouselRef.value) carouselRef.value.next();
+// Mengubah itemsPerPage berdasarkan ukuran layar
+const updateItemsPerPage = () => {
+    itemsPerPage.value = window.innerWidth <= 640 ? 4 : 6; // 640px adalah breakpoint untuk mobile
 };
 
-const prevSlide = () => {
-    if (carouselRef.value) carouselRef.value.prev();
+// Pantau perubahan ukuran layar
+watchEffect(() => {
+    updateItemsPerPage();
+    window.addEventListener("resize", updateItemsPerPage);
+    return () => window.removeEventListener("resize", updateItemsPerPage);
+});
+
+const productsFlashsales = computed(() => props.flashsales.products);
+
+const visibleProducts = computed(() => {
+    return productsFlashsales.value.slice(currentIndex.value, currentIndex.value + itemsPerPage.value);
+});
+
+const next = () => {
+    if (currentIndex.value + itemsPerPage.value < productsFlashsales.value.length) {
+        currentIndex.value += itemsPerPage.value;
+    }
+};
+
+const prev = () => {
+    if (currentIndex.value - itemsPerPage.value >= 0) {
+        currentIndex.value -= itemsPerPage.value;
+    }
 };
 </script>
 <template>
     <Layout>
         <div v-if="sliders.length" class="relative mx-auto w-full overflow-hidden rounded-2xl shadow-lg">
             <Carousel
-                class="h-[400px] w-full"
+                class="h-[170px] w-full md:h-[280px] lg:h-[480px]"
                 :plugins="[
                     Autoplay({
                         delay: 3000,
@@ -66,28 +85,46 @@ const prevSlide = () => {
                 <CarouselNext class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-2 shadow" />
             </Carousel>
         </div>
-        <div class="mx-auto w-full max-w-6xl p-4">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-xl font-bold">Flash Sale</h2>
-                <div class="flex gap-2">
-                    <Button variant="ghost" @click="prevSlide" class="p-2"><ChevronLeft class="h-5 w-5" /></Button>
-                    <Button variant="ghost" @click="nextSlide" class="p-2"><ChevronRight class="h-5 w-5" /></Button>
+        <div class="scrollbar-hidden group overflow-x-auto py-5 pt-10">
+            <div class="grid min-w-full auto-cols-max grid-flow-col gap-4">
+                <a
+                    href="#"
+                    class="hover:scrollbar-visible flex min-w-[320px] items-start justify-between rounded-xl border p-4"
+                    v-for="(category, index) in featuredCategories"
+                    :key="index"
+                >
+                    <div class="flex items-center gap-5">
+                        <div class="rounded-xl bg-secondary p-3">
+                            <img :src="category.image_url" :alt="category.name" class="w-7" />
+                        </div>
+                        <div>
+                            <h4 class="font-semibold uppercase tracking-wider">{{ category.name }}</h4>
+                            <p class="text-sm text-gray-500">Show All</p>
+                        </div>
+                    </div>
+                    <p class="text-xs font-light text-gray-500">({{ category.products_count }})</p>
+                </a>
+            </div>
+        </div>
+        <div class="mx-auto w-full py-5">
+            <div class="relative col-span-3 w-full">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-xl font-semibold tracking-wider">Flash Sales</h2>
+                    <div class="flex gap-2">
+                        <Button variant="ghost" @click="prev" class="p-2" :disabled="currentIndex === 0">
+                            <ChevronLeft class="h-5 w-5" />
+                        </Button>
+                        <Button variant="ghost" @click="next" class="p-2" :disabled="currentIndex + itemsPerPage >= products.length">
+                            <ChevronRight class="h-5 w-5"
+                        /></Button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+                    <div v-for="product in visibleProducts" :key="product.id">
+                        <Product :product="product.product" />
+                    </div>
                 </div>
             </div>
-            <Carousel ref="carouselRef" class="relative">
-                <CarouselContent class="flex space-x-4">
-                    <CarouselItem v-for="(product, index) in products" :key="index" class="w-1/2 md:w-1/4 lg:w-1/6">
-                        <Card>
-                            <CardContent class="p-3">
-                                <img :src="product.image" :alt="product.name" class="h-32 w-full rounded-md object-cover" />
-                                <h3 class="mt-2 text-sm font-semibold">{{ product.name }}</h3>
-                                <p class="font-bold text-red-500">{{ product.price }}</p>
-                                <Button class="mt-2 w-full rounded-md bg-red-500 py-1 text-white hover:bg-red-600">Beli Sekarang</Button>
-                            </CardContent>
-                        </Card>
-                    </CarouselItem>
-                </CarouselContent>
-            </Carousel>
         </div>
     </Layout>
 </template>

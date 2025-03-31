@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Frontend\AccountController;
+use App\Http\Controllers\Frontend\Auth\ForgotPasswordController;
+use App\Http\Controllers\Frontend\Auth\LoginController;
+use App\Http\Controllers\Frontend\Auth\RegisterController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Livewire\AboutPage;
 use App\Livewire\Auth\ForgotPage;
@@ -35,6 +39,13 @@ use Livewire\Component;
 
 
 Route::get('/', [HomeController::class, 'index']);
+
+Route::middleware('guest')->group(function () {
+    Route::get('/sign-in', LoginController::class)->name('login');
+    Route::get('/sign-up', RegisterController::class);
+    Route::get('/forgot-password', ForgotPasswordController::class);
+});
+Route::get('/account', AccountController::class)->middleware('auth');
 
 // Route::get('/', HomePage::class)->name('home');
 // Route::get('/products', ProductsPage::class);
