@@ -117,7 +117,7 @@ const cartCount = computed(() => cartItems.length);
                             <li class="mx-4 my-2">
                                 <div class="flex flex-col gap-2">
                                     <Button class="w-full">Proceed To Checkout</Button>
-                                    <Button class="w-full border" variant="ghost">View Cart</Button>
+                                    <Link href="/cart"> <Button class="w-full border" variant="ghost">View Cart</Button></Link>
                                 </div>
                             </li>
                         </ul>

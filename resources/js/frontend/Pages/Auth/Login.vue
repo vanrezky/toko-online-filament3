@@ -7,6 +7,7 @@ import FormItem from "@frontend/Components/ui/form/FormItem.vue";
 import FormLabel from "@frontend/Components/ui/form/FormLabel.vue";
 import FormMessage from "@frontend/Components/ui/form/FormMessage.vue";
 import Input from "@frontend/Components/ui/input/Input.vue";
+import { assets } from "@frontend/lib/utils";
 import { Link } from "@inertiajs/vue3";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
@@ -67,17 +68,21 @@ const onSubmit = handleSubmit((values) => {
                     <div class="flex flex-col gap-2 text-center">
                         <a
                             href="#"
-                            class="flex justify-between overflow-hidden rounded-xl bg-primary-foreground p-2 text-primary transition duration-200 hover:bg-primary hover:text-secondary"
+                            class="flex items-center justify-between overflow-hidden rounded-xl bg-primary-foreground p-2 text-primary transition duration-200 hover:bg-primary hover:text-secondary"
                         >
-                            <p class="text-sm">Google</p>
-                            <p class="ml-auto">[]</p>
+                            <span class="text-sm">Google</span>
+                            <div>
+                                <img :src="assets('assets/frontends/images/google.svg')" class="size-7" alt="google" />
+                            </div>
                         </a>
                         <a
                             href="#"
-                            class="flex justify-center overflow-hidden rounded-xl bg-primary-foreground p-2 text-primary transition duration-200 hover:bg-primary hover:text-secondary"
+                            class="flex items-center justify-between overflow-hidden rounded-xl bg-primary-foreground p-2 text-primary transition duration-200 hover:bg-primary hover:text-secondary"
                         >
-                            <p class="text-sm">Facebook</p>
-                            <p class="ml-auto">[]</p>
+                            <span class="text-sm">Facebook</span>
+                            <div>
+                                <img :src="assets('assets/frontends/images/facebook.svg')" class="size-7" alt="google" />
+                            </div>
                         </a>
                     </div>
                 </div>
@@ -86,7 +91,7 @@ const onSubmit = handleSubmit((values) => {
         </template>
         <template #footer>
             <p class="text-sm">
-                Dont Have an account?
+                Don't Have an account?
                 <Link href="/sign-up" class="text-link"> Register Now</Link>
             </p>
         </template>

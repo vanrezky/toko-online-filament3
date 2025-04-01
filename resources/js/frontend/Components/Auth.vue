@@ -20,7 +20,7 @@ const props = defineProps({
 });
 </script>
 <template>
-    <Layout>
+    <Layout :title="title">
         <div class="flex justify-center p-5">
             <Card class="w-full max-w-lg">
                 <CardHeader>

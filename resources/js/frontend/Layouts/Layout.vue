@@ -6,11 +6,18 @@ import NavigationMenuSearch from "@frontend/Components/NavigationMenuSearch.vue"
 import NavigationMenuContent from "@frontend/Components/NavigationMenuContent.vue";
 import NavigationSecondary from "@frontend/Components/NavigationSecondary.vue";
 import AppHead from "@frontend/Pages/AppHead.vue";
+
+const props = defineProps({
+    title: {
+        type: String,
+        default: "",
+    },
+});
 </script>
 
 <template>
-    <AppHead />
-    <div class="flex min-h-screen flex-col bg-white font-sans">
+    <AppHead :title="title" />
+    <div class="flex min-h-screen flex-col bg-background font-sans">
         <Topbar />
         <!-- primary navigation-->
         <nav class="border-b border-b-secondary p-2">

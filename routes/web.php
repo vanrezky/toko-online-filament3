@@ -4,6 +4,7 @@ use App\Http\Controllers\Frontend\AccountController;
 use App\Http\Controllers\Frontend\Auth\ForgotPasswordController;
 use App\Http\Controllers\Frontend\Auth\LoginController;
 use App\Http\Controllers\Frontend\Auth\RegisterController;
+use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Livewire\AboutPage;
 use App\Livewire\Auth\ForgotPage;
@@ -46,6 +47,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', ForgotPasswordController::class);
 });
 Route::get('/account', AccountController::class)->middleware('auth');
+
+Route::get('/cart', CartController::class);
 
 // Route::get('/', HomePage::class)->name('home');
 // Route::get('/products', ProductsPage::class);
