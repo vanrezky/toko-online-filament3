@@ -89,7 +89,7 @@ const prev = () => {
             <div class="grid min-w-full auto-cols-max grid-flow-col gap-4">
                 <a
                     href="#"
-                    class="hover:scrollbar-visible flex min-w-[320px] items-start justify-between rounded-xl border p-4"
+                    class="hover:scrollbar-visible transform flex min-w-[320px] items-start justify-between rounded-xl border p-4 transition duration-300 hover:scale-105 hover:shadow-lg"
                     v-for="(category, index) in featuredCategories"
                     :key="index"
                 >

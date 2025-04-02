@@ -30,7 +30,7 @@ const carts = [
         id: 1,
         image_url: "https://placehold.co/150",
         name: "product 1",
-        price: 10.25,
+        price: 10_250,
         qty: 1,
         color: "putih",
         category: "MEN",
@@ -39,8 +39,8 @@ const carts = [
             { name: "Color", value: "White" },
         ],
     },
-    { id: 2, image_url: "https://placehold.co/150", name: "product 2", price: 9.25, qty: 2, category: "WOMEN" },
-    { id: 3, image_url: "https://placehold.co/150", name: "product 3", price: 15.25, qty: 1, category: "CHILD" },
+    { id: 2, image_url: "https://placehold.co/150", name: "product 2", price: 9_250, sale_price: 20_250, qty: 2, category: "WOMEN" },
+    { id: 3, image_url: "https://placehold.co/150", name: "product 3", price: 12_500, sale_price: 50_000, qty: 1, category: "CHILD" },
 ];
 
 const totalPrice = (a, b) => {
@@ -50,46 +50,32 @@ const totalPrice = (a, b) => {
 
 <template>
     <Layout title="Cart">
-        <div class="grid lg:grid-cols-3 lg:gap-5">
-            <Card class="col-span-2">
-                <CardContent class="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow class="font-semibold text-primary">
-                                <TableHead>Product</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Total Price</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow v-for="cart in carts" :key="cart.id">
-                                <TableCell>
-                                    <div class="flex items-center gap-2">
-                                        <img :src="cart.image_url" alt="" class="size-32 rounded-lg" />
-                                        <div>
-                                            <p class="text-xs uppercase text-primary/50">{{ cart.category }}</p>
-                                            <h4 class="font-semibold tracking-wide">{{ cart.name }}</h4>
-                                            <!-- variant -->
-                                            <div class="mt-2" v-show="cart.variants">
-                                                <div v-for="variant in cart.variants">
-                                                    <span class="mr-2 text-xs text-primary/50">{{ variant.name }}</span>
-                                                    <span class="text-xs text-primary"> {{ variant.value }}</span>
-                                                </div>
-                                            </div>
-                                            <!-- variant -->
-                                        </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{{ cart.price }}</TableCell>
-                                <TableCell>{{ cart.qty }}</TableCell>
-                                <TableCell>{{ totalPrice(cart.qty, cart.price) }}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-            <Card>
+        <div class="grid gap-2 lg:grid-cols-3 lg:gap-5">
+            <div class="flex flex-col gap-y-5 lg:col-span-2">
+                <Card v-for="cart in carts" :key="cart.id">
+                    <CardContent class="flex items-start gap-2 p-2">
+                        <img :src="cart.image_url" alt="" class="size-12 rounded-lg lg:size-32" draggable="false" />
+                        <div>
+                            <p class="text-xs uppercase text-primary/50">{{ cart.category }}</p>
+                            <h3 class="font-semibold tracking-wide">{{ cart.name }}</h3>
+                            <!-- variant -->
+                            <div class="mt-2">
+                                <div v-for="variant in cart.variants" v-show="cart.variants">
+                                    <span class="mr-2 text-xs text-primary/50">{{ variant.name }}</span>
+                                    <span class="text-xs text-primary"> {{ variant.value }}</span>
+                                </div>
+                            </div>
+                            <!-- variant -->
+                            <span class="tracking-wider text-primary">Rp{{ cart.price }}</span>
+                            <span v-if="cart.sale_price" class="text-xs italic tracking-wider text-primary/50 line-through"
+                                >Rp{{ cart.sale_price }}</span
+                            >
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <Card class="lg:col-span-1">
                 <CardHeader>
                     <CardTitle class="text-base">Calculating Shipping</CardTitle>
                 </CardHeader>
@@ -183,7 +169,6 @@ const totalPrice = (a, b) => {
                     </div>
                 </CardContent>
             </Card>
-            <div class="col-span-1 rounded-lg bg-secondary shadow"></div>
         </div>
     </Layout>
 </template>
