@@ -41,11 +41,10 @@ const components = [
 </script>
 
 <template>
-    <Container>
+    <Container class="hidden">
         <div class="flex items-center justify-between p-2">
-            <div></div>
             <!-- start navigation -->
-            <NavigationMenu class="hidden lg:flex">
+            <NavigationMenu class="flex">
                 <NavigationMenuList>
                     <NavigationMenuItem>
                         <NavigationMenuTrigger class="font-semibold uppercase tracking-wider">Categories</NavigationMenuTrigger>

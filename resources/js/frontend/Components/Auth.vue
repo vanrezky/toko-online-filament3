@@ -21,8 +21,8 @@ const props = defineProps({
 </script>
 <template>
     <Layout :title="title">
-        <div class="flex justify-center p-5">
-            <Card class="w-full max-w-lg">
+        <div class="flex justify-center py-2 lg:p-5">
+            <Card class="w-full lg:max-w-lg">
                 <CardHeader>
                     <CardTitle>{{ title }}</CardTitle>
                     <CardDescription>{{ description }}</CardDescription>

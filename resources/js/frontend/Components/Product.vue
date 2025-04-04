@@ -1,4 +1,5 @@
 <script setup>
+import { Link } from "@inertiajs/vue3";
 import Card from "./ui/card/Card.vue";
 import CardContent from "./ui/card/CardContent.vue";
 
@@ -12,7 +13,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <a href="#">
+    <Link href="#">
         <Card class="transform overflow-hidden rounded-lg border p-1 shadow-md transition duration-300 hover:scale-105 hover:shadow-lg">
             <CardContent class="min-h-64 p-0 lg:min-h-80">
                 <img :src="product.thumbnail" :alt="product.name" class="w-full rounded-md rounded-b-none" draggable="false" />
@@ -23,5 +24,5 @@ const props = defineProps({
                 </div>
             </CardContent>
         </Card>
-    </a>
+    </Link>
 </template>

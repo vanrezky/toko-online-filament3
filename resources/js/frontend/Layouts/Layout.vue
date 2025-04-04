@@ -20,7 +20,7 @@ const props = defineProps({
     <div class="flex min-h-screen flex-col bg-background font-sans">
         <Topbar />
         <!-- primary navigation-->
-        <nav class="border-b border-b-secondary p-2">
+        <nav class="border-b border-b-secondary">
             <Container>
                 <div class="flex items-center justify-between">
                     <NavigationMenuLogo />
@@ -30,15 +30,15 @@ const props = defineProps({
             </Container>
         </nav>
         <!-- secondary navigation -->
-        <nav class="mb-2 border-b border-b-secondary">
-            <Container>
-                <NavigationSecondary />
-            </Container>
+        <nav class="border-none lg:border-b lg:border-b-secondary">
+            <NavigationSecondary />
         </nav>
-        <!-- content -->
-        <Container>
-            <slot />
-        </Container>
-        <!-- end content -->
+        <div>
+            <!-- content -->
+            <Container class="mt-1 md:mt-2">
+                <slot />
+            </Container>
+            <!-- end content -->
+        </div>
     </div>
 </template>

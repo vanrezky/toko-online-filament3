@@ -131,7 +131,7 @@ const cartCount = computed(() => cartItems.length);
                 <h3 class="mb-4 text-lg font-semibold">Menu</h3>
                 <ul class="space-y-3">
                     <li v-for="menu in menus" :key="menu.url">
-                        <Link :to="menu.url" class="flex items-center gap-3 text-gray-700 hover:text-gray-900">
+                        <Link :href="menu.url" class="flex items-center gap-3 text-gray-700 hover:text-gray-900">
                             <component :is="menu.icon" class="size-6" />
                             {{ menu.name }}
                         </Link>
