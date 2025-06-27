@@ -45,4 +45,8 @@
     .fi-sidebar-item-active .bg-gray-100 {
         @apply bg-gray-100/0;
     }
+
+    .fi-input {
+        @apply border-2 !important;
+    }
 }

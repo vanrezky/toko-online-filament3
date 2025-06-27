@@ -22,7 +22,7 @@ const props = defineProps({
         <!-- primary navigation-->
         <nav class="border-b border-b-secondary">
             <Container>
-                <div class="flex items-center justify-between">
+                <div class="flex h-20 items-center justify-between">
                     <NavigationMenuLogo />
                     <NavigationMenuSearch />
                     <NavigationMenuContent />

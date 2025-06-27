@@ -14,11 +14,16 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'name' => $this->name,
             'slug' => $this->slug,
             'image_url' => $this->getFirstMediaUrl(),
-            'products_count' => $this->when($this->products_count, $this->products_count, 0)
         ];
+
+        $this->when($this->products_count, fn() => $data['products_count'] = $this->products_count);
+
+        return $data;
+
+        // return parent::toArray($request);
     }
 }

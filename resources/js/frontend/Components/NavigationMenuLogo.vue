@@ -8,7 +8,7 @@ const setting = computed(() => usePage().props.settings);
 <template>
     <div class="flex items-center justify-between">
         <Link class="flex flex-none items-center text-2xl font-semibold text-black" :aria-label="setting.site_name" href="/">
-            <img v-if="setting.logo" :src="setting.logo" :alt="setting.site_name" class="h-auto max-w-16 lg:max-w-16" />
+            <img v-if="setting.logo" :src="setting.logo" :alt="setting.site_name" class="h-auto w-32" draggable="false" />
             <span v-else>{{ setting.site_name }}</span>
         </Link>
     </div>

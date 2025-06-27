@@ -15,7 +15,7 @@ const currencies = computed(() => [
 </script>
 
 <template>
-    <div class="border-b border-b-secondary bg-secondary">
+    <div class="border-b border-b-secondary bg-primary">
         <Container>
             <div class="flex items-center justify-between p-2">
                 <div class="hidden gap-1.5 lg:flex">

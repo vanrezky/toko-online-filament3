@@ -6,6 +6,7 @@ use App\Http\Controllers\Frontend\Auth\LoginController;
 use App\Http\Controllers\Frontend\Auth\RegisterController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\ProductDetailController;
 use App\Livewire\AboutPage;
 use App\Livewire\Auth\ForgotPage;
 use App\Livewire\Auth\LoginPage;
@@ -49,6 +50,9 @@ Route::middleware('guest')->group(function () {
 Route::get('/account', AccountController::class)->middleware('auth');
 
 Route::get('/cart', CartController::class);
+
+// wildcard for product detail
+Route::get('{product}', ProductDetailController::class);
 
 // Route::get('/', HomePage::class)->name('home');
 // Route::get('/products', ProductsPage::class);
