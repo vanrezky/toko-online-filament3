@@ -6,7 +6,7 @@ module.exports = {
     safelist: ["dark"],
     prefix: "",
 
-    content: ["./resources/**/*.blade.php", "./resources/**/*.js", "./resources/**/*.vue", "./node_modules/@shadcn-vue/ui/**/*.{js,ts,jsx,tsx,vue}"],
+    content: ["./resources/**/*.blade.php", "./resources/**/*.js", "./resources/**/*.vue"],
 
     theme: {
         container: {
