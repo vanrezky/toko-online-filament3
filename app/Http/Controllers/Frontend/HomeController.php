@@ -22,10 +22,11 @@ class HomeController extends Controller
         $products = Product::with('media')->inRandomOrder()->take(10)->get();
         $featuredCategories = Category::withCount(['products'])->active()->featured()->get();
 
+
         return Inertia::render('Home/Index', [
             'featuredCategories' => CategoryResource::collection($featuredCategories),
             'sliders' => SliderResource::collection($sliders),
-            'flashsales' => FlashsaleResource::make($flashSales),
+            'flashsales' => $flashSales ?  FlashsaleResource::make($flashSales) : [],
             'bestSelling' => Product::inRandomOrder()->take(5)->get(),
             'products' => ProductSimpleResource::collection($products),
         ]);
