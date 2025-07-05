@@ -26,7 +26,8 @@ class ProductResource extends JsonResource
             'sale_price' => $this->sale_price ? money($this->sale_price)->format() : null,
             'price' => money($this->price)->format(),
             'min_order' => $this->min_order,
-            'thumbnail' => $this->resource->getMedia()[0]->getUrl('thumb'),
+            // 'thumbnail' => $this->resource->getMedia()[0]->getUrl('thumb'),
+            'thumbnail' => $this->getFirstMediaUrl(),
             'category' => CategoryResource::make($this->category),
             'images' => $this->resource->getMedia()->map(function ($media) {
                 return $media->getUrl('thumb');

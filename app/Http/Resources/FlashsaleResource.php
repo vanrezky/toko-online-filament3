@@ -19,7 +19,7 @@ class FlashsaleResource extends JsonResource
             'description' => $this->description,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
-            'products' => FlashsaleProductResource::collection($this->products)
+            'products' => FlashsaleProductResource::collection($this->whenLoaded('products'))
         ];
     }
 }

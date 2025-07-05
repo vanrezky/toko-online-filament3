@@ -19,7 +19,7 @@ class RedirectIfAuthenticatedCustomer
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::guard('customer')->check()) {
-            return redirect()->route('home');
+            return redirect()->route('frontend.home');
         }
 
         return $next($request);

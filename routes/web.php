@@ -40,19 +40,23 @@ use Livewire\Component;
 */
 
 
-Route::get('/', [HomeController::class, 'index']);
+Route::name('frontend.')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::middleware('guest')->group(function () {
-    Route::get('/sign-in', LoginController::class)->name('login');
-    Route::get('/sign-up', RegisterController::class);
-    Route::get('/forgot-password', ForgotPasswordController::class);
+    Route::middleware('guest')->group(function () {
+        Route::get('/sign-in', LoginController::class)->name('login');
+        Route::get('/sign-up', RegisterController::class)->name('signup');
+        Route::get('/forgot-password', ForgotPasswordController::class)->name('forgot-password');
+    });
+    Route::get('/account', AccountController::class)->middleware('auth.customer')->name('account');
+
+    Route::get('/cart', CartController::class)->name('cart');
+
+    Route::get('/products')->name('products');
+    Route::get('/wishlist')->name('wishlist');
+    // wildcard for product detail
+    Route::get('{product}', ProductDetailController::class)->name('product-detail');
 });
-Route::get('/account', AccountController::class)->middleware('auth');
-
-Route::get('/cart', CartController::class);
-
-// wildcard for product detail
-Route::get('{product}', ProductDetailController::class);
 
 // Route::get('/', HomePage::class)->name('home');
 // Route::get('/products', ProductsPage::class);

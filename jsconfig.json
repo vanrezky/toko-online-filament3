@@ -3,7 +3,7 @@
         "baseUrl": ".",
         "paths": {
             "@frontend/*": ["./resources/js/frontend/*"],
-            "@styles/*": ["./resources/css/*"]
+            "@styles/*": ["./resources/css/frontend/*"]
         }
     }
 }

@@ -6,7 +6,7 @@ module.exports = {
     safelist: ["dark"],
     prefix: "",
 
-    content: ["./resources/**/*.blade.php", "./resources/**/*.js", "./resources/**/*.vue"],
+    content: ["./resources/**/*.js", "./resources/**/*.vue"],
 
     theme: {
         container: {
@@ -18,7 +18,7 @@ module.exports = {
         },
         extend: {
             fontFamily: {
-                sans: ["Poppins", "system-ui", "sans-serif"],
+                sans: ["Plus Jakarta Sans", "Noto Sans", "sans-serif"],
             },
             colors: {
                 border: "hsl(var(--border))",
