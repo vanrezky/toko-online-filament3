@@ -1,124 +1,165 @@
 <script setup>
-import CategoryCard from "@frontend/components/CategoryCard.vue";
-import HorizontalScroller from "@frontend/components/HorizontalScroller.vue";
-import Layout from "@frontend/components/Layout.vue";
-import ProductCard from "@frontend/components/ProductCard.vue";
-import SearchBar from "@frontend/components/SearchBar.vue";
+import { computed, ref, onMounted } from 'vue';
+import TemplateWrapper from '../../components/TemplateWrapper.vue';
+import HeroCarousel from '../../components/UI/HeroCarousel.vue';
+import ProductCard from '../../components/UI/ProductCard.vue';
+import FlashSaleCard from '../../components/UI/FlashSaleCard.vue';
+import { ChevronRight, Clock } from 'lucide-vue-next';
+import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    title: {
-        type: String,
-        default: () => "",
-    },
-    products: {
-        type: Object,
-        default: () => ({}),
-    },
-    flashsales: {
-        type: Object,
-        default: () => ({}),
-    },
-    featuredCategories: {
-        type: Object,
-        default: () => ({}),
-    },
-    newArrivals: {
-        type: Object,
-        default: () => ({}),
-    },
-    sliders: {
-        type: Object,
-        default: () => ({}),
-    },
+  sliders: Array,
+  flashsales: Object,
+  newArrivals: Array,
+  featuredCategories: Array,
 });
 
-const featured = [
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDHm_RQpXTn1kI8Ma0pvtBLw-CKE1bkMRzjo-aC5KZ7qucVsC1RA3EcPYuyns8HG3VEkGjc_kaLdUkCkBGkMV_hU7tdgLwe0vU7lHpWB8Z-yJzTx299BX2BbuIbQMHrzV1kEJN0_w_oO8PSNnOMyTkfBrnF43ETnZNTgyt8y3JBWRndaNM8Am0-AV_4PTp610Y4Dyq02ZE8ZFL5VYt5ftVP9ZrhoWdTWUhvJgJtKBi6KcwaA90Fuqud4Tx6WqI7BMKMh7pDRSO8JiQ",
-        title: "Modern Living Room",
-    },
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCh7TgXd06fabHaf3imM8O66o6dyY1pzGaMlLB6EZdMk4yVhmuJYeqjsrqQY_PLtI_3JBj2ZRMdrmB63ZgiHGGhqoz_fb84Kz_sYtAr31T9qnPKyJntJSbIng6ESOMbKW0OqtCemiAPzTfO05u9e2nMo3JsqgUYAsCk1OOsYPkCaXDWwfBPxZc4qgYxOyYYSeuq4vV-u1I_G5X1BiPXhu834A-vHflqkKDO4hhwOV7wQFfLFsm8-7U3QzfybT9nGt-z-2CVa6euV7U",
-        title: "Cozy Bedroom",
-    },
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuA_iVZ6UKu_5kIzOmBzAtHYBD-L-zMnyfvoVQhOnwR_k1fJLxveJ13ynQsO4u2iNjL0cl4PBGnpYffPEa8i6fDFvEiEUcPoJoGa2EvzNP_6BOUkjTN_7PGqFDGc4Vu5C3NMyY6GYpPUIU32_AnzeruhNlTMbBdEPPxUWuW1WXL2gmbXMsK-mx6CehQmBd1vMmYFlaW-ttIoqKqFvKKz_EY8OwIiZjLBck_ua5xJW2-C-J2s2cAwIloo9MXDkyFOPIpIf5Gg_etV1X4",
-        title: "Minimalist Kitchen",
-    },
-];
+// For countdown logic
+const timeLeft = ref({
+  hours: '00',
+  minutes: '00',
+  seconds: '00'
+});
 
-const promotions = [
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB76P1CxDXofB4fv1kuMRx8egOPPw7yvVVWWL2srvZg-9uYIYG7Ui0f1e7jy5xRJWKYpHfcqoTeeIlkt4wKp7FWNFVRGsJQYZO7q8_SZVfSNwWcOfxRilGOcEr2WhqkC4pUlPsL3iP2A_t1XyzHAsdfzmQvkR0UUKVjRKNVF5b2i4TCxtauve3U-KXXZEMeiX1Bw7xPhewoE4XmyJc8hXfbEiMyreEjuhLmLqVF6E8oPeZrOWLD6byrk2wDLjJhHrv7Y--4ILcwuiA",
-        title: "Summer Sale",
-    },
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuA6lUoa0YFmHrxvJZl7lpq-iYEQpZi_N28qNMvQQ4FScR0NxapJFTUtw1-L6VZyspfi21_KBZYxK3HKtwkRbteGJcr_0G1i6tJoCP_-dTfGVILcYWo0LsTyqEeaikhvr9lnlAFOdLPPQUlIAJzVETeXOd7frauy5Kbb5OGe3v_oF8y4rSIXIJy3dze0bhBYGFTEEMUkQHWEjWfm3Uaw10szS2FshYl6wuMuqZJuzGXqXPeAeTjMQBN1AaQFq_xL6YBnEWY4iy-tt14",
-        title: "Back to School",
-    },
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDZyzIwNc4xVY54OTAJsVL7u-dvFctOJSQzZrNyxrlVjeuDx-FvbKgSAj22wk81L7fcaUyMpXdKAq8tCMrQvx9o31LdOdeV5qCeFPkL2UGG2q_HG4AcgqKJGA_TXMq-qYBqD5GYNcDSBzN5K-rzx8X0-LVupkE2YhOABE8Ah9DZKzQiFcruG8ctoSU8q6uWbgVL4_NGYdjxNgnLgyT1Vvu07TYim2FmLJtPcbwDw1iSD7D41BUSH8fSE17nbB-500uvez8iKimREeI",
-        title: "Holiday Deals",
-    },
-];
+const calculateTimeLeft = () => {
+  if (!props.flashsales?.end_time) return;
+  
+  const end = new Date(props.flashsales.end_time).getTime();
+  const now = new Date().getTime();
+  const diff = end - now;
+  
+  if (diff > 0) {
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    timeLeft.value = {
+      hours: String(hours).padStart(2, '0'),
+      minutes: String(minutes).padStart(2, '0'),
+      seconds: String(seconds).padStart(2, '0')
+    };
+  }
+};
 
-const arrivals = [
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBJjkruTfANg85AOvgczO7vOmYseHR-_uXNm-PhwTQXERO3ogqRZQcHEKDqKtoVEkBjmN1T2NMpsgVxMLbuOBpYuCoyDUM8uvda7pHus5Ti9K8lzwmi7CNaU9bygC04HJa3VVXvFXGl72iEejQEaJNt_admFW5Tnw4G7RvPL1bqmHT1soVdDRPKQbs48VYQ2XsOn43aDXQqN1zmO0lr19bvoRdQMOPCAIt7D8ZjL5AkKpa0q1-treFeER4ckjOD2l25XqWNIRlJ5gY",
-        title: "Product a",
-        price: "100.000",
-    },
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBJeKC6XqV285DgV_T8c71fVwpXzLoc-NhRr6AIxVa_3Rk-ydMUPCAbM2zEjzsjtD-fJCU48xo6dwuaC9ZTcKNA9nQzFK5-DFvH4XdPq0_fThx-b2bONdrYLD3cluMsWffUBeHBdkmS7Kf1VY6NmezfQv2Ux976osJa5E8omEX7x7F2iR-RIBl8YeeYjA7M4xuIVUx-6DwyWW_xxmLzFxktz6Irwe2h7-WtUVTY8ZFKkZ86NJOFFICSfZ7hx9Ug0UaUZwakfDJAXUY",
-        title: "Product b",
-        price: "155.100",
-    },
-    {
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB03osy8fJF8YJy9wUwPqy7rDzXJZ41C-fN74xpwwx7TUFUWE8L3Zl5Q94OIcGKlsV2oWYrsHfD4tFgvCyJkhkIw4F9Uv5hXZGM4jKCTOQT4D4NFdF1zs-IALTUV-I15ND9poFEB61rg-1TJB2R47-rkfiAt_FG9HpD3htJ21UwARPBae2HqlvyG8KSgwvmPS5YpiEBSgGl2-9OVNkvLwbyoWxBqn5vIEk-2vjtMKvAcfRIZX2LBw8oukbeg7VGnw5Hi_ZXvw_udjk",
-        title: "Product c",
-        price: "92.000",
-    },
-];
+onMounted(() => {
+  calculateTimeLeft();
+  setInterval(calculateTimeLeft, 1000);
+});
 </script>
 
 <template>
-    <Layout :title="title">
-        <div class="relative flex size-full min-h-screen flex-col justify-between overflow-x-hidden bg-white">
-            <div>
-                <!-- search bar -->
-                <SearchBar />
-                <HorizontalScroller title="Featured">
-                    <ProductCard v-for="(item, i) in featured" :key="i" v-bind="item" />
-                </HorizontalScroller>
+  <TemplateWrapper title="Home">
+    <!-- Hero Section -->
+    <HeroCarousel v-if="sliders && sliders.length > 0" :sliders="sliders" />
 
-                <HorizontalScroller :title="flashsales.name" v-if="flashsales">
-                    <ProductCard
-                        v-for="(item, i) in flashsales.products"
-                        :key="i"
-                        :image="item.product.thumbnail"
-                        :title="item.product.name"
-                        :price="item.product.price"
-                    />
-                </HorizontalScroller>
-
-                <div class="px-4 pb-3 pt-5">
-                    <h2 class="text-[22px] font-bold text-[#181111]">Featured Categories</h2>
-                    <div class="mt-3 grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3">
-                        <CategoryCard v-for="(cat, i) in featuredCategories" :key="i" :image="cat.image_url" :title="cat.name" />
-                    </div>
-                </div>
-
-                <HorizontalScroller title="New Arrivals">
-                    <ProductCard
-                        v-for="(item, i) in newArrivals"
-                        :key="i"
-                        :image="item.thumbnail"
-                        :title="item.name"
-                        :price="item.price"
-                        type="rectacle"
-                    />
-                </HorizontalScroller>
+    <!-- Flash Sale -->
+    <section v-if="flashsales && flashsales.products && flashsales.products.length > 0" class="py-12 md:py-20 bg-gray-50">
+      <div class="container mx-auto px-4 md:px-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 space-y-4 md:space-y-0">
+          <div class="space-y-2">
+            <div class="flex items-center space-x-3">
+              <span class="inline-block w-8 h-[2px] bg-red-600"></span>
+              <span class="text-red-600 font-bold uppercase tracking-widest text-xs">Limited Offer</span>
             </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-black tracking-tight">{{ flashsales.name }}</h2>
+          </div>
+          
+          <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-3 text-black">
+              <Clock class="w-5 h-5" />
+              <div class="flex items-center space-x-1 font-bold">
+                <span class="bg-black text-white px-2 py-1 rounded-sm">{{ timeLeft.hours }}</span>
+                <span>:</span>
+                <span class="bg-black text-white px-2 py-1 rounded-sm">{{ timeLeft.minutes }}</span>
+                <span>:</span>
+                <span class="bg-black text-white px-2 py-1 rounded-sm">{{ timeLeft.seconds }}</span>
+              </div>
+            </div>
+            <Link :href="route('frontend.flashsales')" class="hidden md:flex items-center text-sm font-bold uppercase tracking-wider text-black hover:text-gray-600 transition-colors">
+              View All <ChevronRight class="ml-1 w-4 h-4" />
+            </Link>
+          </div>
         </div>
-    </Layout>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          <FlashSaleCard 
+            v-for="item in flashsales.products" 
+            :key="item.product.uuid" 
+            :product="item" 
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- New Arrivals -->
+    <section class="py-12 md:py-20">
+      <div class="container mx-auto px-4 md:px-6 text-center">
+        <div class="max-w-2xl mx-auto space-y-4 mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-black tracking-tight">New Arrivals</h2>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Discover our latest pieces, carefully selected to keep you ahead of the trends.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 text-left">
+          <ProductCard 
+            v-for="product in newArrivals" 
+            :key="product.uuid" 
+            :product="product" 
+          />
+        </div>
+        
+        <div class="mt-12">
+          <Link :href="route('frontend.products')" class="inline-block border-b-2 border-black pb-1 text-sm font-bold uppercase tracking-widest hover:text-gray-500 hover:border-gray-500 transition-all">
+            Explore All Products
+          </Link>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Highlights -->
+    <section v-for="category in featuredCategories" :key="category.id" class="py-12 md:py-20 border-t border-gray-100">
+      <div class="container mx-auto px-4 md:px-6">
+        <div class="flex items-center justify-between mb-8 md:mb-12">
+          <h2 class="text-2xl md:text-3xl font-bold text-black tracking-tight uppercase">{{ category.name }}</h2>
+          <Link :href="route('frontend.products', { category: category.slug })" class="flex items-center text-sm font-bold uppercase tracking-wider text-black hover:text-gray-600 transition-colors">
+            Shop Category <ChevronRight class="ml-1 w-4 h-4" />
+          </Link>
+        </div>
+
+        <div v-if="category.products && category.products.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+          <ProductCard 
+            v-for="product in category.products" 
+            :key="`${category.id}-${product.uuid}`" 
+            :product="product" 
+          />
+        </div>
+        <div v-else class="text-center py-12 bg-gray-50 text-gray-400 text-sm italic uppercase tracking-widest">
+          Coming Soon
+        </div>
+      </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-20 bg-gray-50">
+      <div class="container mx-auto px-4 md:px-6 text-center">
+        <div class="max-w-2xl mx-auto space-y-8">
+          <h2 class="text-3xl md:text-4xl font-bold text-black tracking-tight uppercase">Stay in the Loop</h2>
+          <p class="text-gray-500 text-sm leading-relaxed max-w-md mx-auto">
+            Join our mailing list for exclusive access to new arrivals, private sales, and fashion events.
+          </p>
+          <form class="flex flex-col md:flex-row max-w-md mx-auto gap-4" @submit.prevent>
+            <input 
+              type="email" 
+              placeholder="Your email address" 
+              class="flex-grow bg-white border border-gray-200 py-3 px-6 rounded-none focus:outline-none focus:border-black text-sm transition-all"
+            />
+            <button class="bg-black text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl">
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </TemplateWrapper>
 </template>

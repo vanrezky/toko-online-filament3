@@ -4,9 +4,11 @@ namespace App\Http\Middleware;
 
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\Wishlist;
 use App\Settings\GeneralSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,6 +41,17 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         return array_merge(parent::share($request), [
+            'auth' => [
+                'user' => Auth::guard('customer')->user(),
+            ],
+            'wishlist_product_ids' => function () {
+                if (Auth::guard('customer')->check()) {
+                    return Wishlist::where('customer_id', Auth::guard('customer')->id())
+                        ->pluck('product_id')
+                        ->toArray();
+                }
+                return [];
+            },
             'settings' => function () {
                 $settings = app(GeneralSettings::class);
 
@@ -57,7 +70,6 @@ class HandleInertiaRequests extends Middleware
             'categories' => CategoryResource::collection(
                 Category::homepage()->with('media')->get()
             )
-            //
         ]);
     }
 }

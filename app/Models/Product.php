@@ -25,6 +25,11 @@ class Product extends Model implements HasMedia
         return 'slug';
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     protected function priceCurrency(): Attribute
     {
         return Attribute::make(

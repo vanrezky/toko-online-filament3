@@ -1,41 +1,97 @@
 <script setup>
-import HeaderNavigaton from "@frontend/components/HeaderNavigaton.vue";
-import Layout from "@frontend/components/Layout.vue";
-import { Link } from "@inertiajs/vue3";
-import { route } from "ziggy-js";
+import { useForm, Link } from '@inertiajs/vue3';
+import TemplateWrapper from '../../components/TemplateWrapper.vue';
+import { Mail, Lock, User, ArrowRight } from 'lucide-vue-next';
+
+const form = useForm({
+  first_name: '',
+  last_name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+});
+
+const submit = () => {
+  form.post(route('frontend.signup'), {
+    onFinish: () => form.reset('password', 'password_confirmation'),
+  });
+};
 </script>
 
 <template>
-    <Layout :bottom-navigation="false" title="Sign Up" :backward-icon="null" backward-url="">
-        <HeaderNavigaton title="Sign Up" backward-icon="null" :backward-url="route('frontend.home')" />
-        <h3 class="tracking-light px-4 pb-2 pt-5 text-left text-2xl font-bold leading-tight text-[#181111]">Create Account</h3>
-        <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-            <label class="flex min-w-40 flex-1 flex-col">
-                <input
-                    placeholder="Email"
-                    class="form-input flex h-14 w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-[#f4f0f0] p-4 text-base font-normal leading-normal text-[#181111] placeholder:text-[#886364] focus:border-none focus:outline-0 focus:ring-0"
-                    value=""
-                />
-            </label>
+  <TemplateWrapper title="Create Account">
+    <div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div class="max-w-md w-full space-y-12">
+        <div class="text-center space-y-4">
+          <h2 class="text-3xl md:text-4xl font-bold text-black tracking-tight">Create Account</h2>
+          <p class="text-gray-500 text-sm">Join us to experience the best curated fashion and lifestyle.</p>
         </div>
-        <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-            <label class="flex min-w-40 flex-1 flex-col">
-                <input
-                    placeholder="Password"
-                    class="form-input flex h-14 w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-[#f4f0f0] p-4 text-base font-normal leading-normal text-[#181111] placeholder:text-[#886364] focus:border-none focus:outline-0 focus:ring-0"
-                    value=""
-                />
-            </label>
-        </div>
-        <div class="flex px-4 py-3">
-            <button
-                class="flex h-12 min-w-[84px] max-w-[480px] flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[#e92932] px-5 text-base font-bold leading-normal tracking-[0.015em] text-white"
+
+        <form class="mt-8 space-y-6" @submit.prevent="submit">
+          <div class="space-y-4">
+            <!-- Name Row -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label for="first_name" class="text-xs font-bold uppercase tracking-widest text-black">First Name</label>
+                <input id="first_name" v-model="form.first_name" type="text" required class="w-full bg-white border border-gray-200 py-3 px-4 text-sm focus:outline-none focus:border-black rounded-none" />
+              </div>
+              <div class="space-y-1">
+                <label for="last_name" class="text-xs font-bold uppercase tracking-widest text-black">Last Name</label>
+                <input id="last_name" v-model="form.last_name" type="text" required class="w-full bg-white border border-gray-200 py-3 px-4 text-sm focus:outline-none focus:border-black rounded-none" />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="space-y-1">
+              <label for="email" class="text-xs font-bold uppercase tracking-widest text-black">Email Address</label>
+              <div class="relative">
+                <input id="email" v-model="form.email" type="email" required class="w-full bg-white border border-gray-200 py-3 px-10 text-sm focus:outline-none focus:border-black rounded-none" placeholder="name@example.com" />
+                <Mail class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+              </div>
+              <p v-if="form.errors.email" class="text-xs text-red-500 mt-1">{{ form.errors.email }}</p>
+            </div>
+
+            <!-- Password -->
+            <div class="space-y-1">
+              <label for="password" class="text-xs font-bold uppercase tracking-widest text-black">Password</label>
+              <div class="relative">
+                <input id="password" v-model="form.password" type="password" required class="w-full bg-white border border-gray-200 py-3 px-10 text-sm focus:outline-none focus:border-black rounded-none" placeholder="••••••••" />
+                <Lock class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+              </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="space-y-1">
+              <label for="password_confirmation" class="text-xs font-bold uppercase tracking-widest text-black">Confirm Password</label>
+              <div class="relative">
+                <input id="password_confirmation" v-model="form.password_confirmation" type="password" required class="w-full bg-white border border-gray-200 py-3 px-10 text-sm focus:outline-none focus:border-black rounded-none" placeholder="••••••••" />
+                <Lock class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+              </div>
+              <p v-if="form.errors.password" class="text-xs text-red-500 mt-1">{{ form.errors.password }}</p>
+            </div>
+          </div>
+
+          <div>
+            <button 
+              type="submit" 
+              :disabled="form.processing"
+              class="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold uppercase tracking-widest text-white bg-black hover:bg-gray-800 focus:outline-none transition-all disabled:bg-gray-300"
             >
-                <span class="truncate">Sign Up</span>
+              Create Account
+              <ArrowRight class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
+          </div>
+        </form>
+
+        <div class="text-center pt-8 border-t border-gray-200">
+          <p class="text-sm text-gray-500">
+            Already have an account? 
+            <Link :href="route('frontend.login')" class="font-bold text-black hover:underline ml-1">
+              Sign In
+            </Link>
+          </p>
         </div>
-        <Link class="px-4 pb-3 pt-1 text-center text-sm font-normal leading-normal text-[#886364] underline" :href="route('frontend.login')"
-            >Already have an account? Sign in</Link
-        >
-    </Layout>
+      </div>
+    </div>
+  </TemplateWrapper>
 </template>

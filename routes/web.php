@@ -7,26 +7,7 @@ use App\Http\Controllers\Frontend\Auth\RegisterController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductDetailController;
-use App\Livewire\AboutPage;
-use App\Livewire\Auth\ForgotPage;
-use App\Livewire\Auth\LoginPage;
-use App\Livewire\Auth\RegisterPage;
-use App\Livewire\Auth\ResetPage;
-use App\Livewire\BlogPage;
-use App\Livewire\CancelPage;
-use App\Livewire\CartPage;
-use App\Livewire\CheckoutPage;
-use App\Livewire\ContactPage;
-use App\Livewire\HomePage;
-use App\Livewire\MyOrderPage;
-use App\Livewire\OrderDetailPage;
-use App\Livewire\ProductDetailPage;
-use App\Livewire\ProductsPage;
-use App\Livewire\ProfilePage;
-use App\Livewire\SuccessPage;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
-use Livewire\Component;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,47 +20,34 @@ use Livewire\Component;
 |
 */
 
+// Global login route for Laravel default auth redirects
+Route::get('/login', function () {
+    return redirect()->route('frontend.login');
+})->name('login');
 
 Route::name('frontend.')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
 
-    Route::middleware('guest')->group(function () {
-        Route::get('/sign-in', LoginController::class)->name('login');
-        Route::get('/sign-up', RegisterController::class)->name('signup');
+    // Guest routes for customers
+    Route::middleware('auth.customer.guest')->group(function () {
+        Route::get('/login', LoginController::class)->name('login');
+        Route::get('/register', RegisterController::class)->name('signup');
         Route::get('/forgot-password', ForgotPasswordController::class)->name('forgot-password');
     });
+
+    // Authenticated routes for customers
     Route::get('/account', AccountController::class)->middleware('auth.customer')->name('account');
+    Route::get('/checkout', \App\Http\Controllers\Frontend\CheckoutController::class)->middleware('auth.customer')->name('checkout');
+    Route::get('/orders', [\App\Http\Controllers\Frontend\OrderController::class, 'index'])->middleware('auth.customer')->name('orders');
+    Route::get('/orders/{id}', [\App\Http\Controllers\Frontend\OrderController::class, 'show'])->middleware('auth.customer')->name('orders.show');
 
+    // Public shop routes
     Route::get('/cart', CartController::class)->name('cart');
-
-    Route::get('/products')->name('products');
-    Route::get('/wishlist')->name('wishlist');
-    // wildcard for product detail
+    Route::get('/flash-sale', \App\Http\Controllers\Frontend\FlashsaleController::class)->name('flashsales');
+    Route::get('/products', \App\Http\Controllers\Frontend\ProductController::class)->name('products');
+    Route::get('/wishlist', [\App\Http\Controllers\Frontend\WishlistController::class, 'index'])->name('wishlist');
+    Route::post('/wishlist/toggle', [\App\Http\Controllers\Frontend\WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    
+    // Wildcard for product detail - MUST BE LAST
     Route::get('{product}', ProductDetailController::class)->name('product-detail');
 });
-
-// Route::get('/', HomePage::class)->name('home');
-// Route::get('/products', ProductsPage::class);
-// Route::get('/products/{product}', ProductDetailPage::class);
-
-// Route::get('/checkout', CheckoutPage::class);
-// Route::get('/my-orders', MyOrderPage::class);
-// Route::get('my-orders/{order}', OrderDetailPage::class);
-
-// Route::get('/contact', ContactPage::class);
-// Route::get('/about', AboutPage::class);
-// Route::get('/blog', BlogPage::class);
-
-// Route::group(['middleware' => 'auth.customer.guest'], function () {
-//     Route::get('/login', LoginPage::class)->name('login');
-//     Route::get('/register', RegisterPage::class);
-//     Route::get('/reset', ResetPage::class);
-//     Route::get('/forgot', ForgotPage::class);
-// });
-
-// Route::group(['middleware' => 'auth.customer'], function () {
-//     Route::get('/cart', CartPage::class);
-//     Route::get('/order/success', SuccessPage::class);
-//     Route::get('/order/cancel', CancelPage::class);
-//     Route::get('/profile', ProfilePage::class);
-// });

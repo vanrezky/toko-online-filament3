@@ -18,23 +18,32 @@ class HomeController extends Controller
     public function index()
     {
         $sliders = Slider::active()->with('media')->get();
+
         $flashSales = Flashsale::active()->with([
             'products' => fn($Q) => $Q->limit(4),
-            'products.product.media'
+            'products.product.media',
+            'products.product.category'
         ])->first();
-        $products = Product::with('media')->inRandomOrder()->take(10)->get();
-        $featuredCategories = Category::withCount(['products'])->active()->featured()->get();
 
-        $newArrivals = Product::with('media')->latest()->limit(3)->get();
+        $newArrivals = Product::active()->with('media', 'category')->latest()->limit(4)->get();
 
-        // dd(json_encode($flashSales ? FlashsaleResource::make($flashSales) : []));
+        $featuredCategories = Category::active()
+            ->featured()
+            ->with(['products' => fn($q) => $q->active()->with('media')->limit(6)])
+            ->get();
+
+        // dd([
+        //     // 'sliders' => SliderResource::collection($sliders),
+        //     // 'flashsales' => $flashSales ? FlashsaleResource::make($flashSales) : null,
+        //     // 'newArrivals' => ProductSimpleResource::collection($newArrivals),
+        //     'featuredCategories' => CategoryResource::collection($featuredCategories),
+        // ]);
 
         return Inertia::render('Home/Index', [
-            'featuredCategories' => CategoryResource::collection($featuredCategories),
-            'newArrivals' => ProductSimpleResource::collection($newArrivals),
             'sliders' => SliderResource::collection($sliders),
-            'flashsales' => $flashSales ? FlashsaleResource::make($flashSales) : [],
-            'bestSelling' => Product::inRandomOrder()->take(5)->get(),
+            'flashsales' => $flashSales ? FlashsaleResource::make($flashSales) : null,
+            'newArrivals' => ProductSimpleResource::collection($newArrivals),
+            'featuredCategories' => CategoryResource::collection($featuredCategories),
         ]);
     }
 }

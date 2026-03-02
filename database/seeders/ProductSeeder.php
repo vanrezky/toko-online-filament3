@@ -16,22 +16,17 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        Product::create([
-            'name' => 'product first on web',
-            'slug' => 'product-first-on-web',
-            'category_id' => Category::active()->first()->id,
-            'warehouse_id' => Warehouse::active()->first()->id,
-            'digital' => 0,
-            'digital_url' => null,
-            'description' => fake()->paragraph(),
-            'code' => 'PR848293',
-            'stock' => 50,
-            'weight' => 1000,
-            'price' => 500000,
-            'sale_price' => 650000,
-            'afiliate_price' => 2500,
-            'min_order' => 1,
-            'user_id' => User::first()->id
+        $user = User::first() ?? User::factory()->create();
+        $categories = Category::active()->get();
+        if ($categories->isEmpty()) {
+            $categories = Category::factory()->count(3)->create(['is_active' => true]);
+        }
+        $warehouse = Warehouse::active()->first();
+
+        Product::factory()->count(20)->create([
+            'user_id' => $user->id,
+            'category_id' => fn() => $categories->random()->id,
+            'warehouse_id' => $warehouse?->id,
         ]);
     }
 }

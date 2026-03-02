@@ -1,6 +1,5 @@
 <script setup>
 import AppHead from "./AppHead.vue";
-import BottomNavigation from "./BottomNavigation.vue";
 const props = defineProps({
     title: {
         type: String,
@@ -22,7 +21,6 @@ const props = defineProps({
             <!--  content -->
             <slot />
             <!--  bottom navigation -->
-            <BottomNavigation v-if="bottomNavigation" />
         </div>
     </div>
 </template>

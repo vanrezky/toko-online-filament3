@@ -20,7 +20,8 @@ class ProductDetailController extends Controller
                 'productAttributeOption'
             ]),
             'warehouse',
-            'faqs'
+            'faqs',
+            'meta'
         ]);
         $product = ProductResource::make($product);
 

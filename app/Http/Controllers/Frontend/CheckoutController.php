@@ -5,14 +5,11 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 
-class AccountController extends Controller
+class CheckoutController extends Controller
 {
     public function __invoke(Request $request)
     {
-        return Inertia::render('Account/Profile', [
-            'user' => Auth::guard('customer')->user()
-        ]);
+        return Inertia::render('Checkout/Index');
     }
 }

@@ -15,15 +15,20 @@ class CategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = [
+            'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
             'image_url' => $this->getFirstMediaUrl(),
         ];
 
-        $this->when($this->products_count, fn() => $data['products_count'] = $this->products_count);
+        if (isset($this->products_count)) {
+            $data['products_count'] = $this->products_count;
+        }
+
+        if ($this->relationLoaded('products')) {
+            $data['products'] = ProductSimpleResource::collection($this->products);
+        }
 
         return $data;
-
-        // return parent::toArray($request);
     }
 }
