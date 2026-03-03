@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\Page;
 use App\Models\Wishlist;
 use App\Settings\GeneralSettings;
 use Illuminate\Http\Request;
@@ -62,10 +63,14 @@ class HandleInertiaRequests extends Middleware
                 ];
             },
             'menu' => [
-                'Home',
-                'Contact',
-                'About',
-                'Blogs',
+                'header' => Page::headerMenu()->get()->map(fn($page) => [
+                    'name' => $page->title,
+                    'href' => route('frontend.page.show', $page->slug),
+                ]),
+                'footer' => Page::footerMenu()->get()->map(fn($page) => [
+                    'name' => $page->title,
+                    'href' => route('frontend.page.show', $page->slug),
+                ]),
             ],
             'categories' => CategoryResource::collection(
                 Category::homepage()->with('media')->get()

@@ -42,7 +42,7 @@ class ProductResource extends JsonResource
             'variants' => $this->productVariants->map(function ($variant) {
                 return [
                     'id' => $variant->id,
-                    'variant_name' => $variant->variant_name,
+                    'variant_name' => $variant->attributes->map(fn($attr) => $attr->productAttributeOption?->name)->filter()->implode(' - '),
                     'sku' => $variant->sku,
                     'price' => money($variant->price)->format(),
                     'raw_price' => $variant->price,

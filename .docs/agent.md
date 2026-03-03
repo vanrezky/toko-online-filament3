@@ -9,6 +9,7 @@
 - inertia
 - nvm use 22 for node version 22
 - frontend vite & vue 3
+- filament3
 
 ## Database Awareness
 

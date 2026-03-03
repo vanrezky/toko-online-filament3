@@ -100,6 +100,20 @@ class PageResource extends Resource
                                     ->default(BlogPostStatus::PUBLISHED->value)
                                     ->native(false)
                                     ->required(),
+                                Forms\Components\Toggle::make('show_in_menu')
+                                    ->label(__('Show in Menu'))
+                                    ->default(false)
+                                    ->live(),
+                                Forms\Components\Select::make('menu_location')
+                                    ->label(__('Menu Location'))
+                                    ->options([
+                                        'header' => 'Header',
+                                        'footer' => 'Footer',
+                                        'both' => 'Both',
+                                    ])
+                                    ->required(fn (Get $get) => $get('show_in_menu'))
+                                    ->disabled(fn (Get $get) => !$get('show_in_menu'))
+                                    ->dehydrated(fn (Get $get) => $get('show_in_menu')),
                                 DateTimePicker::make('published_at')
                                     ->helperText(__('If published, the page will be visible on this date.'))
                                     ->default(now())

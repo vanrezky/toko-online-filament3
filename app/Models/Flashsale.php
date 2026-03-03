@@ -10,13 +10,24 @@ class Flashsale extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'start_time', 'end_time'];
+    protected $fillable = ['name', 'description', 'start_time', 'end_time', 'is_active'];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($flashsale) {
+            if ($flashsale->is_active) {
+                static::where('id', '!=', $flashsale->id)->update(['is_active' => false]);
+            }
+        });
+    }
 
     public function scopeActive($query)
     {
-        $query->first();
-        // $now = now()->format('Y-m-d H:i:s');
-        // $condition->whereRaw("'{$now}' between start_time and end_time");
+        return $query->where('is_active', true)
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>=', now());
     }
 
     public function products(): HasMany

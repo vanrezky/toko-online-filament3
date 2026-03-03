@@ -20,7 +20,9 @@ class WishlistController extends Controller
             $wishlistItems = Wishlist::where('customer_id', $customer->id)
                 ->with(['product.media', 'product.category'])
                 ->get()
-                ->pluck('product');
+                ->pluck('product')
+                ->filter()
+                ->unique('id');
         }
 
         return Inertia::render('Wishlist/Index', [

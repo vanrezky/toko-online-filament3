@@ -6,10 +6,15 @@ import ProductCard from '../../components/UI/ProductCard.vue';
 import { Heart, ShoppingBag, ArrowRight } from 'lucide-vue-next';
 
 const props = defineProps({
-  products: Object
+  products: [Object, Array]
 });
 
-const items = computed(() => props.products.data || []);
+const items = computed(() => {
+  if (Array.isArray(props.products)) {
+    return props.products;
+  }
+  return props.products?.data || [];
+});
 </script>
 
 <template>

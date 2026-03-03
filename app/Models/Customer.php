@@ -4,16 +4,18 @@ namespace App\Models;
 
 use App\Traits\HasProfilePictureTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Image\Enums\Fit;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Customer extends Authenticatable
+class Customer extends Authenticatable implements HasMedia
 {
-    use HasFactory, HasProfilePictureTrait, Notifiable;
+    use HasFactory, HasProfilePictureTrait, Notifiable, InteractsWithMedia;
 
     protected $fillable = ['first_name', 'last_name', 'email', 'email_verified_at', 'username', 'password', 'phone', 'balance', 'image', 'is_active', 'is_guest'];
 
@@ -34,6 +36,13 @@ class Customer extends Authenticatable
         'full_name',
     ];
 
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('thumb')
+            ->fit(Fit::Contain, 300, 300)
+            ->nonQueued();
+    }
 
     public function address(): HasMany
     {

@@ -37,6 +37,9 @@ class FlashsaleResource extends Resource
                             ->maxLength(255),
                         Forms\Components\Textarea::make('description')
                             ->columnSpanFull(),
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(false),
                         Group::make(
                             [
                                 Forms\Components\DateTimePicker::make('start_time')
@@ -63,6 +66,8 @@ class FlashsaleResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Active'),
                 Tables\Columns\TextColumn::make('start_time')
                     ->dateTime()
                     ->sortable(),

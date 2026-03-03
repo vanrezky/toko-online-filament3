@@ -507,7 +507,6 @@ class ProductResource extends Resource
             $variant = $product->productVariants()->updateOrCreate(
                 ['id' => $variantData['id'] ?? null],  // Update jika ID ada, jika tidak buat baru
                 [
-                    'variant_name' => $variantData['variant_name'],
                     'sku' => $variantData['sku'],
                     'price' => $variantData['price'],
                     'stock' => $variantData['stock'],

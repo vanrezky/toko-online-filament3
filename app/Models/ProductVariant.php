@@ -14,7 +14,7 @@ class ProductVariant extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['product_id', 'variant_name', 'sku', 'price', 'stock', 'weight', 'dimensions', 'status'];
+    protected $fillable = ['product_id', 'sku', 'price', 'stock', 'weight', 'dimensions', 'status'];
 
     public function attributes(): HasMany
     {

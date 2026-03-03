@@ -10,7 +10,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(route('frontend.login'), {
+  form.post(route('frontend.login.post'), {
     onFinish: () => form.reset('password'),
   });
 };

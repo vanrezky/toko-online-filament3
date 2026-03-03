@@ -18,7 +18,8 @@ class BlogPost extends Model
     protected $fillable = ['title', 'slug', 'content', 'published_at', 'blog_category_id', 'image', 'is_status', 'user_id'];
 
     protected $casts = [
-        'is_status' => BlogPostStatus::class
+        'is_status' => BlogPostStatus::class,
+        'published_at' => 'date',
     ];
 
 

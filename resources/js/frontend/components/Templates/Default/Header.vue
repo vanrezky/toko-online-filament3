@@ -35,11 +35,12 @@ const handleSearch = () => {
   }
 };
 
-const navItems = [
+const navItems = computed(() => [
   { name: 'Home', href: route('frontend.home') },
   { name: 'Products', href: route('frontend.products') },
-  { name: 'About', href: '#' },
-];
+  { name: 'Blogs', href: route('frontend.blog.index') },
+  ...(usePage().props.menu?.header || []),
+]);
 
 const cartItemCount = ref(0); // This should be dynamic based on cart state
 </script>
