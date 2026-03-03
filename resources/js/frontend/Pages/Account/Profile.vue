@@ -118,11 +118,21 @@ const fetchSubDistricts = async (districtId, selectId = null) => {
 const submitAddress = () => {
   if (addressForm.id) {
     addressForm.patch(route('frontend.account.address.update', addressForm.id), {
-      onSuccess: () => activeSection.value = 'addresses',
+      onSuccess: () => {
+        activeSection.value = 'addresses';
+        addressForm.reset();
+        districts.value = [];
+        subDistricts.value = [];
+      },
     });
   } else {
     addressForm.post(route('frontend.account.address.store'), {
-      onSuccess: () => activeSection.value = 'addresses',
+      onSuccess: () => {
+        activeSection.value = 'addresses';
+        addressForm.reset();
+        districts.value = [];
+        subDistricts.value = [];
+      },
     });
   }
 };

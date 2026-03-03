@@ -24,11 +24,6 @@ const toggleWishlist = (e) => {
   e.preventDefault();
   e.stopPropagation();
   
-  if (!page.props.auth.user) {
-    router.get(route('frontend.login'));
-    return;
-  }
-
   router.post(route('frontend.wishlist.toggle'), {
     product_id: productData.value.id
   }, {

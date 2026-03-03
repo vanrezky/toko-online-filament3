@@ -35,6 +35,7 @@ class WishlistController extends Controller
         $customer = Auth::guard('customer')->user();
 
         if (!$customer) {
+            session()->put('url.intended', url()->previous());
             return redirect()->route('frontend.login');
         }
 
