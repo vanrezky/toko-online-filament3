@@ -18,6 +18,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -63,9 +64,10 @@ class ProductVariantsRelationManager extends RelationManager
                                             }
                                         },
                                     ]),
-                            ])->createOptionUsing(fn(array $data): int => $this->createAttribute($data)),
+                            ])->createOptionUsing(fn(array $data): int => $this->createAttribute($data))
+                            ->columnSpanFull(),
 
-                        Repeater::make('product_attribute_options')
+                            Repeater::make('product_attribute_options')
                             ->label(__('Options'))
                             ->hidden(fn(Get $get) => empty($get('product_attribute_id')))
                             ->simple(
@@ -104,7 +106,7 @@ class ProductVariantsRelationManager extends RelationManager
                             ->disabledOn('edit')
                             ->deletable(fn(string $context): bool => $context === 'create')
                             ->reorderable(fn(string $context): bool => $context === 'create')
-                            ->addable(fn(string $context): bool => $context === 'create'),
+                            ->addable(fn(string $context): bool => $context === 'create')
                     ])
                     ->columnSpanFull()
                     ->minItems(1)

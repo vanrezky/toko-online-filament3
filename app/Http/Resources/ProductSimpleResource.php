@@ -21,8 +21,7 @@ class ProductSimpleResource extends JsonResource
         }
 
         return [
-            'id' => $this->id,
-            'uuid' => $this->uuid,
+            'id' => $this->uuid,
             'name' => Str::limit($this->name, 35, ''),
             'slug' => $this->slug,
             'category_name' => $this->category?->name,

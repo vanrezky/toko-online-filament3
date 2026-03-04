@@ -53,12 +53,18 @@ Route::name('frontend.')->group(function () {
 
         Route::post('/logout', \App\Http\Controllers\Frontend\Auth\LogoutController::class)->name('logout');
         Route::get('/checkout', \App\Http\Controllers\Frontend\CheckoutController::class)->name('checkout');
+        Route::post('/checkout', [\App\Http\Controllers\Frontend\CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/orders', [\App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('orders');
-        Route::get('/orders/{id}', [\App\Http\Controllers\Frontend\OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{transaction}', [\App\Http\Controllers\Frontend\OrderController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{transaction}/payment-method', [\App\Http\Controllers\Frontend\OrderController::class, 'changePaymentMethod'])->name('orders.payment-method');
     });
 
     // Public shop routes
     Route::get('/cart', CartController::class)->name('cart');
+    Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
+    Route::patch('/cart/{item}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.destroy');
+
     Route::get('/flash-sale', \App\Http\Controllers\Frontend\FlashsaleController::class)->name('flashsales');
     Route::get('/products', \App\Http\Controllers\Frontend\ProductController::class)->name('products');
     Route::get('/blog', [\App\Http\Controllers\Frontend\BlogController::class, 'index'])->name('blog.index');

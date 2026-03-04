@@ -15,7 +15,7 @@ class ProductDetailController extends Controller
     {
         $product->loadMissing([
             'category',
-            'productVariants.attributes' => fn($Q) => $Q->with([
+            'productVariants.variantAttributes' => fn($Q) => $Q->with([
                 'productAttribute',
                 'productAttributeOption'
             ]),
@@ -25,8 +25,6 @@ class ProductDetailController extends Controller
         ]);
         $product = ProductResource::make($product);
 
-        // $debug = json_encode($product);
-        // dd(json_decode($debug, true));
         return Inertia::render('ProductDetail/Index', [
             'product' => $product
         ]);

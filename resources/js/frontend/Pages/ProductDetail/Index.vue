@@ -105,10 +105,14 @@ const addToCart = () => {
     return;
   }
   
-  console.log('Adding to cart:', {
-    product_uuid: props.product.uuid,
-    variant_id: selectedVariant.value?.id,
+  router.post(route('frontend.cart.store'), {
+    product_id: props.product.id,
+    product_variant_id: selectedVariant.value?.id,
     quantity: quantity.value,
+  }, {
+    onSuccess: () => {
+      // router.visit(route('frontend.cart')); // Redirect to cart on success if preferred
+    }
   });
 };
 </script>

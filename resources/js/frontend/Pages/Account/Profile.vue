@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Link, useForm, router } from '@inertiajs/vue3';
+import { Link, useForm, router, usePage } from '@inertiajs/vue3';
 import TemplateWrapper from '../../components/TemplateWrapper.vue';
 import { User, Package, MapPin, Settings, LogOut, ChevronRight, Camera, Save, X, Plus, Trash2, CheckCircle2 } from 'lucide-vue-next';
 import axios from 'axios';
@@ -11,7 +11,19 @@ const props = defineProps({
   provinces: Array,
 });
 
-const activeSection = ref('overview'); // 'overview', 'settings', 'addresses', 'address_form'
+const page = usePage();
+const getSectionFromUrl = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('section') || 'overview';
+};
+
+const activeSection = ref(getSectionFromUrl()); // 'overview', 'settings', 'addresses', 'address_form'
+
+// Watch for URL changes (e.g. when clicking a link that only changes query params)
+watch(() => page.url, () => {
+  activeSection.value = getSectionFromUrl();
+});
+
 const imagePreview = ref(null);
 const fileInput = ref(null);
 const editingAddress = ref(null);
@@ -84,7 +96,7 @@ const openAddressForm = (address = null) => {
     addressForm.address = address.address;
     addressForm.postal_code = address.postal_code;
     addressForm.is_featured = !!address.is_featured;
-    
+
     // Fetch dependent data
     fetchDistricts(address.province_id, address.district_id);
     fetchSubDistricts(address.district_id, address.sub_district_id);
@@ -162,7 +174,7 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
     <div class="py-12 md:py-20 bg-gray-50 min-h-screen font-sans">
       <div class="container mx-auto px-4 md:px-6">
         <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12">
-          
+
           <!-- Sidebar Navigation -->
           <aside class="w-full lg:w-72 shrink-0">
             <div class="bg-white p-8 shadow-sm space-y-8 sticky top-32">
@@ -183,8 +195,8 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
                     <component :is="item.icon" class="w-4 h-4" />
                     <span>{{ item.name }}</span>
                   </Link>
-                  <button 
-                    v-else 
+                  <button
+                    v-else
                     @click="activeSection = item.id"
                     class="flex items-center justify-between w-full p-3 text-xs font-bold uppercase tracking-widest transition-all"
                     :class="activeSection === item.id || (activeSection === 'address_form' && item.id === 'addresses') ? 'text-black bg-gray-50' : 'text-gray-500 hover:text-black hover:bg-gray-50'"
@@ -196,7 +208,7 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
                     <ChevronRight class="w-3 h-3" />
                   </button>
                 </template>
-                
+
                 <Link :href="route('frontend.logout')" method="post" as="button" class="flex items-center space-x-4 w-full p-3 text-xs font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 transition-all">
                   <LogOut class="w-4 h-4" />
                   <span>Sign Out</span>
@@ -207,7 +219,7 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
 
           <!-- Main Content Area -->
           <div class="flex-grow">
-            
+
             <!-- OVERVIEW SECTION -->
             <div v-if="activeSection === 'overview'" class="space-y-8 animate-in fade-in duration-500">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -241,13 +253,13 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
             <!-- SETTINGS SECTION -->
             <div v-if="activeSection === 'settings'" class="bg-white p-8 md:p-12 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-right-4 duration-500">
               <h2 class="text-2xl font-bold uppercase tracking-widest mb-12 italic">Account Settings</h2>
-              
+
               <form @submit.prevent="submitProfile" class="space-y-12">
                 <div class="flex flex-col items-center md:items-start space-y-6">
                   <div class="relative group">
                     <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-50 bg-gray-100 flex items-center justify-center shadow-inner">
-                      <img v-if="imagePreview || user.image || user.profile_photo_url" 
-                           :src="imagePreview || user.image || user.profile_photo_url" 
+                      <img v-if="imagePreview || user.image || user.profile_photo_url"
+                           :src="imagePreview || user.image || user.profile_photo_url"
                            class="w-full h-full object-cover" />
                       <User v-else class="w-16 h-16 text-gray-300" />
                     </div>
@@ -309,10 +321,10 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
               </div>
 
               <div class="grid grid-cols-1 gap-6">
-                <div v-for="address in (addresses || [])" :key="address.id" 
+                <div v-for="address in (addresses || [])" :key="address.id"
                      class="bg-white p-8 shadow-sm border transition-all flex flex-col md:flex-row justify-between gap-6"
                      :class="address.is_featured ? 'border-black' : 'border-gray-100 hover:border-gray-200'">
-                  
+
                   <div class="space-y-4">
                     <div class="flex items-center space-x-3">
                       <h3 class="font-bold text-black uppercase tracking-widest">{{ address.name }}</h3>
@@ -365,7 +377,7 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
                     <input v-model="addressForm.phone" type="text" class="input-elegant" placeholder="08..." />
                     <p v-if="addressForm.errors.phone" class="text-xs text-red-500">{{ addressForm.errors.phone }}</p>
                   </div>
-                  
+
                   <div class="space-y-2">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-black">Province</label>
                     <select v-model="addressForm.province_id" @change="fetchDistricts(addressForm.province_id)" class="input-elegant appearance-none">

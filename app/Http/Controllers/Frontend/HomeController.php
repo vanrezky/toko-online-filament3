@@ -32,13 +32,6 @@ class HomeController extends Controller
             ->with(['products' => fn($q) => $q->active()->with('media')->limit(6)])
             ->get();
 
-        // dd([
-        //     // 'sliders' => SliderResource::collection($sliders),
-        //     // 'flashsales' => $flashSales ? FlashsaleResource::make($flashSales) : null,
-        //     // 'newArrivals' => ProductSimpleResource::collection($newArrivals),
-        //     'featuredCategories' => CategoryResource::collection($featuredCategories),
-        // ]);
-
         return Inertia::render('Home/Index', [
             'sliders' => SliderResource::collection($sliders),
             'flashsales' => $flashSales ? FlashsaleResource::make($flashSales) : null,

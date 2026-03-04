@@ -20,8 +20,7 @@ class ProductResource extends JsonResource
         }
 
         return [
-            'id' => $this->id,
-            'uuid' => $this->uuid,
+            'id' => $this->uuid,
             'name' => $this->name,
             'slug' => $this->slug,
             'digital' => $this->digital,
@@ -41,13 +40,13 @@ class ProductResource extends JsonResource
             'warehouse' => WarehouseResource::make($this->warehouse),
             'variants' => $this->productVariants->map(function ($variant) {
                 return [
-                    'id' => $variant->id,
-                    'variant_name' => $variant->attributes->map(fn($attr) => $attr->productAttributeOption?->name)->filter()->implode(' - '),
+                    'id' => $variant->uuid,
+                    'variant_name' => $variant->variant_name,
                     'sku' => $variant->sku,
                     'price' => money($variant->price)->format(),
                     'raw_price' => $variant->price,
                     'stock' => $variant->stock,
-                    'attributes' => $variant->attributes->map(function ($attr) {
+                    'attributes' => $variant->variantAttributes->map(function ($attr) {
                         return [
                             'name' => $attr->productAttribute?->name,
                             'option' => $attr->productAttributeOption?->name,

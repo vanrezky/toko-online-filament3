@@ -1,4 +1,4 @@
-<script setup
+<script setup>
 import { computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import TemplateWrapper from '../../components/TemplateWrapper.vue';
@@ -30,7 +30,7 @@ const updateQuantity = (item, delta) => {
 
 const removeItem = (id) => {
   if (confirm('Are you sure you want to remove this item?')) {
-    router.delete(route('frontend.cart.remove', id), {
+    router.delete(route('frontend.cart.destroy', id), {
       preserveScroll: true
     });
   }
@@ -50,7 +50,7 @@ const removeItem = (id) => {
               <!-- Item Image -->
               <div class="w-24 md:w-32 aspect-[4/5] bg-gray-50 overflow-hidden flex-shrink-0">
                 <img
-                  :src="item.product.media?.[0]?.original_url || 'https://placehold.co/200x250?text=No+Image'"
+                  :src="item.product.thumbnail || 'https://placehold.co/200x250?text=No+Image'"
                   :alt="item.product.name"
                   class="w-full h-full object-cover"
                 />

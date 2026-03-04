@@ -17,7 +17,7 @@ class AuthenticateCustomer
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::guard('customer')->check()) {
-            return redirect()->route('frontend.login');
+            return redirect()->guest(route('frontend.login'));
         }
         return $next($request);
     }

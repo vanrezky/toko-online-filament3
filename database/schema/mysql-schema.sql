@@ -312,6 +312,7 @@ CREATE TABLE `flashsales` (
   `description` tinytext COLLATE utf8mb4_unicode_ci,
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -421,6 +422,8 @@ CREATE TABLE `pages` (
   `parent_id` bigint unsigned DEFAULT NULL,
   `order` int unsigned NOT NULL,
   `is_status` tinyint(1) NOT NULL DEFAULT '1',
+  `show_in_menu` tinyint(1) NOT NULL DEFAULT '0',
+  `menu_location` enum('header','footer','both') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `published_at` date NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -636,8 +639,7 @@ DROP TABLE IF EXISTS `product_variants`;
 CREATE TABLE `product_variants` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `product_id` bigint unsigned NOT NULL,
-  `variant_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Red - XL',
-  `sku` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sku` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price` decimal(15,2) NOT NULL,
   `stock` int unsigned NOT NULL DEFAULT '0',
   `weight` int unsigned DEFAULT NULL,
@@ -1089,3 +1091,6 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (48,'2025_01_29_113
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (49,'2025_02_01_173642_create_wishlists_table',1);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (50,'2025_02_01_173956_create_transactions_table',1);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (51,'2025_02_01_174015_create_transcation_products_table',1);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (52,'2026_03_03_032139_add_is_active_to_flashsales_table',2);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (53,'2026_03_03_032149_alter_product_variants_table',2);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (54,'2026_03_03_040708_add_menu_fields_to_pages_table',3);

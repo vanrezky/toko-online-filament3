@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cart_id')->references('id')->on('carts')->cascadeOnDelete();
             $table->foreignId('product_id')->references('id')->on('products')->cascadeOnDelete();
-            $table->foreignId('product_variant_id')->references('id')->on('product_variants')->noActionOnDelete();
+            $table->unsignedBigInteger('product_variant_id')->nullable();
+            $table->foreign('product_variant_id')->references('id')->on('product_variants')->noActionOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->decimal('price', 15, 2);
             $table->decimal('discount', 15, 2)->nullable();

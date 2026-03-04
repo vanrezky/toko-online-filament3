@@ -2,14 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuidTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CartItem extends Model
 {
-    use HasFactory;
-    protected $fillable = ['cart_id', 'product_id', 'product_variant_id', 'quantity', 'price', 'discount', 'note'];
+    use HasFactory, HasUuidTrait;
+    protected $fillable = ['uuid', 'cart_id', 'product_id', 'product_variant_id', 'quantity', 'price', 'discount', 'note'];
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     public function cart(): BelongsTo
     {

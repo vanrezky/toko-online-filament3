@@ -42,7 +42,7 @@ const navItems = computed(() => [
   ...(usePage().props.menu?.header || []),
 ]);
 
-const cartItemCount = ref(0); // This should be dynamic based on cart state
+const cartItemCount = computed(() => usePage().props.cart_total || 0); // This should be dynamic based on cart state
 </script>
 
 <template>
@@ -67,9 +67,9 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
 
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center space-x-8">
-          <Link 
-            v-for="item in navItems" 
-            :key="item.name" 
+          <Link
+            v-for="item in navItems"
+            :key="item.name"
             :href="item.href"
             class="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 hover:text-black transition-colors"
           >
@@ -82,11 +82,11 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
           <!-- Desktop Search Toggle -->
           <div class="hidden md:flex items-center">
             <div v-if="isSearchOpen" class="relative flex items-center animate-in fade-in slide-in-from-right-4 duration-300">
-              <input 
+              <input
                 id="desktop-search-input"
                 v-model="searchQuery"
-                type="text" 
-                placeholder="Search products..." 
+                type="text"
+                placeholder="Search products..."
                 class="w-64 bg-gray-50 border-b border-black py-1 px-2 text-sm focus:outline-none"
                 @keyup.enter="handleSearch"
               />
@@ -103,7 +103,7 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
           <button @click="toggleSearch" class="md:hidden text-gray-700 hover:text-black p-2">
             <Search class="w-6 h-6" />
           </button>
-          
+
           <Link :href="route('frontend.wishlist')" class="relative text-gray-700 hover:text-black p-1 transition-transform hover:scale-110">
             <Heart class="w-6 h-6" />
             <span v-if="wishlistCount > 0" class="absolute -top-1 -right-1 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
@@ -114,7 +114,7 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
           <Link :href="route('frontend.account')" class="text-gray-700 hover:text-black p-1 transition-transform hover:scale-110">
             <User class="w-6 h-6" />
           </Link>
-          
+
           <Link :href="route('frontend.cart')" class="relative text-gray-700 hover:text-black p-1 transition-transform hover:scale-110">
             <ShoppingCart class="w-6 h-6" />
             <span v-if="cartItemCount > 0" class="absolute -top-1 -right-1 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
@@ -136,11 +136,11 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
     >
       <div v-if="isSearchOpen" class="absolute top-full left-0 w-full bg-white border-b border-gray-100 p-4 shadow-xl z-40 md:hidden">
         <div class="relative flex items-center">
-          <input 
+          <input
             id="mobile-search-input"
             v-model="searchQuery"
-            type="text" 
-            placeholder="Search our collection..." 
+            type="text"
+            placeholder="Search our collection..."
             class="w-full bg-gray-50 border border-gray-200 py-4 px-6 text-sm focus:outline-none focus:border-black rounded-none transition-all"
             @keyup.enter="handleSearch"
           />
@@ -152,13 +152,13 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
     </transition>
 
     <!-- Mobile Menu Sidebar -->
-    <div 
-      v-if="isMobileMenuOpen" 
+    <div
+      v-if="isMobileMenuOpen"
       class="fixed inset-0 bg-black/50 z-[60] backdrop-blur-sm"
       @click="isMobileMenuOpen = false"
     ></div>
-    
-    <div 
+
+    <div
       class="fixed top-0 left-0 bottom-0 w-[80%] max-w-sm bg-white z-[70] shadow-2xl transition-transform duration-300 ease-in-out transform"
       :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
     >
@@ -169,18 +169,18 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
             <X class="w-6 h-6" />
           </button>
         </div>
-        
+
         <nav class="flex flex-col space-y-8">
-          <Link 
-            v-for="item in navItems" 
-            :key="item.name" 
+          <Link
+            v-for="item in navItems"
+            :key="item.name"
             :href="item.href"
             @click="isMobileMenuOpen = false"
             class="text-xs font-bold uppercase tracking-[0.3em] text-black border-b border-gray-50 pb-4"
           >
             {{ item.name }}
           </Link>
-          <Link 
+          <Link
             :href="route('frontend.wishlist')"
             @click="isMobileMenuOpen = false"
             class="text-xs font-bold uppercase tracking-[0.3em] text-black border-b border-gray-50 pb-4 flex justify-between items-center"
@@ -189,7 +189,7 @@ const cartItemCount = ref(0); // This should be dynamic based on cart state
             <span v-if="wishlistCount > 0" class="bg-black text-white px-2 py-0.5 rounded-full text-[10px]">{{ wishlistCount }}</span>
           </Link>
         </nav>
-        
+
         <div class="mt-auto pt-8 border-t border-gray-100 space-y-6">
           <Link :href="route('frontend.account')" class="flex items-center space-x-4 text-xs font-bold uppercase tracking-widest text-gray-500">
             <User class="w-5 h-5" />

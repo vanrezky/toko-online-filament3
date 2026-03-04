@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductSimpleResource;
+use App\Models\Product;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -40,11 +41,12 @@ class WishlistController extends Controller
         }
 
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => 'required|exists:products,uuid',
         ]);
 
+        $product = Product::select('id')->where('uuid', $request->product_id)->first();
         $wishlist = Wishlist::where('customer_id', $customer->id)
-            ->where('product_id', $request->product_id)
+            ->where('product_id', $product->id)
             ->first();
 
         if ($wishlist) {
@@ -53,7 +55,7 @@ class WishlistController extends Controller
         } else {
             Wishlist::create([
                 'customer_id' => $customer->id,
-                'product_id' => $request->product_id,
+                'product_id' => $product->id,
             ]);
             $status = 'added';
         }
