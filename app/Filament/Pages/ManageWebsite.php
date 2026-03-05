@@ -129,24 +129,24 @@ class ManageWebsite extends SettingsPage
                             ->schema([
                                 Toggle::make('registration')
                                     ->label(__('Account Registration'))
-                                    ->helperText('Lorem, ipsum dolor sit amet consectetur adipisicing elit. Vel, dignissimos nobis itaque aspernatur saepe nisi eos minus quasi animi dolore non at hic commodi ipsum assumenda nostrum nesciunt tenetur magni.'),
+                                    ->helperText('Allow users to create an account on the website. When this option is enabled, visitors will be able to register and access member features such as placing orders, viewing their history, and managing their profile.'),
                                 Toggle::make('force_ssl')
                                     ->label(__('Force SSL'))
-                                    ->helperText('Lorem ipsum dolor sit, amet consectetur adipisicing elit. Adipisci, voluptas laborum? Suscipit sint molestiae magni ab? Tempore ea, eligendi similique modi animi, et quaerat perspiciatis enim excepturi, mollitia nobis quidem?'),
+                                    ->helperText('Automatically redirect all visitors to the secure HTTPS version of the website. This helps protect user data and ensures that all communication between the browser and server is encrypted.'),
                                 Toggle::make('secure_password')
                                     ->label(__('Secure Password'))
-                                    ->helperText('Lorem ipsum dolor sit amet consectetur adipisicing elit. In facere odio ab quibusdam sequi nemo officia reprehenderit neque! Odit corporis nemo quia, rerum atque voluptatem rem error voluptates maiores porro.'),
+                                    ->helperText('Require users to create stronger passwords for better account security. When enabled, passwords must follow certain rules such as minimum length and the use of letters or numbers.'),
                                 Toggle::make('term_agreement')
                                     ->label('Term & Agreement')
-                                    ->helperText('Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatibus sint dignissimos repudiandae dolorum. Necessitatibus optio magnam non quibusdam earum! Soluta, maxime? Deleniti, ipsum totam ab asperiores eligendi atque aut quas!'),
+                                    ->helperText('Require users to agree to your Terms and Conditions before they can register or use certain features. This helps ensure that users understand the rules and policies of your website.'),
                                 Select::make('active_template')
                                     ->options([
                                         'default' => 'Default',
                                     ])
-                                    ->helperText('Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae voluptatum provident rem ad commodi aliquam illum impedit quia, minus consectetur. Nam dicta rerum omnis repellat asperiores dignissimos culpa itaque et.'),
+                                    ->helperText('Select the template that will be used for the website layout and appearance. You can switch templates to change the design without affecting the website content.'),
                                 Toggle::make('site_active')
                                     ->label(__('Site Active'))
-                                    ->helperText('Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur voluptatem voluptatum commodi libero est ducimus at, laboriosam ipsa atque. Dolore architecto ipsa aut corrupti quam quasi. Ullam quisquam cum delectus!')
+                                    ->helperText('Turn the website on or off. When disabled, visitors will not be able to access the site and may see a maintenance or temporary unavailable page.')
                             ])
                     ])->columnSpanFull()
             ]);

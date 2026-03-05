@@ -88,9 +88,10 @@ DROP TABLE IF EXISTS `cart_items`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cart_items` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cart_id` bigint unsigned NOT NULL,
   `product_id` bigint unsigned NOT NULL,
-  `product_variant_id` bigint unsigned NOT NULL,
+  `product_variant_id` bigint unsigned DEFAULT NULL,
   `quantity` int unsigned NOT NULL DEFAULT '1',
   `price` decimal(15,2) NOT NULL,
   `discount` decimal(15,2) DEFAULT NULL,
@@ -98,6 +99,7 @@ CREATE TABLE `cart_items` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `cart_items_uuid_unique` (`uuid`),
   KEY `cart_items_cart_id_foreign` (`cart_id`),
   KEY `cart_items_product_id_foreign` (`product_id`),
   KEY `cart_items_product_variant_id_foreign` (`product_variant_id`),
@@ -142,11 +144,13 @@ DROP TABLE IF EXISTS `carts`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `carts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `customer_id` bigint unsigned NOT NULL,
   `status` enum('active','checked_out','abandoned') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `carts_uuid_unique` (`uuid`),
   KEY `carts_customer_id_foreign` (`customer_id`),
   KEY `carts_status_index` (`status`),
   CONSTRAINT `carts_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE
@@ -638,6 +642,7 @@ DROP TABLE IF EXISTS `product_variants`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product_variants` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `product_id` bigint unsigned NOT NULL,
   `sku` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price` decimal(15,2) NOT NULL,
@@ -649,6 +654,7 @@ CREATE TABLE `product_variants` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_variants_sku_unique` (`sku`),
+  UNIQUE KEY `product_variants_uuid_unique` (`uuid`),
   KEY `product_variants_product_id_foreign` (`product_id`),
   CONSTRAINT `product_variants_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -871,6 +877,7 @@ CREATE TABLE `transactions` (
   `to_district_id` bigint unsigned NOT NULL,
   `cod` tinyint(1) NOT NULL DEFAULT '0',
   `cod_fee` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `payment_method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `receipt_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `delivery_date` datetime DEFAULT NULL,
   `status` enum('unpaid','shipped','delivered','rejected','completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unpaid',
@@ -902,6 +909,7 @@ DROP TABLE IF EXISTS `transcation_products`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `transcation_products` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `transaction_id` bigint unsigned NOT NULL,
   `customer_id` bigint unsigned NOT NULL,
   `is_digital` tinyint(1) NOT NULL DEFAULT '0',
@@ -914,6 +922,7 @@ CREATE TABLE `transcation_products` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `transcation_products_uuid_unique` (`uuid`),
   KEY `transcation_products_customer_id_foreign` (`customer_id`),
   KEY `transcation_products_transaction_id_index` (`transaction_id`),
   KEY `transcation_products_product_id_index` (`product_id`),
@@ -1094,3 +1103,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (51,'2025_02_01_174
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (52,'2026_03_03_032139_add_is_active_to_flashsales_table',2);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (53,'2026_03_03_032149_alter_product_variants_table',2);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (54,'2026_03_03_040708_add_menu_fields_to_pages_table',3);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (55,'2026_03_04_204626_add_uuid_to_carts_and_cart_items_table',4);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (56,'2026_03_04_204733_add_uuid_to_transaction_products_table',5);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (57,'2026_03_04_204821_add_uuid_to_product_variants_table',6);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (58,'2026_03_04_204943_add_payment_method_to_transactions_table',7);

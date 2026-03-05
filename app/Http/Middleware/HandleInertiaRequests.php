@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => CustomerResource::make(Auth::guard('customer')->user()),
+                'user' => Auth::guard('customer')->user() ? CustomerResource::make(Auth::guard('customer')->user()) : null,
             ],
             'wishlist_product_ids' => function () {
                 if (Auth::guard('customer')->check()) {
@@ -93,7 +93,13 @@ class HandleInertiaRequests extends Middleware
             ],
             'categories' => CategoryResource::collection(
                 Category::homepage()->with('media')->get()
-            )
+            ),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+                'info' => $request->session()->get('info'),
+            ],
         ]);
     }
 }

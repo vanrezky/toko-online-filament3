@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, getCurrentInstance } from 'vue';
 import { Link, useForm, router, usePage } from '@inertiajs/vue3';
 import TemplateWrapper from '../../components/TemplateWrapper.vue';
 import { User, Package, MapPin, Settings, LogOut, ChevronRight, Camera, Save, X, Plus, Trash2, CheckCircle2 } from 'lucide-vue-next';
@@ -12,6 +12,7 @@ const props = defineProps({
 });
 
 const page = usePage();
+const { proxy } = getCurrentInstance();
 const getSectionFromUrl = () => {
   const params = new URLSearchParams(window.location.search);
   return params.get('section') || 'overview';
@@ -150,11 +151,21 @@ const submitAddress = () => {
 };
 
 const deleteAddress = (id) => {
-  if (confirm('Are you sure you want to delete this address?')) {
-    router.delete(route('frontend.account.address.delete', id), {
-      preserveScroll: true,
-    });
-  }
+  proxy.$confirm({
+    title: 'Delete Address',
+    message: 'Are you sure you want to delete this address?',
+    button: {
+      no: 'Cancel',
+      yes: 'Delete'
+    },
+    callback: (confirm) => {
+      if (confirm) {
+        router.delete(route('frontend.account.address.delete', id), {
+          preserveScroll: true,
+        });
+      }
+    }
+  });
 };
 
 const setFeaturedAddress = (address) => {
@@ -445,3 +456,4 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
   @apply w-full border border-gray-200 bg-white px-4 py-3 text-sm focus:border-black focus:outline-none transition-all duration-300 rounded-none;
 }
 </style>
+

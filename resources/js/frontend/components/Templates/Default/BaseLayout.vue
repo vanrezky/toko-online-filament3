@@ -5,6 +5,8 @@ import AppHead from '../../AppHead.vue';
 import TopbarNotice from './TopbarNotice.vue';
 import Header from './Header.vue';
 import Footer from './Footer.vue';
+import { Toaster } from "vue-sonner";
+import FlashMessages from "@frontend/components/FlashMessages.vue";
 
 const props = defineProps({
   title: String,
@@ -17,6 +19,9 @@ const settings = computed(() => usePage().props.settings);
 
 <template>
   <AppHead :title="title" :description="description" :keywords="keywords" />
+  <Toaster position="top-right" richColors closeButton />
+  <FlashMessages />
+  <vue3-confirm-dialog />
   
   <div class="min-h-screen flex flex-col bg-white">
     <TopbarNotice />

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, getCurrentInstance } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import TemplateWrapper from '../../components/TemplateWrapper.vue';
 import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-vue-next';
@@ -7,6 +7,8 @@ import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-vue-next';
 const props = defineProps({
   cart: Object
 });
+
+const { proxy } = getCurrentInstance();
 
 const items = computed(() => props.cart?.items || []);
 const subtotal = computed(() => {
@@ -29,13 +31,24 @@ const updateQuantity = (item, delta) => {
 };
 
 const removeItem = (id) => {
-  if (confirm('Are you sure you want to remove this item?')) {
-    router.delete(route('frontend.cart.destroy', id), {
-      preserveScroll: true
-    });
-  }
+  proxy.$confirm({
+    title: 'Remove Item',
+    message: 'Are you sure you want to remove this item from your bag?',
+    button: {
+      no: 'Cancel',
+      yes: 'Remove'
+    },
+    callback: (confirm) => {
+      if (confirm) {
+        router.delete(route('frontend.cart.destroy', id), {
+          preserveScroll: true
+        });
+      }
+    }
+  });
 };
 </script>
+
 
 <template>
   <TemplateWrapper title="Your Shopping Bag">

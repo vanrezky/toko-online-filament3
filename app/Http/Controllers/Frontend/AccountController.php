@@ -56,7 +56,7 @@ class AccountController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Profile updated successfully.');
+        return back()->with('success', 'Profile updated successfully.');
     }
 
     public function storeAddress(Request $request)
@@ -80,7 +80,7 @@ class AccountController extends Controller
 
         $customer->address()->create($request->all());
 
-        return back()->with('status', 'Address added successfully.');
+        return back()->with('success', 'Address added successfully.');
     }
 
     public function updateAddress(Request $request, CustomerAddress $address)
@@ -106,7 +106,7 @@ class AccountController extends Controller
 
         $address->update($request->all());
 
-        return back()->with('status', 'Address updated successfully.');
+        return back()->with('success', 'Address updated successfully.');
     }
 
     public function deleteAddress(CustomerAddress $address)
@@ -115,9 +115,13 @@ class AccountController extends Controller
             abort(403);
         }
 
-        $address->delete();
+        $countAddress = CustomerAddress::where('customer_id', $address->customer_id)->count();
+        if ($countAddress <= 1) {
+            return back()->with('error', 'Address cannot be deleted.');
+        }
 
-        return back()->with('status', 'Address deleted successfully.');
+        $address->delete();
+        return back()->with('success', 'Address deleted successfully.');
     }
 
     public function getDistricts(Province $province)
