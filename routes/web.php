@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\Auth\RegisterController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductDetailController;
+use App\Services\ApiCoId\IndonesiaRegionService;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +22,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Global login route for Laravel default auth redirects
+Route::get('provinces', function () {
+    $provinces = (new IndonesiaRegionService())->getProvinces();
+
+    dd($provinces);
+});
+
 Route::get('/login', function () {
     return redirect()->route('frontend.login');
 })->name('login');
@@ -41,12 +48,12 @@ Route::name('frontend.')->group(function () {
     Route::middleware('auth.customer')->group(function () {
         Route::get('/account', AccountController::class)->name('account');
         Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.update');
-        
+
         // Address management
         Route::post('/account/address', [AccountController::class, 'storeAddress'])->name('account.address.store');
         Route::patch('/account/address/{address}', [AccountController::class, 'updateAddress'])->name('account.address.update');
         Route::delete('/account/address/{address}', [AccountController::class, 'deleteAddress'])->name('account.address.delete');
-        
+
         // Regions
         Route::get('/regions/districts/{province}', [AccountController::class, 'getDistricts'])->name('regions.districts');
         Route::get('/regions/sub-districts/{district}', [AccountController::class, 'getSubDistricts'])->name('regions.sub-districts');
@@ -73,7 +80,9 @@ Route::name('frontend.')->group(function () {
     Route::get('/wishlist', [\App\Http\Controllers\Frontend\WishlistController::class, 'index'])->name('wishlist');
     Route::get('/faq', \App\Http\Controllers\Frontend\FaqController::class)->name('faq');
     Route::post('/wishlist/toggle', [\App\Http\Controllers\Frontend\WishlistController::class, 'toggle'])->name('wishlist.toggle');
-    
+
     // Wildcard for product detail - MUST BE LAST
     Route::get('{product}', ProductDetailController::class)->name('product-detail');
 });
+
+
