@@ -7,7 +7,6 @@ use App\Http\Controllers\Frontend\Auth\RegisterController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductDetailController;
-use App\Services\ApiCoId\IndonesiaRegionService;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,12 +21,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Global login route for Laravel default auth redirects
-Route::get('provinces', function () {
-    $provinces = (new IndonesiaRegionService())->getProvinces();
-
-    dd($provinces);
-});
-
 Route::get('/login', function () {
     return redirect()->route('frontend.login');
 })->name('login');
@@ -57,9 +50,11 @@ Route::name('frontend.')->group(function () {
         // Regions
         Route::get('/regions/districts/{province}', [AccountController::class, 'getDistricts'])->name('regions.districts');
         Route::get('/regions/sub-districts/{district}', [AccountController::class, 'getSubDistricts'])->name('regions.sub-districts');
+        Route::get('/regions/villages/{subDistrict}', [AccountController::class, 'getVillages'])->name('regions.villages');
 
         Route::post('/logout', \App\Http\Controllers\Frontend\Auth\LogoutController::class)->name('logout');
         Route::get('/checkout', \App\Http\Controllers\Frontend\CheckoutController::class)->name('checkout');
+        Route::get('/checkout/shipping-costs', [\App\Http\Controllers\Frontend\CheckoutController::class, 'getShippingCosts'])->name('checkout.shipping-costs');
         Route::post('/checkout', [\App\Http\Controllers\Frontend\CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/orders', [\App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('orders');
         Route::get('/orders/{transaction}', [\App\Http\Controllers\Frontend\OrderController::class, 'show'])->name('orders.show');
@@ -84,5 +79,3 @@ Route::name('frontend.')->group(function () {
     // Wildcard for product detail - MUST BE LAST
     Route::get('{product}', ProductDetailController::class)->name('product-detail');
 });
-
-

@@ -28,13 +28,39 @@ class WarehouseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Warehouse Information')
+                Forms\Components\Section::make('Warehouse Location')
                     ->schema([
+                        Forms\Components\Select::make('province_id')
+                            ->relationship('province', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->reactive()
+                            ->afterStateUpdated(fn(callable $set) => $set('district_id', null))
+                            ->required(),
+                        Forms\Components\Select::make('district_id')
+                            ->relationship('district', 'name', fn($query, $get) => $query->where('province_id', $get('province_id')))
+                            ->searchable()
+                            ->preload()
+                            ->reactive()
+                            ->afterStateUpdated(fn(callable $set) => $set('sub_district_id', null))
+                            ->required(),
                         Forms\Components\Select::make('sub_district_id')
-                            ->relationship('subDistrict', 'name')
+                            ->relationship('subDistrict', 'name', fn($query, $get) => $query->where('district_id', $get('district_id')))
+                            ->searchable()
+                            ->preload()
+                            ->reactive()
+                            ->afterStateUpdated(fn(callable $set) => $set('village_id', null))
+                            ->required(),
+                        Forms\Components\Select::make('village_id')
+                            ->relationship('village', 'name', fn($query, $get) => $query->where('sub_district_id', $get('sub_district_id')))
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Forms\Components\TextInput::make('postal_code')
+                            ->maxLength(10),
+                    ])->columns(2),
+                Forms\Components\Section::make('Warehouse Information')
+                    ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255),

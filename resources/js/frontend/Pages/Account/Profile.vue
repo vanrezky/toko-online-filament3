@@ -31,6 +31,7 @@ const editingAddress = ref(null);
 
 const districts = ref([]);
 const subDistricts = ref([]);
+const villages = ref([]);
 
 // Profile Form
 const profileForm = useForm({
@@ -49,6 +50,7 @@ const addressForm = useForm({
   province_id: '',
   district_id: '',
   sub_district_id: '',
+  village_id: '',
   address: '',
   postal_code: '',
   is_featured: false,
@@ -94,6 +96,7 @@ const openAddressForm = (address = null) => {
     addressForm.province_id = address.province_id;
     addressForm.district_id = address.district_id;
     addressForm.sub_district_id = address.sub_district_id;
+    addressForm.village_id = address.village_id;
     addressForm.address = address.address;
     addressForm.postal_code = address.postal_code;
     addressForm.is_featured = !!address.is_featured;
@@ -101,11 +104,13 @@ const openAddressForm = (address = null) => {
     // Fetch dependent data
     fetchDistricts(address.province_id, address.district_id);
     fetchSubDistricts(address.district_id, address.sub_district_id);
+    fetchVillages(address.sub_district_id, address.village_id);
   } else {
     editingAddress.value = null;
     addressForm.reset();
     districts.value = [];
     subDistricts.value = [];
+    villages.value = [];
   }
   activeSection.value = 'address_form';
 };
@@ -117,7 +122,9 @@ const fetchDistricts = async (provinceId, selectId = null) => {
   if (!selectId) {
     addressForm.district_id = '';
     addressForm.sub_district_id = '';
+    addressForm.village_id = '';
     subDistricts.value = [];
+    villages.value = [];
   }
 };
 
@@ -125,7 +132,25 @@ const fetchSubDistricts = async (districtId, selectId = null) => {
   if (!districtId) return;
   const res = await axios.get(route('frontend.regions.sub-districts', districtId));
   subDistricts.value = res.data;
-  if (!selectId) addressForm.sub_district_id = '';
+  if (!selectId) {
+    addressForm.sub_district_id = '';
+    addressForm.village_id = '';
+    villages.value = [];
+  }
+};
+
+const fetchVillages = async (subDistrictId, selectId = null) => {
+  if (!subDistrictId) return;
+  const res = await axios.get(route('frontend.regions.villages', subDistrictId));
+  villages.value = res.data;
+  if (!selectId) addressForm.village_id = '';
+};
+
+const onVillageChange = () => {
+  const village = villages.value.find(v => v.id === addressForm.village_id);
+  if (village && village.postal_code) {
+    addressForm.postal_code = village.postal_code;
+  }
 };
 
 const submitAddress = () => {
@@ -243,7 +268,7 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
                   <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Default Shipping</p>
                   <div v-if="featuredAddress" class="space-y-1">
                     <h4 class="text-sm font-bold text-black">{{ featuredAddress.name }}</h4>
-                    <p class="text-xs text-gray-500 leading-relaxed">{{ featuredAddress.address }}, {{ featuredAddress.sub_district_name }}, {{ featuredAddress.district_name }}, {{ featuredAddress.province_name }}</p>
+                    <p class="text-xs text-gray-500 leading-relaxed">{{ featuredAddress.address }}, {{ featuredAddress.village_name }}, {{ featuredAddress.sub_district_name }}, {{ featuredAddress.district_name }}, {{ featuredAddress.province_name }}</p>
                   </div>
                   <p v-else class="text-xs text-gray-400 italic">No default address set</p>
                   <button @click="activeSection = 'addresses'" class="text-[10px] font-bold uppercase tracking-widest border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-all">Manage Addresses</button>
@@ -345,7 +370,7 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
                       <p class="text-xs text-gray-500 font-bold uppercase">{{ address.phone }}</p>
                       <p class="text-sm text-gray-600 leading-relaxed max-w-md">
                         {{ address.address }}<br />
-                        {{ address.sub_district_name }}, {{ address.district_name }}<br />
+                        {{ address.village_name }}, {{ address.sub_district_name }}, {{ address.district_name }}<br />
                         {{ address.province_name }} {{ address.postal_code }}
                       </p>
                     </div>
@@ -409,7 +434,7 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
 
                   <div class="space-y-2">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-black">Sub-district</label>
-                    <select v-model="addressForm.sub_district_id" :disabled="!addressForm.district_id" class="input-elegant appearance-none disabled:bg-gray-50">
+                    <select v-model="addressForm.sub_district_id" @change="fetchVillages(addressForm.sub_district_id)" :disabled="!addressForm.district_id" class="input-elegant appearance-none disabled:bg-gray-50">
                       <option value="" disabled>Select Sub-district</option>
                       <option v-for="sd in subDistricts" :key="sd.id" :value="sd.id">{{ sd.name }}</option>
                     </select>
@@ -417,8 +442,24 @@ const featuredAddress = computed(() => props.addresses?.find(a => a.is_featured)
                   </div>
 
                   <div class="space-y-2">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-black">Village</label>
+                    <select v-model="addressForm.village_id" @change="onVillageChange" :disabled="!addressForm.sub_district_id" class="input-elegant appearance-none disabled:bg-gray-50">
+                      <option value="" disabled>Select Village</option>
+                      <option v-for="v in villages" :key="v.id" :value="v.id">{{ v.name }}</option>
+                    </select>
+                    <p v-if="addressForm.errors.village_id" class="text-xs text-red-500">{{ addressForm.errors.village_id }}</p>
+                  </div>
+
+                  <div class="space-y-2">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-black">Postal Code</label>
-                    <input v-model="addressForm.postal_code" type="text" class="input-elegant" />
+                    <input
+                      v-model="addressForm.postal_code"
+                      type="text"
+                      inputmode="numeric"
+                      @input="addressForm.postal_code = addressForm.postal_code.replace(/\D/g, '')"
+                      class="input-elegant"
+                      placeholder="12345"
+                    />
                     <p v-if="addressForm.errors.postal_code" class="text-xs text-red-500">{{ addressForm.errors.postal_code }}</p>
                   </div>
                 </div>

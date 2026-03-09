@@ -11,11 +11,26 @@ class Warehouse extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sub_district_id', 'name', 'address', 'contact_name', 'contact_phone', 'courier', 'description', 'is_active'];
+    protected $fillable = ['sub_district_id', 'province_id', 'district_id', 'village_id', 'postal_code', 'name', 'address', 'contact_name', 'contact_phone', 'courier', 'description', 'is_active'];
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(District::class);
+    }
 
     public function subDistrict(): BelongsTo
     {
         return $this->belongsTo(SubDistrict::class);
+    }
+
+    public function village(): BelongsTo
+    {
+        return $this->belongsTo(Village::class);
     }
 
     public function scopeActive($query)

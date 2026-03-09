@@ -9,21 +9,29 @@ use App\Models\CustomerAddress;
 use App\Models\Province;
 use App\Models\District;
 use App\Models\SubDistrict;
+use App\Services\RegionalService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
+    protected $regionalService;
+
+    public function __construct(RegionalService $regionalService)
+    {
+        $this->regionalService = $regionalService;
+    }
+
     public function __invoke(Request $request)
     {
         $customer = Auth::guard('customer')->user();
-        $customer->load(['address.province', 'address.district', 'address.subDistrict']);
+        $customer->load(['address.province', 'address.district', 'address.subDistrict', 'address.village']);
 
         return Inertia::render('Account/Profile', [
             'user' => CustomerResource::make($customer),
             'addresses' => AddressResource::collection($customer->address),
-            'provinces' => Province::all()->map(fn($p) => ['id' => $p->id, 'name' => $p->name]),
+            'provinces' => $this->regionalService->getProvinces()->map(fn($p) => ['id' => $p->id, 'name' => $p->name]),
         ]);
     }
 
@@ -69,8 +77,9 @@ class AccountController extends Controller
             'province_id' => 'required|exists:provinces,id',
             'district_id' => 'required|exists:districts,id',
             'sub_district_id' => 'required|exists:sub_districts,id',
+            'village_id' => 'required|exists:villages,id',
             'address' => 'required|string',
-            'postal_code' => 'required|string|max:10',
+            'postal_code' => 'required|numeric',
             'is_featured' => 'boolean',
         ]);
 
@@ -95,8 +104,9 @@ class AccountController extends Controller
             'province_id' => 'required|exists:provinces,id',
             'district_id' => 'required|exists:districts,id',
             'sub_district_id' => 'required|exists:sub_districts,id',
+            'village_id' => 'required|exists:villages,id',
             'address' => 'required|string',
-            'postal_code' => 'required|string|max:10',
+            'postal_code' => 'required|numeric',
             'is_featured' => 'boolean',
         ]);
 
@@ -126,11 +136,20 @@ class AccountController extends Controller
 
     public function getDistricts(Province $province)
     {
-        return response()->json($province->districts()->get(['id', 'name']));
+        return response()->json($this->regionalService->getDistricts($province->id)->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
     }
 
     public function getSubDistricts(District $district)
     {
-        return response()->json($district->subDistricts()->get(['id', 'name']));
+        return response()->json($this->regionalService->getSubdistricts($district->id)->map(fn($s) => ['id' => $s->id, 'name' => $s->name]));
+    }
+
+    public function getVillages(SubDistrict $subDistrict)
+    {
+        return response()->json($this->regionalService->getVillages($subDistrict->id)->map(fn($v) => [
+            'id' => $v->id,
+            'name' => $v->name,
+            'postal_code' => $v->postal_code,
+        ]));
     }
 }

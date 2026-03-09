@@ -28,6 +28,8 @@ class AddressResource extends JsonResource
             'district_name' => $this->district?->name,
             'sub_district_id' => $this->sub_district_id,
             'sub_district_name' => $this->subDistrict?->name,
+            'village_id' => $this->village_id,
+            'village_name' => $this->village?->name,
         ];
     }
 }

@@ -44,4 +44,9 @@ class Transaction extends Model
     {
         return $this->belongsTo(CustomerAddress::class, 'customer_address_id');
     }
+
+    public function shippingDetails(): HasMany
+    {
+        return $this->hasMany(TransactionShippingDetail::class);
+    }
 }

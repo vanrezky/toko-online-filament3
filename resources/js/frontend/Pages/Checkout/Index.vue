@@ -1,6 +1,8 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useForm, Link } from "@inertiajs/vue3";
+import axios from "axios";
+import { Loader2 } from "lucide-vue-next";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
 import { Truck, CreditCard, ShoppingBag, ChevronRight, MapPin } from "lucide-vue-next";
 
@@ -12,15 +14,58 @@ const props = defineProps({
 
 const form = useForm({
     address_id: props.addresses?.find(a => a.is_featured)?.id || props.addresses?.[0]?.id || null,
-    shipping_method: props.shippingMethods?.[0]?.id || null,
+    shipping_methods: {}, // mapping warehouse_id => chosen_option
     payment_method: "bank_transfer",
     notes: "",
 });
 
+const shippingResults = ref([]);
+const isLoadingShipping = ref(false);
+
+const fetchShippingCosts = async () => {
+    if (!form.address_id) return;
+    
+    isLoadingShipping.value = true;
+    try {
+        const response = await axios.get(route('frontend.checkout.shipping-costs'), {
+            params: { address_id: form.address_id }
+        });
+        shippingResults.value = response.data;
+        
+        // Initialize chosen methods with first option if not set
+        const methods = { ...form.shipping_methods };
+        response.data.forEach(item => {
+            if (item.options && item.options.length > 0) {
+                // Only set if not already selected or if we want to reset
+                methods[item.warehouse_id] = {
+                    ...item.options[0],
+                    weight: item.weight
+                };
+            }
+        });
+        form.shipping_methods = methods;
+    } catch (error) {
+        console.error("Failed to fetch shipping costs", error);
+    } finally {
+        isLoadingShipping.value = false;
+    }
+};
+
+watch(() => form.address_id, () => {
+    fetchShippingCosts();
+});
+
+onMounted(() => {
+    if (form.address_id) {
+        fetchShippingCosts();
+    }
+});
+
 const items = computed(() => props.cart?.items || []);
 const subtotal = computed(() => items.value.reduce((total, item) => total + (item.price * item.quantity), 0));
-const selectedShipping = computed(() => props.shippingMethods?.find(m => m.id === form.shipping_method));
-const shippingFee = computed(() => selectedShipping.value?.price || 0);
+const shippingFee = computed(() => {
+    return Object.values(form.shipping_methods).reduce((sum, method) => sum + (method.price || 0), 0);
+});
 const total = computed(() => subtotal.value + shippingFee.value);
 
 const formatCurrency = (amount) => {
@@ -91,36 +136,56 @@ const submitOrder = () => {
 
                             <!-- Shipping Method Section -->
                             <section class="space-y-6 bg-white p-8 shadow-sm border border-gray-100">
-                                <div class="mb-6 flex items-center space-x-3">
-                                    <div class="flex h-8 w-8 items-center justify-center bg-black text-sm font-bold text-white">2</div>
-                                    <h2 class="text-lg font-bold uppercase tracking-widest text-black">Shipping Method</h2>
+                                <div class="mb-6 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex h-8 w-8 items-center justify-center bg-black text-sm font-bold text-white">2</div>
+                                        <h2 class="text-lg font-bold uppercase tracking-widest text-black">Shipping Method</h2>
+                                    </div>
+                                    <div v-if="isLoadingShipping" class="flex items-center space-x-2">
+                                        <Loader2 class="h-4 w-4 animate-spin text-gray-400" />
+                                        <span class="text-[10px] uppercase font-bold text-gray-400">Updating Costs...</span>
+                                    </div>
                                 </div>
 
-                                <div class="space-y-3">
-                                    <label
-                                        v-for="method in shippingMethods"
-                                        :key="method.id"
-                                        class="flex cursor-pointer items-center justify-between border p-5 transition-all hover:bg-gray-50"
-                                        :class="form.shipping_method === method.id ? 'border-black' : 'border-gray-100'"
-                                    >
-                                        <div class="flex items-center">
-                                            <div class="relative flex items-center justify-center">
-                                                <input
-                                                    type="radio"
-                                                    :value="method.id"
-                                                    v-model="form.shipping_method"
-                                                    class="h-4 w-4 border-gray-300 text-black focus:ring-black rounded-none"
-                                                />
-                                            </div>
-                                            <div class="ml-4">
-                                                <span class="block text-xs font-bold text-black uppercase tracking-widest">{{ method.name }}</span>
-                                                <span class="text-[10px] text-gray-400 uppercase">Estimated arrival in {{ method.id === 'standard' ? '3-5' : '1-2' }} days</span>
-                                            </div>
+                                <div v-if="shippingResults.length > 0" class="space-y-8">
+                                    <div v-for="warehouse in shippingResults" :key="warehouse.warehouse_id" class="space-y-4">
+                                        <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50 pb-2">
+                                            Shipping from {{ warehouse.warehouse_name }}
+                                        </h3>
+                                        <div class="space-y-2">
+                                            <label
+                                                v-for="option in warehouse.options"
+                                                :key="option.courier_code"
+                                                class="flex cursor-pointer items-center justify-between border p-5 transition-all hover:bg-gray-50"
+                                                :class="form.shipping_methods[warehouse.warehouse_id]?.courier_code === option.courier_code ? 'border-black' : 'border-gray-100'"
+                                            >
+                                                <div class="flex items-center">
+                                                    <div class="relative flex items-center justify-center">
+                                                        <input
+                                                            type="radio"
+                                                            :name="'shipping_' + warehouse.warehouse_id"
+                                                            @change="form.shipping_methods[warehouse.warehouse_id] = { ...option, weight: warehouse.weight }"
+                                                            :checked="form.shipping_methods[warehouse.warehouse_id]?.courier_code === option.courier_code"
+                                                            class="h-4 w-4 border-gray-300 text-black focus:ring-black rounded-none"
+                                                        />
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <span class="block text-xs font-bold text-black uppercase tracking-widest">{{ option.courier_name }}</span>
+                                                        <span class="text-[10px] text-gray-400 uppercase">Estimated arrival: {{ option.estimation }}</span>
+                                                    </div>
+                                                </div>
+                                                <span class="text-sm font-bold text-black">{{ formatCurrency(option.price) }}</span>
+                                            </label>
                                         </div>
-                                        <span class="text-sm font-bold text-black">{{ formatCurrency(method.price) }}</span>
-                                    </label>
+                                    </div>
                                 </div>
-                                <p v-if="form.errors.shipping_method" class="text-xs text-red-500">{{ form.errors.shipping_method }}</p>
+                                <div v-else-if="!isLoadingShipping && form.address_id" class="p-8 text-center border border-dashed border-gray-100">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">No shipping options available for this address.</p>
+                                </div>
+                                <div v-else-if="!form.address_id" class="p-8 text-center border border-dashed border-gray-100">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Please select a shipping address first.</p>
+                                </div>
+                                <p v-if="form.errors.shipping_methods" class="text-xs text-red-500">{{ form.errors.shipping_methods }}</p>
                             </section>
 
                             <!-- Payment Method Section -->

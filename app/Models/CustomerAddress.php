@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CustomerAddress extends Model
 {
     use HasFactory, HasModelTrait, SoftDeletes;
-    protected $fillable = ['customer_id', 'is_active', 'is_featured', 'province_id', 'district_id', 'sub_district_id', 'name', 'phone', 'address', 'postal_code'];
+    protected $fillable = ['customer_id', 'is_active', 'is_featured', 'province_id', 'district_id', 'sub_district_id', 'village_id', 'name', 'phone', 'address', 'postal_code'];
 
     public function customer(): BelongsTo
     {
@@ -31,5 +31,10 @@ class CustomerAddress extends Model
     public function subDistrict(): BelongsTo
     {
         return $this->belongsTo(SubDistrict::class);
+    }
+
+    public function village(): BelongsTo
+    {
+        return $this->belongsTo(Village::class);
     }
 }
