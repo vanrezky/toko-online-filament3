@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Village extends Model
 {
@@ -15,4 +16,9 @@ class Village extends Model
         'rajaongkir',
         'apicoid_code',
     ];
+
+    public function subDistrict(): BelongsTo
+    {
+        return $this->belongsTo(SubDistrict::class);
+    }
 }
