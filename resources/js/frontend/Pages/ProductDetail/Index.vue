@@ -66,8 +66,30 @@ const selectedVariant = computed(() => {
 });
 
 const displayPrice = computed(() => {
+  if (props.product.wholesales && props.product.wholesales.length > 0) {
+    const applicableWholesale = [...props.product.wholesales]
+      .sort((a, b) => b.min_qty - a.min_qty)
+      .find(w => quantity.value >= w.min_qty);
+    
+    if (applicableWholesale) return applicableWholesale.price;
+  }
+
   if (selectedVariant.value) return selectedVariant.value.price;
   return props.product.sale_price || props.product.price;
+});
+
+const activeWholesale = computed(() => {
+  if (!props.product.wholesales || props.product.wholesales.length === 0) return null;
+  return [...props.product.wholesales]
+    .sort((a, b) => b.min_qty - a.min_qty)
+    .find(w => quantity.value >= w.min_qty);
+});
+
+const nextWholesale = computed(() => {
+  if (!props.product.wholesales || props.product.wholesales.length === 0) return null;
+  return [...props.product.wholesales]
+    .sort((a, b) => a.min_qty - b.min_qty)
+    .find(w => quantity.value < w.min_qty);
 });
 
 const displayStock = computed(() => {
@@ -167,12 +189,20 @@ const addToCart = () => {
                 {{ product.name }}
               </h1>
               <div class="flex items-center space-x-4">
-                <template v-if="isSale">
+                <template v-if="isSale && !activeWholesale">
                   <span class="text-2xl font-bold text-black">{{ product.sale_price }}</span>
                   <span class="text-lg text-gray-400 line-through">{{ product.price }}</span>
                   <span v-if="product.discount_percentage" class="bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">{{ product.discount_percentage }}% OFF</span>
                 </template>
-                <span v-else class="text-2xl font-bold text-black">{{ displayPrice }}</span>
+                <div v-else class="flex flex-col">
+                  <span class="text-2xl font-bold text-black">{{ displayPrice }}</span>
+                  <p v-if="activeWholesale" class="text-[10px] font-bold text-green-600 uppercase tracking-widest mt-1">
+                    Wholesale Price Applied (Min. {{ activeWholesale.min_qty }} units)
+                  </p>
+                  <p v-else-if="nextWholesale" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                    Wholesale price ready minimum {{ nextWholesale.min_qty }} units for {{ nextWholesale.price }}
+                  </p>
+                </div>
               </div>
             </div>
 

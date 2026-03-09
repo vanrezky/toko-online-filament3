@@ -29,7 +29,9 @@ class ProductResource extends JsonResource
             'stock' => $this->stock,
             'weight' => $this->weight,
             'sale_price' => $this->sale_price ? money($this->sale_price)->format() : null,
+            'raw_sale_price' => $this->sale_price,
             'price' => money($this->price)->format(),
+            'raw_price' => $this->price,
             'discount_percentage' => $discountPercentage,
             'min_order' => $this->min_order,
             'thumbnail' => $this->getFirstMediaUrl(),
@@ -52,6 +54,13 @@ class ProductResource extends JsonResource
                             'option' => $attr->productAttributeOption?->name,
                         ];
                     }),
+                ];
+            }),
+            'wholesales' => $this->wholesales->map(function ($wholesale) {
+                return [
+                    'min_qty' => $wholesale->min_qty,
+                    'price' => money($wholesale->price)->format(),
+                    'raw_price' => $wholesale->price,
                 ];
             }),
             'faqs' => ProductFaqResource::collection($this->faqs),

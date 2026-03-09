@@ -58,11 +58,11 @@ class CartController extends Controller
         $variant = null;
         if ($request->product_variant_id) {
             $variant = ProductVariant::where('uuid', $request->product_variant_id)->first();
-            $price = $variant->price;
-        } else if ($product->sale_price) {
-            $price = $product->sale_price;
-            $discount = $product->price - $product->sale_price;
         }
+
+        $priceInfo = $product->calculatePrice($request->quantity, $variant);
+        $price = $priceInfo['price'];
+        $discount = $priceInfo['discount'];
 
 
         $cart = Cart::firstOrCreate(
@@ -75,8 +75,13 @@ class CartController extends Controller
             ->first();
 
         if ($item) {
-            $item->increment('quantity', $request->quantity);
-            // Optionally update price if it changed, but usually we keep the price at the time of adding
+            $newQuantity = $item->quantity + $request->quantity;
+            $priceInfo = $product->calculatePrice($newQuantity, $variant);
+            $item->update([
+                'quantity' => $newQuantity,
+                'price' => $priceInfo['price'],
+                'discount' => $priceInfo['discount'],
+            ]);
         } else {
             $cart->items()->create([
                 'product_id' => $product->id,
@@ -96,7 +101,13 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $item->update(['quantity' => $request->quantity]);
+        $priceInfo = $item->product->calculatePrice($request->quantity, $item->productVariant);
+
+        $item->update([
+            'quantity' => $request->quantity,
+            'price' => $priceInfo['price'],
+            'discount' => $priceInfo['discount'],
+        ]);
 
         return redirect()->back()->with('success', 'Cart updated successfully.');
     }

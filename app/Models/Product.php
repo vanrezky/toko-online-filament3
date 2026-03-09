@@ -110,4 +110,25 @@ class Product extends Model implements HasMedia
     {
         return $this->hasMany(ProductAttribute::class);
     }
+    public function calculatePrice(int $quantity, ?ProductVariant $variant = null): array
+    {
+        $price = $variant ? $variant->price : ($this->sale_price ?: $this->price);
+        $discount = (!$variant && $this->sale_price) ? ($this->price - $this->sale_price) : 0;
+
+        // Check for wholesale pricing
+        $wholesale = $this->wholesales()
+            ->where('min_qty', '<=', $quantity)
+            ->orderBy('min_qty', 'desc')
+            ->first();
+
+        if ($wholesale) {
+            $price = $wholesale->price;
+            $discount = 0; // Wholesale price usually doesn't stack with sale price
+        }
+
+        return [
+            'price' => $price,
+            'discount' => $discount
+        ];
+    }
 }
