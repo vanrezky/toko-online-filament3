@@ -10,7 +10,7 @@ class SubDistrict extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['district_id', 'name', 'postal_code', 'rajaongkir', 'postal_code'];
+    protected $fillable = ['district_id', 'name', 'postal_code', 'rajaongkir', 'apicoid_code'];
 
     public function district(): BelongsTo
     {

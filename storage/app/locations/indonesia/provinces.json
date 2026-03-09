@@ -168,5 +168,25 @@
     "id": 34,
     "name": "Sumatera Utara",
     "rajaongkir": 34
+  },
+  {
+    "id": 35,
+    "name": "Papua Selatan",
+    "rajaongkir": null
+  },
+  {
+    "id": 36,
+    "name": "Papua Tengah",
+    "rajaongkir": null
+  },
+  {
+    "id": 37,
+    "name": "Papua Pegunungan",
+    "rajaongkir": null
+  },
+  {
+    "id": 38,
+    "name": "Papua Barat Daya",
+    "rajaongkir": null
   }
 ]

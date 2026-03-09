@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('villages', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('sub_district_id')->constrained()->cascadeOnDelete();
             $table->string('name', 100);
             $table->string('postal_code', 10)->nullable();
             $table->string('rajaongkir')->nullable();

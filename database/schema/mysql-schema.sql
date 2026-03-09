@@ -185,6 +185,25 @@ CREATE TABLE `countries` (
   UNIQUE KEY `countries_iso3_unique` (`iso3`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `couriers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `couriers` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fullname` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `logo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `rajaongkir_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `apicoid_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `customer_addresses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -202,6 +221,7 @@ CREATE TABLE `customer_addresses` (
   `is_featured` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `customer_addresses_customer_id_foreign` (`customer_id`),
   KEY `customer_addresses_province_id_foreign` (`province_id`),
@@ -246,12 +266,13 @@ DROP TABLE IF EXISTS `districts`;
 CREATE TABLE `districts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `province_id` bigint unsigned NOT NULL,
-  `type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'district/city',
+  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'district/city',
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rajaongkir` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `postal_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `apicoid_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `districts_province_id_foreign` (`province_id`),
   CONSTRAINT `districts_province_id_foreign` FOREIGN KEY (`province_id`) REFERENCES `provinces` (`id`)
@@ -744,6 +765,7 @@ CREATE TABLE `provinces` (
   `rajaongkir` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `apicoid_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `provinces_country_id_foreign` (`country_id`),
   CONSTRAINT `provinces_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE CASCADE
@@ -830,6 +852,7 @@ CREATE TABLE `sub_districts` (
   `postal_code` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `apicoid_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `sub_districts_district_id_foreign` (`district_id`),
   CONSTRAINT `sub_districts_district_id_foreign` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE CASCADE
@@ -972,6 +995,23 @@ CREATE TABLE `users` (
   UNIQUE KEY `users_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `villages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `villages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `sub_district_id` bigint unsigned NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `postal_code` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rajaongkir` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `apicoid_code` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `villages_sub_district_id_foreign` (`sub_district_id`),
+  CONSTRAINT `villages_sub_district_id_foreign` FOREIGN KEY (`sub_district_id`) REFERENCES `sub_districts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `vouchers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -1107,3 +1147,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (55,'2026_03_04_204
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (56,'2026_03_04_204733_add_uuid_to_transaction_products_table',5);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (57,'2026_03_04_204821_add_uuid_to_product_variants_table',6);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (58,'2026_03_04_204943_add_payment_method_to_transactions_table',7);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (59,'2026_03_05_053459_add_deleted_at_column_to_customer_addresses_table',8);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (62,'2026_03_06_233129_create_couriers_table',9);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (63,'2026_03_07_000217_create_courier_settings',10);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (65,'2026_03_07_020450_create_villages_table',11);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (66,'2026_03_07_020005_add_apicoid__code_to_provinces_table',12);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (69,'2026_03_07_020458_create_villages_table',13);

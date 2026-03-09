@@ -12,7 +12,7 @@ class District extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['province_id', 'type', 'name', 'rajaongkir', 'postal_code'];
+    protected $fillable = ['province_id', 'type', 'name', 'rajaongkir', 'postal_code', 'apicoid_code'];
 
     public function province(): BelongsTo
     {

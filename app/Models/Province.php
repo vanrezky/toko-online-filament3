@@ -12,7 +12,7 @@ class Province extends Model
 {
     use HasFactory;
 
-    protected $fillable  = ['country_id', 'name', 'rajaongkir'];
+    protected $fillable  = ['country_id', 'name', 'rajaongkir', 'apicoid_code'];
 
 
     public function setNameAttribute($name)
