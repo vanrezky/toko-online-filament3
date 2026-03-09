@@ -112,7 +112,9 @@ const addToCart = () => {
   }, {
     onSuccess: () => {
       // router.visit(route('frontend.cart')); // Redirect to cart on success if preferred
-    }
+    },
+    preserveScroll: true,
+    preserveState: true,
   });
 };
 </script>

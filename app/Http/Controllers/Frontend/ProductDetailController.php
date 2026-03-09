@@ -11,7 +11,6 @@ use Inertia\Inertia;
 class ProductDetailController extends Controller
 {
     public function __invoke(Request $request,  Product $product)
-
     {
         $product->loadMissing([
             'category',
