@@ -15,9 +15,20 @@ class ProductSimpleResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $customer = auth('customer')->user();
+        $resellerId = $customer?->reseller_id;
+
+        $targetPrice = $this->price;
+        if ($resellerId) {
+            $resellerPrice = $this->resellerPrices->where('reseller_id', $resellerId)->first();
+            if ($resellerPrice) {
+                $targetPrice = $resellerPrice->price;
+            }
+        }
+
         $discountPercentage = null;
-        if ($this->sale_price && $this->price > 0) {
-            $discountPercentage = round((($this->price - $this->sale_price) / $this->price) * 100);
+        if ($this->sale_price && $targetPrice > 0) {
+            $discountPercentage = round((($this->sale_price - $targetPrice) / $this->sale_price) * 100);
         }
 
         return [
@@ -30,7 +41,7 @@ class ProductSimpleResource extends JsonResource
             'code' => $this->code,
             'stock' => $this->stock,
             'sale_price' => $this->sale_price ? money($this->sale_price)->format() : null,
-            'price' => money($this->price)->format(),
+            'price' => money($targetPrice)->format(),
             'discount_percentage' => $discountPercentage,
             'min_order' => $this->min_order,
             'thumbnail' => $this->resource->getMedia()->first()?->getUrl('thumb'),

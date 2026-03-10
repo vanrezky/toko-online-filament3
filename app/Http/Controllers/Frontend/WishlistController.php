@@ -19,7 +19,7 @@ class WishlistController extends Controller
 
         if ($customer) {
             $wishlistItems = Wishlist::where('customer_id', $customer->id)
-                ->with(['product.media', 'product.category'])
+                ->with(['product.media', 'product.category', 'product.resellerPrices', 'product.wholesales'])
                 ->get()
                 ->pluck('product')
                 ->filter()

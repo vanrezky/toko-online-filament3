@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $query = Product::active()->with('media', 'category');
+        $query = Product::active()->with(['media', 'category', 'resellerPrices', 'wholesales']);
 
         if ($request->filled('category')) {
             $query->whereHas('category', function ($q) use ($request) {

@@ -22,14 +22,16 @@ class HomeController extends Controller
         $flashSales = Flashsale::active()->with([
             'products' => fn($Q) => $Q->limit(4),
             'products.product.media',
-            'products.product.category'
+            'products.product.category',
+            'products.product.resellerPrices',
+            'products.product.wholesales'
         ])->first();
 
-        $newArrivals = Product::active()->with('media', 'category')->latest()->limit(4)->get();
+        $newArrivals = Product::active()->with(['media', 'category', 'resellerPrices', 'wholesales'])->latest()->limit(4)->get();
 
         $featuredCategories = Category::active()
             ->featured()
-            ->with(['products' => fn($q) => $q->active()->with('media')->limit(6)])
+            ->with(['products' => fn($q) => $q->active()->with(['media', 'resellerPrices', 'wholesales'])->limit(6)])
             ->get();
 
         return Inertia::render('Home/Index', [

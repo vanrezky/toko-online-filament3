@@ -14,10 +14,23 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $discountPercentage = null;
-        if ($this->sale_price && $this->price > 0) {
-            $discountPercentage = round((($this->price - $this->sale_price) / $this->price) * 100);
+        $customer = auth('customer')->user();
+        $resellerId = $customer?->reseller_id;
+
+        $targetPrice = $this->price;
+        if ($resellerId) {
+            $resellerPrice = $this->resellerPrices->where('reseller_id', $resellerId)->first();
+            if ($resellerPrice) {
+                $targetPrice = $resellerPrice->price;
+            }
         }
+
+        $discountPercentage = null;
+        if ($this->sale_price && $targetPrice > 0) {
+            $discountPercentage = round((($this->sale_price - $targetPrice) / $this->sale_price) * 100);
+        }
+
+        $wholesales = $this->wholesales->where('reseller_id', $resellerId);
 
         return [
             'id' => $this->uuid,
@@ -30,8 +43,8 @@ class ProductResource extends JsonResource
             'weight' => $this->weight,
             'sale_price' => $this->sale_price ? money($this->sale_price)->format() : null,
             'raw_sale_price' => $this->sale_price,
-            'price' => money($this->price)->format(),
-            'raw_price' => $this->price,
+            'price' => money($targetPrice)->format(),
+            'raw_price' => $targetPrice,
             'discount_percentage' => $discountPercentage,
             'min_order' => $this->min_order,
             'thumbnail' => $this->getFirstMediaUrl(),
@@ -40,7 +53,7 @@ class ProductResource extends JsonResource
                 return $media->getUrl('thumb');
             }),
             'warehouse' => WarehouseResource::make($this->warehouse),
-            'variants' => $this->productVariants->map(function ($variant) {
+            'variants' => $this->productVariants->map(function ($variant) use ($targetPrice) {
                 return [
                     'id' => $variant->uuid,
                     'variant_name' => $variant->variant_name,
@@ -56,15 +69,15 @@ class ProductResource extends JsonResource
                     }),
                 ];
             }),
-            'wholesales' => $this->wholesales->count() > 0
-                ? $this->wholesales->map(fn($w) => [
+            'wholesales' => $wholesales->count() > 0
+                ? $wholesales->map(fn($w) => [
                     'min_qty' => $w->min_qty,
                     'price' => money($w->price)->format(),
                     'raw_price' => $w->price,
                 ])->prepend([
                     'min_qty' => (int) ($this->min_order ?: 1),
-                    'price' => money($this->sale_price ?: $this->price)->format(),
-                    'raw_price' => $this->sale_price ?: $this->price,
+                    'price' => money($targetPrice)->format(),
+                    'raw_price' => $targetPrice,
                 ])->unique('min_qty')->sortBy('min_qty')->values()
                 : [],
             'faqs' => ProductFaqResource::collection($this->faqs),
