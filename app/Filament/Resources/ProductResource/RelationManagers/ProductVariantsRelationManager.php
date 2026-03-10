@@ -67,7 +67,7 @@ class ProductVariantsRelationManager extends RelationManager
                             ])->createOptionUsing(fn(array $data): int => $this->createAttribute($data))
                             ->columnSpanFull(),
 
-                            Repeater::make('product_attribute_options')
+                        Repeater::make('product_attribute_options')
                             ->label(__('Options'))
                             ->hidden(fn(Get $get) => empty($get('product_attribute_id')))
                             ->simple(
@@ -118,6 +118,7 @@ class ProductVariantsRelationManager extends RelationManager
                     ->label(__('Price'))
                     ->numeric()
                     ->required()
+                    ->default(fn() => $this->getOwnerRecord()->price)
                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                 TextInput::make('stock')
                     ->label(__('Stock'))

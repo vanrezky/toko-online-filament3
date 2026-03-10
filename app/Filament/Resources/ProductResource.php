@@ -135,6 +135,7 @@ class ProductResource extends Resource
                                         ->label(__('Normal Price'))
                                         ->helperText(__('Normal After discount. just enter  the number only. e.g: 100000'))
                                         ->required()
+                                        ->live(onBlur: true)
                                         ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
                                     Forms\Components\TextInput::make('afiliate_price')
                                         ->rules('nullable|numeric')
@@ -268,7 +269,7 @@ class ProductResource extends Resource
                                                     ->form([
                                                         Forms\Components\Repeater::make('wholesales')
                                                             ->default(fn($record): array => $record ? $record->wholesales->toArray() : [])
-                                                            ->schema(self::getwholesalesSchema())
+                                                            ->schema(self::getWholesalesSchema())
                                                             ->hiddenLabel()
                                                             ->grid(['lg' => 2])
 
@@ -280,7 +281,7 @@ class ProductResource extends Resource
                                         Forms\Components\TextInput::make('price')
                                             ->required()
                                             ->numeric()
-                                            ->default(0)
+                                            ->default(fn(Get $get) => $get('../../price'))
                                             ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0),
 
                                     ])->grid(['md' => 2]),
@@ -450,7 +451,7 @@ class ProductResource extends Resource
         return auth()->user()->can('update_product');
     }
 
-    public static function getwholesalesSchema(): array
+    public static function getWholesalesSchema(): array
     {
         return [
             Forms\Components\TextInput::make('min_qty')
@@ -462,7 +463,7 @@ class ProductResource extends Resource
                 ->label(__('Price per item'))
                 ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 0)
                 ->required()
-                ->default(0)
+                ->default(fn(Get $get) => $get('../../price'))
                 ->distinct()
         ];
     }

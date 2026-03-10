@@ -66,27 +66,36 @@ const selectedVariant = computed(() => {
 });
 
 const displayPrice = computed(() => {
+  // If we have a selected variant, we use its price as the base price
+  let basePrice = selectedVariant.value ? selectedVariant.value.price : (props.product.sale_price || props.product.price);
+  
   if (props.product.wholesales && props.product.wholesales.length > 0) {
+    // Get real wholesale tiers (those with quantity higher than min_order)
+    const minOrder = props.product.min_order || 1;
     const applicableWholesale = [...props.product.wholesales]
+      .filter(w => w.min_qty > minOrder) // Only tiers that are actually wholesale price drops
       .sort((a, b) => b.min_qty - a.min_qty)
       .find(w => quantity.value >= w.min_qty);
     
     if (applicableWholesale) return applicableWholesale.price;
   }
 
-  if (selectedVariant.value) return selectedVariant.value.price;
-  return props.product.sale_price || props.product.price;
+  return basePrice;
 });
 
 const activeWholesale = computed(() => {
   if (!props.product.wholesales || props.product.wholesales.length === 0) return null;
+  const minOrder = props.product.min_order || 1;
+  // An active wholesale is a tier > minOrder that the user has reached
   return [...props.product.wholesales]
+    .filter(w => w.min_qty > minOrder)
     .sort((a, b) => b.min_qty - a.min_qty)
     .find(w => quantity.value >= w.min_qty);
 });
 
 const nextWholesale = computed(() => {
   if (!props.product.wholesales || props.product.wholesales.length === 0) return null;
+  // Next wholesale is the first tier higher than current quantity
   return [...props.product.wholesales]
     .sort((a, b) => a.min_qty - b.min_qty)
     .find(w => quantity.value < w.min_qty);

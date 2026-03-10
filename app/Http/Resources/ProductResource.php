@@ -56,13 +56,17 @@ class ProductResource extends JsonResource
                     }),
                 ];
             }),
-            'wholesales' => $this->wholesales->map(function ($wholesale) {
-                return [
-                    'min_qty' => $wholesale->min_qty,
-                    'price' => money($wholesale->price)->format(),
-                    'raw_price' => $wholesale->price,
-                ];
-            }),
+            'wholesales' => $this->wholesales->count() > 0
+                ? $this->wholesales->map(fn($w) => [
+                    'min_qty' => $w->min_qty,
+                    'price' => money($w->price)->format(),
+                    'raw_price' => $w->price,
+                ])->prepend([
+                    'min_qty' => (int) ($this->min_order ?: 1),
+                    'price' => money($this->sale_price ?: $this->price)->format(),
+                    'raw_price' => $this->sale_price ?: $this->price,
+                ])->unique('min_qty')->sortBy('min_qty')->values()
+                : [],
             'faqs' => ProductFaqResource::collection($this->faqs),
             'meta' => MetaResource::make($this->whenLoaded('meta')),
         ];
