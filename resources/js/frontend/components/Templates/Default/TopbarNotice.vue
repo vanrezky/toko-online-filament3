@@ -2,20 +2,25 @@
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 
-// Mock promotions for now, or fetch from settings/props
-const promotions = [
-  { id: 1, text: 'Free Shipping Worldwide', link: '#' },
-  { id: 2, text: 'Flash Sale ends in 2 hours', link: '#' }
-];
+const promotions = computed(() => {
+  const promos = usePage().props.promotions;
+  return (Array.isArray(promos) ? promos : promos?.data || []).filter(p => p.position === 'topbar');
+});
 </script>
 
 <template>
-  <div class="bg-black text-white py-2 text-center text-xs sm:text-sm font-medium">
+  <div v-if="promotions.length > 0" class="bg-black text-white py-2 text-center text-xs sm:text-sm font-medium">
     <div class="container mx-auto px-4 overflow-hidden relative h-5">
       <div class="animate-marquee whitespace-nowrap">
         <span v-for="(promo, index) in promotions" :key="promo.id" class="mx-8">
-          {{ promo.text }}
-          <a v-if="promo.link !== '#'" :href="promo.link" class="underline ml-2">Shop Now</a>
+          <component 
+            :is="promo.target_link ? 'a' : 'span'" 
+            :href="promo.target_link" 
+            :target="promo.target_anchor"
+            class="hover:underline cursor-pointer"
+          >
+            {{ promo.title }}
+          </component>
         </span>
       </div>
     </div>

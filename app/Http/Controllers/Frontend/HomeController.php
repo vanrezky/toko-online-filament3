@@ -7,9 +7,11 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\FlashsaleResource;
 use App\Http\Resources\ProductSimpleResource;
 use App\Http\Resources\SliderResource;
+use App\Http\Resources\PromotionResource;
 use App\Models\Category;
 use App\Models\Flashsale;
 use App\Models\Product;
+use App\Models\Promotion;
 use App\Models\Slider;
 use Inertia\Inertia;
 

@@ -6,10 +6,12 @@ use App\Enums\CartStatus;
 use App\Filament\Resources\UserResource;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CustomerResource;
+use App\Http\Resources\PromotionResource;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Page;
+use App\Models\Promotion;
 use App\Models\Wishlist;
 use App\Settings\GeneralSettings;
 use Illuminate\Http\Request;
@@ -100,6 +102,9 @@ class HandleInertiaRequests extends Middleware
                 'warning' => $request->session()->get('warning'),
                 'info' => $request->session()->get('info'),
             ],
+            'promotions' => PromotionResource::collection(
+                Promotion::active()->with('media')->get()
+            ),
         ]);
     }
 }

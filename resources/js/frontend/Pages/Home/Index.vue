@@ -4,15 +4,23 @@ import TemplateWrapper from '../../components/TemplateWrapper.vue';
 import HeroCarousel from '../../components/UI/HeroCarousel.vue';
 import ProductCard from '../../components/UI/ProductCard.vue';
 import FlashSaleCard from '../../components/UI/FlashSaleCard.vue';
-import { ChevronRight, Clock } from 'lucide-vue-next';
+import { ChevronRight, Clock, X } from 'lucide-vue-next';
 import { Link } from '@inertiajs/vue3';
+import PromotionBanner from '../../components/UI/PromotionBanner.vue';
 
 const props = defineProps({
   sliders: Array,
   flashsales: Object,
   newArrivals: Array,
   featuredCategories: Array,
+  promotions: [Array, Object],
 });
+
+const allPromos = computed(() => Array.isArray(props.promotions) ? props.promotions : props.promotions?.data || []);
+const heroPromos = computed(() => allPromos.value.filter(p => p.position === 'home_hero'));
+const sidebarPromos = computed(() => allPromos.value.filter(p => p.position === 'home_sidebar'));
+const popupPromos = computed(() => allPromos.value.filter(p => p.position === 'home_popup'));
+const showPopup = ref(false);
 
 // For countdown logic
 const timeLeft = ref({
@@ -44,6 +52,12 @@ const calculateTimeLeft = () => {
 onMounted(() => {
   calculateTimeLeft();
   setInterval(calculateTimeLeft, 1000);
+
+  if (popupPromos.value.length > 0) {
+    setTimeout(() => {
+      showPopup.value = true;
+    }, 3000);
+  }
 });
 </script>
 
@@ -51,6 +65,15 @@ onMounted(() => {
   <TemplateWrapper title="Home">
     <!-- Hero Section -->
     <HeroCarousel v-if="sliders && sliders.length > 0" :sliders="sliders" />
+
+    <!-- Promotions: Hero Position (New Section) -->
+    <section v-if="heroPromos.length > 0" class="py-12 border-b border-gray-100">
+      <div class="container mx-auto px-4 md:px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <PromotionBanner v-for="promo in heroPromos" :key="promo.id" :promotion="promo" class="aspect-[16/7] md:aspect-[21/9]" />
+        </div>
+      </div>
+    </section>
 
     <!-- Flash Sale -->
     <section v-if="flashsales && flashsales.products && flashsales.products.length > 0" class="py-12 md:py-20 bg-gray-50">
@@ -117,6 +140,15 @@ onMounted(() => {
       </div>
     </section>
 
+    <!-- Promotions: Sidebar Position (as a new standalone section to not break New Arrivals layout) -->
+    <section v-if="sidebarPromos.length > 0" class="py-12 bg-white">
+      <div class="container mx-auto px-4 md:px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+           <PromotionBanner v-for="promo in sidebarPromos" :key="promo.id" :promotion="promo" class="aspect-[4/5]" />
+        </div>
+      </div>
+    </section>
+
     <!-- Category Highlights -->
     <section v-for="category in featuredCategories" :key="category.id" class="py-12 md:py-20 border-t border-gray-100">
       <div class="container mx-auto px-4 md:px-6">
@@ -161,5 +193,35 @@ onMounted(() => {
         </div>
       </div>
     </section>
+
+    <!-- Popup Promotion Modal -->
+    <div v-if="showPopup && popupPromos.length > 0" class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/70 backdrop-blur-md">
+      <div class="relative bg-white max-w-lg w-full shadow-2xl overflow-hidden animate-zoom-in max-h-[85vh] flex flex-col">
+        <!-- Close Button -->
+        <button 
+          @click="showPopup = false" 
+          class="absolute top-3 right-3 z-[110] w-10 h-10 flex items-center justify-center bg-black/40 text-white hover:bg-black transition-all duration-300 rounded-full backdrop-blur-md border border-white/20 shadow-lg"
+        >
+          <X class="w-6 h-6" />
+        </button>
+
+        <div class="overflow-y-auto flex-grow">
+          <PromotionBanner 
+            :promotion="popupPromos[0]" 
+            :class="popupPromos[0].image_url ? 'aspect-auto' : 'aspect-square'" 
+          />
+        </div>
+      </div>
+    </div>
   </TemplateWrapper>
 </template>
+
+<style scoped>
+@keyframes zoom-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-zoom-in {
+  animation: zoom-in 0.4s ease-out forwards;
+}
+</style>

@@ -2,6 +2,7 @@
 import { Link, usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 import { Instagram, Facebook, Twitter, Mail } from "lucide-vue-next";
+import PromotionBanner from "../../UI/PromotionBanner.vue";
 
 const { props } = usePage();
 const settings = computed(() => props.settings);
@@ -16,10 +17,20 @@ const customerServiceLinks = [
 ];
 
 const companyLinks = computed(() => [...(usePage().props.menu?.footer || [])]);
+const footerPromos = computed(() => {
+  const promos = usePage().props.promotions;
+  return (Array.isArray(promos) ? promos : promos?.data || []).filter(p => p.position === 'footer');
+});
 </script>
 
 <template>
     <footer class="border-t border-gray-100 bg-white pb-8 pt-16">
+        <!-- Promotions: Footer Position (New Section) -->
+        <div v-if="footerPromos.length > 0" class="container mx-auto px-4 md:px-6 mb-12">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <PromotionBanner v-for="promo in footerPromos" :key="promo.id" :promotion="promo" class="aspect-[16/7] md:aspect-[21/9]" />
+          </div>
+        </div>
         <div class="container mx-auto px-4 md:px-6">
             <div class="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
                 <!-- Brand Section -->

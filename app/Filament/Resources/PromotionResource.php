@@ -53,14 +53,19 @@ class PromotionResource extends Resource
                         Forms\Components\DatePicker::make('end_at')->native(false),
                     ])->columnSpan(2)->columns(2),
 
-                Forms\Components\Section::make('Promotion Information')
+                Forms\Components\Section::make('Settings')
                     ->schema([
-                        Forms\Components\DatePicker::make('start_at')->native(false),
-                        Forms\Components\DatePicker::make('end_at')->native(false),
-                        Forms\Components\TextInput::make('position')
+
+                        Forms\Components\Select::make('position')
+                            ->options([
+                                'topbar' => 'Topbar',
+                                'home_hero' => 'Home Hero Slider',
+                                'home_sidebar' => 'Home Sidebar',
+                                'home_popup' => 'Home Popup Banner',
+                                'footer' => 'Footer Banner',
+                            ])
                             ->required()
-                            ->maxLength(255)
-                            ->default('top')
+                            ->default('topbar')
                             ->columnSpanFull(),
                         Forms\Components\Toggle::make('is_active')
                             ->required(),
