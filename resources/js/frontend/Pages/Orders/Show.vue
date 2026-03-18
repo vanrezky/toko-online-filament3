@@ -2,18 +2,7 @@
 import { computed, ref } from "vue";
 import { Link, useForm } from "@inertiajs/vue3";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
-import { 
-  Package, 
-  ChevronLeft, 
-  Clock, 
-  MapPin, 
-  Truck, 
-  CreditCard, 
-  CheckCircle2, 
-  AlertCircle,
-  ArrowRight,
-  ExternalLink
-} from "lucide-vue-next";
+import { Package, ChevronLeft, Clock, MapPin, Truck, CreditCard, CheckCircle2, AlertCircle, ArrowRight, ExternalLink, X } from "lucide-vue-next";
 
 const props = defineProps({
     order: Object,
@@ -21,116 +10,134 @@ const props = defineProps({
 });
 
 const statusColors = {
-    unpaid: "text-orange-500 bg-orange-50 border-orange-100",
-    shipped: "text-blue-500 bg-blue-50 border-blue-100",
-    delivered: "text-green-500 bg-green-50 border-green-100",
-    completed: "text-green-600 bg-green-100 border-green-200",
-    rejected: "text-red-500 bg-red-50 border-red-100",
+    unpaid: "text-[#fa8456] bg-[#fff5f0] border-[#fed7aa]",
+    shipped: "text-[#3b82f6] bg-[#eff6ff] border-[#bfdbfe]",
+    delivered: "text-[#22c55e] bg-[#f0fdf4] border-[#bbf7d0]",
+    completed: "text-[#16a34a] bg-[#dcfce7] border-[#86efac]",
+    rejected: "text-[#ef4444] bg-[#fef2f2] border-[#fecaca]",
+};
+
+const statusLabels = {
+    unpaid: "Menunggu Pembayaran",
+    shipped: "Dikirim",
+    delivered: "Diterima",
+    completed: "Selesai",
+    rejected: "Ditolak",
 };
 
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 };
 
 const subtotal = computed(() => {
-    return props.order.products?.reduce((acc, p) => acc + (p.price * p.quantity), 0) || 0;
+    return props.order.products?.reduce((acc, p) => acc + p.price * p.quantity, 0) || 0;
 });
 
 const isExpired = computed(() => {
-  return props.order.timelimit && new Date(props.order.timelimit) < new Date();
+    return props.order.timelimit && new Date(props.order.timelimit) < new Date();
 });
 
 const showPaymentModal = ref(false);
 const paymentForm = useForm({
-    payment_method: props.order.payment_method
+    payment_method: props.order.payment_method,
 });
 
 const changePayment = () => {
-    paymentForm.post(route('frontend.orders.payment-method', props.order.id), {
-        onSuccess: () => showPaymentModal.value = false,
-        preserveScroll: true
+    paymentForm.post(route("frontend.orders.payment-method", props.order.id), {
+        onSuccess: () => (showPaymentModal.value = false),
+        preserveScroll: true,
     });
 };
 </script>
 
 <template>
-    <TemplateWrapper title="Order Details">
-        <div class="min-h-screen bg-gray-50 py-12 md:py-20 font-sans">
+    <TemplateWrapper title="Detail Pesanan">
+        <div class="min-h-screen bg-[#f8f7fc] py-12 font-sans md:py-20">
             <div class="container mx-auto px-4 md:px-6">
                 <div class="mx-auto max-w-5xl space-y-8">
                     <!-- Header -->
-                    <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-8">
+                    <div class="flex flex-col gap-6 border-b border-[#e8e6ef] pb-8 md:flex-row md:items-center md:justify-between">
                         <div class="space-y-2">
-                            <Link :href="route('frontend.orders')" class="group flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">
-                                <ChevronLeft class="h-3 w-3" />
-                                <span>Back to History</span>
-                            </Link>
-                            <h1 class="text-3xl font-bold tracking-tight text-black italic uppercase">Order #{{ order.id.substring(0, 8).toUpperCase() }}</h1>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Placed on {{ formatDate(order.created_at) }}</p>
-                        </div>
-                        <div class="flex items-center space-x-4">
-                            <span
-                                class="rounded-full border px-6 py-2 text-[10px] font-bold uppercase tracking-[0.2em]"
-                                :class="statusColors[order.status]"
+                            <Link
+                                :href="route('frontend.orders')"
+                                class="group flex items-center gap-2 text-sm text-[#6b5a4d] transition-colors hover:text-[#fa8456]"
                             >
-                                {{ order.status }}
+                                <ChevronLeft class="h-4 w-4" />
+                                <span>Kembali ke Pesanan</span>
+                            </Link>
+                            <h1 class="text-2xl font-bold text-[#2d1b0e]">Pesanan #{{ order.id.substring(0, 8).toUpperCase() }}</h1>
+                            <p class="text-sm text-[#6b5a4d]">{{ formatDate(order.created_at) }}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="rounded-full border px-6 py-2 text-sm font-semibold" :class="statusColors[order.status]">
+                                {{ statusLabels[order.status] || order.status }}
                             </span>
                         </div>
                     </div>
 
                     <!-- Timelimit Warning -->
-                    <div v-if="order.status === 'unpaid' && order.timelimit" 
-                         class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 border shadow-sm"
-                         :class="isExpired ? 'bg-red-50 border-red-100 text-red-600' : 'bg-orange-50 border-orange-100 text-orange-600'">
-                        <div class="flex items-center space-x-4">
+                    <div
+                        v-if="order.status === 'unpaid' && order.timelimit"
+                        class="flex flex-col gap-4 rounded-xl p-6 md:flex-row md:items-center md:justify-between"
+                        :class="isExpired ? 'border border-red-100 bg-red-50 text-red-600' : 'border border-orange-100 bg-[#fff5f0] text-[#fa8456]'"
+                    >
+                        <div class="flex items-center gap-4">
                             <Clock class="h-6 w-6" />
                             <div>
-                                <p class="text-[11px] font-bold uppercase tracking-[0.1em]">
-                                    {{ isExpired ? 'This order has expired' : 'Awaiting Payment' }}
+                                <p class="font-semibold text-[#2d1b0e]">
+                                    {{ isExpired ? "Pesanan ini sudah kedaluwarsa" : "Menunggu Pembayaran" }}
                                 </p>
-                                <p class="text-[10px] font-medium uppercase tracking-widest mt-0.5">
-                                    {{ isExpired ? 'Please place a new order' : 'Complete payment before' }} {{ formatDate(order.timelimit) }}
+                                <p class="text-sm text-[#6b5a4d]">
+                                    {{ isExpired ? "Silakan buat pesanan baru" : "Selesaikan pembayaran sebelum" }} {{ formatDate(order.timelimit) }}
                                 </p>
                             </div>
                         </div>
-                        <button v-if="!isExpired" class="bg-black text-white px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg">
-                            Pay Now
+                        <button
+                            v-if="!isExpired"
+                            class="rounded-full bg-[#fa8456] px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-[#e56f3f] hover:shadow-lg"
+                        >
+                            Bayar Sekarang
                         </button>
                     </div>
 
                     <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
                         <!-- Items & Shipping -->
-                        <div class="space-y-8 lg:col-span-8">
+                        <div class="space-y-6 lg:col-span-8">
                             <!-- Items Section -->
-                            <section class="bg-white p-8 shadow-sm border border-gray-100">
-                                <h2 class="mb-8 text-xs font-bold uppercase tracking-[0.2em] text-black border-b border-gray-50 pb-4">Order Items</h2>
-                                <div class="space-y-8">
-                                    <div v-for="item in order.products" :key="item.uuid" class="flex gap-6">
-                                        <div class="h-32 w-24 flex-shrink-0 bg-gray-50 border border-gray-50 overflow-hidden">
-                                            <img :src="item.product?.thumbnail || 'https://placehold.co/100x120?text=Product'" class="h-full w-full object-cover" />
+                            <section class="rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm md:p-8">
+                                <h2 class="mb-6 border-b border-[#f0eef5] pb-4 text-base font-bold text-[#2d1b0e]">Item Pesanan</h2>
+                                <div class="space-y-6">
+                                    <div v-for="item in order.products" :key="item.uuid" class="flex gap-5">
+                                        <div class="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-[#f5f3fc]">
+                                            <img
+                                                :src="item.product?.thumbnail || 'https://placehold.co/100x120/f5f3fc/2d1b0e?text=Produk'"
+                                                class="h-full w-full object-cover"
+                                            />
                                         </div>
                                         <div class="flex flex-grow flex-col py-1">
                                             <div class="flex justify-between">
                                                 <div>
-                                                    <h4 class="text-sm font-bold uppercase tracking-wider text-black">{{ item.product?.name }}</h4>
-                                                    <p v-if="item.description" class="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-400">{{ item.description }}</p>
+                                                    <h4 class="text-sm font-bold text-[#2d1b0e]">{{ item.product?.name }}</h4>
+                                                    <p v-if="item.description" class="mt-1 text-xs text-[#6b5a4d]">{{ item.description }}</p>
                                                 </div>
-                                                <p class="text-sm font-bold text-black">{{ formatCurrency(item.price) }}</p>
+                                                <p class="text-sm font-bold text-[#fa8456]">{{ formatCurrency(item.price) }}</p>
                                             </div>
-                                            <div class="mt-auto flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                                <span>Quantity: {{ item.quantity }}</span>
-                                                <span class="text-black">Total: {{ formatCurrency(item.price * item.quantity) }}</span>
+                                            <div class="mt-auto flex items-center justify-between text-sm text-[#6b5a4d]">
+                                                <span>Jumlah: {{ item.quantity }}</span>
+                                                <span class="font-semibold text-[#2d1b0e]"
+                                                    >Total: {{ formatCurrency(item.price * item.quantity) }}</span
+                                                >
                                             </div>
                                         </div>
                                     </div>
@@ -138,75 +145,80 @@ const changePayment = () => {
                             </section>
 
                             <!-- Shipping Details -->
-                            <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="bg-white p-8 shadow-sm border border-gray-100 space-y-4">
-                                    <div class="flex items-center space-x-3 text-black">
-                                        <MapPin class="h-4 w-4" />
-                                        <h2 class="text-[11px] font-bold uppercase tracking-widest">Delivery Address</h2>
+                            <section class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                <div class="space-y-4 rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm">
+                                    <div class="flex items-center gap-3 text-[#fa8456]">
+                                        <MapPin class="h-5 w-5" />
+                                        <h2 class="text-sm font-bold text-[#2d1b0e]">Alamat Pengiriman</h2>
                                     </div>
-                                    <div class="space-y-2 text-[11px] leading-relaxed text-gray-500 uppercase tracking-tight">
-                                        <p class="font-bold text-black">{{ order.address.name || 'Shipping Address' }}</p>
-                                        <p>{{ order.address.phone || '' }}</p>
+                                    <div class="space-y-1 text-sm leading-relaxed text-[#6b5a4d]">
+                                        <p class="font-semibold text-[#2d1b0e]">{{ order.address.name || "Alamat Pengiriman" }}</p>
+                                        <p>{{ order.address.phone || "" }}</p>
                                         <p>{{ order.address.full_address }}</p>
                                         <p>{{ order.address.sub_district }}, {{ order.address.district }}</p>
                                         <p>{{ order.address.province }} {{ order.address.postal_code }}</p>
                                     </div>
                                 </div>
-                                <div class="bg-white p-8 shadow-sm border border-gray-100 space-y-4">
-                                    <div class="flex items-center space-x-3 text-black">
-                                        <Truck class="h-4 w-4" />
-                                        <h2 class="text-[11px] font-bold uppercase tracking-widest">Shipping Method</h2>
+                                <div class="space-y-4 rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm">
+                                    <div class="flex items-center gap-3 text-[#fa8456]">
+                                        <Truck class="h-5 w-5" />
+                                        <h2 class="text-sm font-bold text-[#2d1b0e]">Metode Pengiriman</h2>
                                     </div>
-                                    <div class="space-y-1 text-[11px] text-gray-500 uppercase tracking-widest">
-                                        <p class="font-bold text-black">{{ order.shipping_method || 'Standard Shipping' }}</p>
-                                        <p>Cost: {{ formatCurrency(order.shipping_cost) }}</p>
+                                    <div class="space-y-1 text-sm text-[#6b5a4d]">
+                                        <p class="font-semibold text-[#2d1b0e]">{{ order.shipping_method || "Standard Shipping" }}</p>
+                                        <p>Biaya: {{ formatCurrency(order.shipping_cost) }}</p>
                                     </div>
                                 </div>
                             </section>
                         </div>
 
                         <!-- Payment & Totals -->
-                        <div class="space-y-8 lg:col-span-4">
+                        <div class="space-y-6 lg:col-span-4">
                             <!-- Payment Section -->
-                            <section class="bg-white p-8 shadow-sm border border-gray-100 space-y-6">
-                                <div class="flex items-center justify-between border-b border-gray-50 pb-4">
-                                    <div class="flex items-center space-x-3 text-black">
-                                        <CreditCard class="h-4 w-4" />
-                                        <h2 class="text-[11px] font-bold uppercase tracking-widest">Payment</h2>
+                            <section class="space-y-5 rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm md:p-8">
+                                <div class="flex items-center justify-between border-b border-[#f0eef5] pb-4">
+                                    <div class="flex items-center gap-3 text-[#fa8456]">
+                                        <CreditCard class="h-5 w-5" />
+                                        <h2 class="text-sm font-bold text-[#2d1b0e]">Pembayaran</h2>
                                     </div>
-                                    <button 
+                                    <button
                                         v-if="order.status === 'unpaid' && !isExpired"
                                         @click="showPaymentModal = true"
-                                        class="text-[9px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors"
+                                        class="text-sm font-semibold text-[#fa8456] transition-colors hover:text-[#e56f3f]"
                                     >
-                                        Change
+                                        Ubah
                                     </button>
                                 </div>
-                                <div class="space-y-1 text-[11px] text-gray-500 uppercase tracking-widest">
-                                    <p class="font-bold text-black">{{ order.payment_method?.replace('_', ' ') || 'Not selected' }}</p>
-                                    <p>Status: <span :class="order.status === 'unpaid' ? 'text-orange-500' : 'text-green-500'">{{ order.status === 'unpaid' ? 'Awaiting Payment' : 'Paid' }}</span></p>
+                                <div class="space-y-1 text-sm text-[#6b5a4d]">
+                                    <p class="font-semibold text-[#2d1b0e]">{{ order.payment_method?.replace("_", " ") || "Belum dipilih" }}</p>
+                                    <p>
+                                        Status:
+                                        <span :class="order.status === 'unpaid' ? 'text-[#fa8456]' : 'text-[#22c55e]'">{{
+                                            order.status === "unpaid" ? "Menunggu Pembayaran" : "Lunas"
+                                        }}</span>
+                                    </p>
                                 </div>
                             </section>
 
                             <!-- Totals Section -->
-                            <section class="bg-black p-8 text-white shadow-xl space-y-6">
-                                <h2 class="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 border-b border-white/10 pb-4">Order Summary</h2>
-                                <div class="space-y-4">
-                                    <div class="flex justify-between text-[11px] font-bold uppercase tracking-widest">
-                                        <span class="text-gray-400">Subtotal</span>
-                                        <span>{{ formatCurrency(order.subtotal) }}</span>
+                            <section class="space-y-5 rounded-xl bg-[#2d1b0e] p-6 text-white shadow-lg md:p-8">
+                                <h2 class="border-b border-white/10 pb-4 text-sm font-bold text-[#c4bfc9]">Ringkasan Pesanan</h2>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-[#c4bfc9]">Subtotal</span>
+                                        <span class="font-semibold">{{ formatCurrency(order.subtotal) }}</span>
                                     </div>
-                                    <div class="flex justify-between text-[11px] font-bold uppercase tracking-widest">
-                                        <span class="text-gray-400">Shipping</span>
-                                        <span>{{ formatCurrency(order.shipping_cost) }}</span>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-[#c4bfc9]">Pengiriman</span>
+                                        <span class="font-semibold">{{ formatCurrency(order.shipping_cost) }}</span>
                                     </div>
-                                    <div v-if="order.discount > 0" class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-green-400">
-                                        <span>Discount</span>
+                                    <div v-if="order.discount > 0" class="flex justify-between text-sm text-[#86efac]">
+                                        <span>Diskon</span>
                                         <span>- {{ formatCurrency(order.discount) }}</span>
                                     </div>
-                                    <div class="flex justify-between border-t border-white/20 pt-6">
-                                        <span class="text-xs font-bold uppercase tracking-[0.3em]">Total</span>
-                                        <span class="text-2xl font-bold italic">{{ formatCurrency(order.total) }}</span>
+                                    <div class="flex justify-between border-t border-white/20 pt-4">
+                                        <span class="text-sm font-bold">Total</span>
+                                        <span class="text-xl font-bold text-[#fa8456]">{{ formatCurrency(order.total) }}</span>
                                     </div>
                                 </div>
                             </section>
@@ -217,32 +229,59 @@ const changePayment = () => {
         </div>
 
         <!-- Payment Selection Modal -->
-        <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
-            <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                <div class="w-full max-w-md bg-white p-8 shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-300">
-                    <div class="flex items-center justify-between mb-8">
-                        <h3 class="text-lg font-bold uppercase tracking-[0.2em] italic">Change Payment</h3>
-                        <button @click="showPaymentModal = false" class="text-gray-400 hover:text-black transition-colors">
-                            <span class="text-2xl">&times;</span>
+        <transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+                    <div class="mb-8 flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-[#2d1b0e]">Ubah Metode Pembayaran</h3>
+                        <button @click="showPaymentModal = false" class="text-[#6b5a4d] transition-colors hover:text-[#2d1b0e]">
+                            <X class="h-6 w-6" />
                         </button>
                     </div>
 
-                    <form @submit.prevent="changePayment" class="space-y-6">
+                    <form @submit.prevent="changePayment" class="space-y-5">
                         <div class="space-y-3">
-                            <label v-for="method in paymentMethods" :key="method.id" 
-                                class="flex items-center p-4 border cursor-pointer transition-all hover:bg-gray-50"
-                                :class="paymentForm.payment_method === method.id ? 'border-black bg-gray-50' : 'border-gray-100'">
-                                <input type="radio" v-model="paymentForm.payment_method" :value="method.id" class="h-4 w-4 text-black focus:ring-black rounded-none border-gray-300" />
-                                <span class="ml-4 text-xs font-bold uppercase tracking-widest">{{ method.name }}</span>
+                            <label
+                                v-for="method in paymentMethods"
+                                :key="method.id"
+                                class="flex cursor-pointer items-center rounded-xl border p-4 transition-all"
+                                :class="
+                                    paymentForm.payment_method === method.id
+                                        ? 'border-[#fa8456] bg-[#fff5f0]'
+                                        : 'border-[#e8e6ef] hover:border-[#fa8456]/50'
+                                "
+                            >
+                                <input
+                                    type="radio"
+                                    v-model="paymentForm.payment_method"
+                                    :value="method.id"
+                                    class="h-5 w-5 border-[#e8e6ef] text-[#fa8456] accent-[#fa8456] focus:ring-[#fa8456]"
+                                />
+                                <span class="ml-4 text-sm font-semibold text-[#2d1b0e]">{{ method.name }}</span>
                             </label>
                         </div>
 
                         <div class="flex flex-col gap-3 pt-4">
-                            <button type="submit" :disabled="paymentForm.processing" class="w-full bg-black text-white py-4 text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-gray-800 disabled:bg-gray-400 transition-all shadow-lg">
-                                {{ paymentForm.processing ? 'Updating...' : 'Confirm Change' }}
+                            <button
+                                type="submit"
+                                :disabled="paymentForm.processing"
+                                class="w-full rounded-full bg-[#fa8456] py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-[#e56f3f] hover:shadow-lg disabled:bg-[#c4bfc9]"
+                            >
+                                {{ paymentForm.processing ? "Memperbarui..." : "Konfirmasi" }}
                             </button>
-                            <button type="button" @click="showPaymentModal = false" class="w-full py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-all">
-                                Cancel
+                            <button
+                                type="button"
+                                @click="showPaymentModal = false"
+                                class="w-full py-3 text-sm font-semibold text-[#6b5a4d] transition-colors hover:text-[#2d1b0e]"
+                            >
+                                Batal
                             </button>
                         </div>
                     </form>
@@ -251,13 +290,3 @@ const changePayment = () => {
         </transition>
     </TemplateWrapper>
 </template>
-
-<style scoped>
-.scrollbar-hidden::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hidden {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-</style>

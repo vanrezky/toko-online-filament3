@@ -1,166 +1,232 @@
 <script setup>
-import { computed, getCurrentInstance } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
-import TemplateWrapper from '../../components/TemplateWrapper.vue';
-import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-vue-next';
+import { computed, ref, watch } from "vue";
+import { Link, router } from "@inertiajs/vue3";
+import TemplateWrapper from "../../components/TemplateWrapper.vue";
+import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from "lucide-vue-next";
+import { formatCurrency } from "../../lib/utils";
+import debounce from "lodash/debounce";
 
 const props = defineProps({
-  cart: Object
+    cart: Object,
 });
 
-const { proxy } = getCurrentInstance();
+const localItems = ref([...(props.cart?.items || [])]);
 
-const items = computed(() => props.cart?.items || []);
+watch(
+    () => props.cart?.items,
+    (newItems) => {
+        localItems.value = [...(newItems || [])];
+    },
+    { deep: true },
+);
+
 const subtotal = computed(() => {
-  return items.value.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return localItems.value.reduce((total, item) => total + item.price * item.quantity, 0);
 });
+const tax = computed(() => Math.round(subtotal.value * 0.1));
+const total = computed(() => subtotal.value + tax.value);
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
-};
+const updateQuantity = debounce((itemId, newQty) => {
+    if (newQty < 1) return;
 
-const updateQuantity = (item, delta) => {
-  const newQty = item.quantity + delta;
-  if (newQty < 1) return;
+    router.patch(
+        route("frontend.cart.update", itemId),
+        {
+            quantity: newQty,
+        },
+        {
+            preserveScroll: true,
+        },
+    );
+}, 300);
 
-  router.patch(route('frontend.cart.update', item.id), {
-    quantity: newQty
-  }, {
-    preserveScroll: true
-  });
+const handleQuantityChange = (item, delta) => {
+    const newQty = item.quantity + delta;
+    if (newQty < 1) return;
+
+    item.quantity = newQty;
+    updateQuantity(item.id, newQty);
 };
 
 const removeItem = (id) => {
-  proxy.$confirm({
-    title: 'Remove Item',
-    message: 'Are you sure you want to remove this item from your bag?',
-    button: {
-      no: 'Cancel',
-      yes: 'Remove'
-    },
-    callback: (confirm) => {
-      if (confirm) {
-        router.delete(route('frontend.cart.destroy', id), {
-          preserveScroll: true
-        });
-      }
-    }
-  });
+    router.delete(route("frontend.cart.destroy", id), {
+        preserveScroll: true,
+    });
 };
 </script>
 
-
 <template>
-  <TemplateWrapper title="Your Shopping Bag">
-    <div class="py-12 md:py-20">
-      <div class="container mx-auto px-4 md:px-6">
-        <h1 class="text-3xl md:text-4xl font-bold text-black tracking-tight mb-12">Shopping Bag</h1>
+    <TemplateWrapper title="Keranjang Belanja">
+        <div class="min-h-screen bg-secondary/30 py-8 md:py-12">
+            <div class="container mx-auto px-4">
+                <div v-if="localItems.length > 0">
+                    <h1 class="mb-8 text-2xl font-bold text-foreground md:text-3xl">Keranjang Belanja</h1>
 
-        <div v-if="items.length > 0" class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-          <!-- Cart Items List -->
-          <div class="lg:col-span-8 space-y-8">
-            <div v-for="item in items" :key="item.id" class="flex py-8 border-b border-gray-100 first:pt-0 group">
-              <!-- Item Image -->
-              <div class="w-24 md:w-32 aspect-[4/5] bg-gray-50 overflow-hidden flex-shrink-0">
-                <img
-                  :src="item.product.thumbnail || 'https://placehold.co/200x250?text=No+Image'"
-                  :alt="item.product.name"
-                  class="w-full h-full object-cover"
-                />
-              </div>
+                    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
+                        <!-- Cart Items List -->
+                        <div class="space-y-4">
+                            <div v-for="item in localItems" :key="item.id" class="overflow-hidden rounded-2xl bg-white p-4 shadow-sm">
+                                <div class="flex flex-col gap-4 sm:flex-row">
+                                    <div class="h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-secondary sm:h-32 sm:w-32">
+                                        <Link :href="route('frontend.product-detail', item.product?.slug)">
+                                            <img
+                                                :src="item.product?.thumbnail || 'https://placehold.co/200x200?text=No+Image'"
+                                                :alt="item.product?.name"
+                                                class="h-full w-full object-cover transition-transform hover:scale-105"
+                                            />
+                                        </Link>
+                                    </div>
 
-              <!-- Item Details -->
-              <div class="flex-grow ml-6 md:ml-8 flex flex-col justify-between">
-                <div class="flex justify-between items-start">
-                  <div class="space-y-1">
-                    <h3 class="text-sm md:text-base font-bold text-black hover:text-gray-600 transition-colors">
-                      <Link :href="route('frontend.product-detail', item.product.slug)">{{ item.product.name }}</Link>
-                    </h3>
-                    <p v-if="item.product_variant" class="text-xs text-gray-400 uppercase tracking-widest">
-                      Variant: {{ item.product_variant.variant_name }}
-                    </p>
-                  </div>
-                  <p class="text-sm md:text-base font-bold text-black">
-                    {{ formatCurrency(item.price * item.quantity) }}
-                  </p>
+                                    <div class="flex min-w-0 flex-grow flex-col justify-between">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0 flex-grow">
+                                                <Link
+                                                    :href="route('frontend.product-detail', item.product?.slug)"
+                                                    class="line-clamp-2 text-sm font-bold text-foreground transition-colors hover:text-primary sm:text-base"
+                                                >
+                                                    {{ item.product?.name }}
+                                                </Link>
+                                                <p v-if="item.product_variant" class="mt-1 text-xs text-muted-foreground">
+                                                    {{ item.product_variant.variant_name }}
+                                                </p>
+                                                <div class="mt-2 flex items-center gap-2">
+                                                    <span class="text-sm font-bold text-primary sm:text-base">
+                                                        {{ formatCurrency(item.price) }}
+                                                    </span>
+                                                    <span
+                                                        v-if="item.original_price && item.original_price > item.price"
+                                                        class="text-xs text-muted-foreground line-through"
+                                                    >
+                                                        {{ formatCurrency(item.original_price) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                @click="removeItem(item.id)"
+                                                class="flex shrink-0 items-center justify-center rounded-full p-2 text-muted-foreground transition-all hover:bg-red-50 hover:text-red-500"
+                                            >
+                                                <Trash2 class="h-5 w-5" />
+                                            </button>
+                                        </div>
+
+                                        <div class="mt-4 flex items-center justify-between sm:mt-0">
+                                            <div class="flex items-center rounded-full border border-border bg-secondary/50">
+                                                <button
+                                                    @click="handleQuantityChange(item, -1)"
+                                                    class="flex h-10 w-10 items-center justify-center rounded-l-full text-muted-foreground transition-all hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                                                    :disabled="item.quantity <= 1"
+                                                >
+                                                    <Minus class="h-4 w-4" />
+                                                </button>
+                                                <span class="w-14 text-center text-sm font-semibold">{{ item.quantity }}</span>
+                                                <button
+                                                    @click="handleQuantityChange(item, 1)"
+                                                    class="flex h-10 w-10 items-center justify-center rounded-r-full text-muted-foreground transition-all hover:bg-secondary"
+                                                >
+                                                    <Plus class="h-4 w-4" />
+                                                </button>
+                                            </div>
+
+                                            <span class="text-lg font-bold text-foreground sm:text-xl">
+                                                {{ formatCurrency(item.price * item.quantity) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl border-2 border-dashed border-border bg-white p-4">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <Link
+                                        :href="route('frontend.products')"
+                                        class="flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
+                                    >
+                                        <ShoppingBag class="h-4 w-4" />
+                                        Lanjut Belanja
+                                    </Link>
+                                    <Link
+                                        :href="route('frontend.home')"
+                                        class="text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
+                                    >
+                                        Beranda
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary Sidebar (Right) -->
+                        <div>
+                            <div class="sticky top-24 space-y-4">
+                                <div class="rounded-2xl bg-white p-6 shadow-sm">
+                                    <h2 class="mb-6 text-lg font-bold text-foreground">Ringkasan Belanja</h2>
+
+                                    <div class="space-y-4 border-b border-border pb-4">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-muted-foreground">Subtotal ({{ localItems.length }} item)</span>
+                                            <span class="font-medium text-foreground">{{ formatCurrency(subtotal) }}</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-muted-foreground">Estimasi Pajak (10%)</span>
+                                            <span class="font-medium text-foreground">{{ formatCurrency(tax) }}</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-muted-foreground">Ongkos Kirim</span>
+                                            <span class="font-medium text-foreground">Dihitung saat checkout</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="py-4">
+                                        <div class="mb-2 flex items-center justify-between">
+                                            <span class="text-lg font-bold text-foreground">Total</span>
+                                            <span class="text-2xl font-bold text-primary">{{ formatCurrency(total) }}</span>
+                                        </div>
+                                        <p class="text-xs text-muted-foreground">* Harga sudah termasuk estimasi pajak</p>
+                                    </div>
+
+                                    <Link
+                                        :href="route('frontend.checkout')"
+                                        class="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg"
+                                    >
+                                        <span>Checkout</span>
+                                        <ArrowRight class="h-4 w-4" />
+                                    </Link>
+                                </div>
+
+                                <div class="rounded-2xl bg-white p-4 shadow-sm">
+                                    <div class="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Masukkan kode promo"
+                                            class="flex-grow rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        />
+                                        <button
+                                            class="rounded-xl bg-foreground px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-foreground/90"
+                                        >
+                                            Pakai
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex items-center justify-between mt-4">
-                  <!-- Quantity Control -->
-                  <div class="flex items-center border border-gray-100 h-10">
-                    <button @click="updateQuantity(item, -1)" class="w-8 h-full flex items-center justify-center hover:bg-gray-50 transition-colors">
-                      <Minus class="w-3 h-3" />
-                    </button>
-                    <span class="w-10 text-center text-xs font-bold">{{ item.quantity }}</span>
-                    <button @click="updateQuantity(item, 1)" class="w-8 h-full flex items-center justify-center hover:bg-gray-50 transition-colors">
-                      <Plus class="w-3 h-3" />
-                    </button>
-                  </div>
-
-                  <!-- Remove Button -->
-                  <button @click="removeItem(item.id)" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors flex items-center space-x-2">
-                    <Trash2 class="w-4 h-4" />
-                    <span class="hidden sm:inline">Remove</span>
-                  </button>
+                <!-- Empty State -->
+                <div v-else class="py-20 text-center">
+                    <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-secondary">
+                        <ShoppingBag class="h-12 w-12 text-muted-foreground" />
+                    </div>
+                    <h2 class="mb-2 text-2xl font-bold text-foreground">Keranjang Anda kosong</h2>
+                    <p class="mx-auto mb-8 max-w-md text-muted-foreground">Yuk mulai belanja dan temukan produk favoritmu!</p>
+                    <Link
+                        :href="route('frontend.products')"
+                        class="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg"
+                    >
+                        <ShoppingBag class="h-5 w-5" />
+                        Mulai Belanja
+                    </Link>
                 </div>
-              </div>
             </div>
-          </div>
-
-          <!-- Order Summary Sidebar -->
-          <div class="lg:col-span-4">
-            <div class="bg-gray-50 p-8 space-y-8 sticky top-32">
-              <h2 class="text-sm font-bold uppercase tracking-widest text-black">Order Summary</h2>
-
-              <div class="space-y-4">
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-500">Subtotal</span>
-                  <span class="text-black font-medium">{{ formatCurrency(subtotal) }}</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-500">Estimated Shipping</span>
-                  <span class="text-black font-medium">Calculated at checkout</span>
-                </div>
-                <div class="pt-4 border-t border-gray-200 flex justify-between">
-                  <span class="text-base font-bold text-black uppercase tracking-widest">Total</span>
-                  <span class="text-xl font-bold text-black">{{ formatCurrency(subtotal) }}</span>
-                </div>
-              </div>
-
-              <Link
-                :href="route('frontend.checkout')"
-                class="block w-full bg-black text-white py-4 text-center text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
-              >
-                <span>Proceed to Checkout</span>
-                <ArrowRight class="w-4 h-4" />
-              </Link>
-
-              <div class="pt-4 space-y-3">
-                <p class="text-[10px] text-gray-400 text-center uppercase tracking-widest">Secure payments with SSL encryption</p>
-                <div class="flex justify-center space-x-4 opacity-30 grayscale">
-                   <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" alt="Visa" class="h-4 w-auto" />
-                   <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" alt="Mastercard" class="h-4 w-auto" />
-                   <img src="https://cdn-icons-png.flaticon.com/512/196/196566.png" alt="PayPal" class="h-4 w-auto" />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <!-- Empty State -->
-        <div v-else class="py-20 text-center space-y-8">
-          <div class="w-24 h-24 bg-gray-50 flex items-center justify-center mx-auto rounded-full">
-            <ShoppingBag class="w-10 h-10 text-gray-300" />
-          </div>
-          <div class="space-y-3">
-            <h2 class="text-2xl font-bold text-black">Your bag is empty</h2>
-            <p class="text-gray-500 text-sm max-w-sm mx-auto">Looks like you haven't added anything to your bag yet. Let's find something for you.</p>
-          </div>
-          <Link :href="route('frontend.products')" class="inline-block bg-black text-white px-10 py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg">
-            Start Shopping
-          </Link>
-        </div>
-      </div>
-    </div>
-  </TemplateWrapper>
+    </TemplateWrapper>
 </template>

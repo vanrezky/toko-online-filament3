@@ -35,8 +35,12 @@ class CartController extends Controller
     public function store(Request $request)
     {
         if (!Auth::guard('customer')->check()) {
-            // Save current URL (product page) as intended destination after login
-            // Since this is a POST request, we usually want to redirect back to the product detail page
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => 'Please login to add items to cart.',
+                    'redirect' => route('frontend.login'),
+                ], 401);
+            }
             session()->put('url.intended', url()->previous());
             return redirect()->route('frontend.login')->with('error', 'Please login to add items to cart.');
         }
@@ -52,7 +56,10 @@ class CartController extends Controller
         $discount = 0;
 
         if (!$request->product_variant_id && $product->product_variants_count > 0) {
-            return redirect()->back()->with('errors', 'Please choose the variant product.');
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Please choose the variant product.'], 422);
+            }
+            return redirect()->back()->with('error', 'Please choose the variant product.');
         }
 
         $variant = null;
@@ -92,6 +99,14 @@ class CartController extends Controller
             ]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Item added to cart successfully.',
+                'cart_count' => $cart->items()->sum('quantity'),
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Item added to bag successfully.');
     }
 
@@ -109,12 +124,20 @@ class CartController extends Controller
             'discount' => $priceInfo['discount'],
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Cart updated.']);
+        }
+
         return redirect()->back()->with('success', 'Cart updated successfully.');
     }
 
-    public function destroy(CartItem $item)
+    public function destroy(Request $request, CartItem $item)
     {
         $item->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Item removed.']);
+        }
 
         return redirect()->back()->with('success', 'Item removed from bag.');
     }

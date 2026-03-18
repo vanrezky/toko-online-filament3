@@ -63,7 +63,7 @@ Route::name('frontend.')->group(function () {
 
     // Public shop routes
     Route::get('/cart', CartController::class)->name('cart');
-    Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
+    Route::post('/cart/add', [CartController::class, 'store'])->name('cart.store');
     Route::patch('/cart/{item}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{item}', [CartController::class, 'destroy'])->name('cart.destroy');
 

@@ -6,41 +6,44 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\FlashsaleResource;
 use App\Http\Resources\ProductSimpleResource;
-use App\Http\Resources\SliderResource;
-use App\Http\Resources\PromotionResource;
 use App\Models\Category;
 use App\Models\Flashsale;
 use App\Models\Product;
-use App\Models\Promotion;
-use App\Models\Slider;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sliders = Slider::active()->with('media')->get();
+        if ($request->filled('search')) {
+            return redirect()->route('frontend.products', $request->only('search'));
+        }
 
-        $flashSales = Flashsale::active()->with([
-            'products' => fn($Q) => $Q->limit(4),
-            'products.product.media',
-            'products.product.category',
-            'products.product.resellerPrices',
-            'products.product.wholesales'
-        ])->first();
+        if ($request->filled('category')) {
+            return redirect()->route('frontend.products', $request->only('category'));
+        }
 
-        $newArrivals = Product::active()->with(['media', 'category', 'resellerPrices', 'wholesales'])->latest()->limit(4)->get();
+        $flashSales = Flashsale::active()
+            ->with([
+                'products' => fn($Q) => $Q->limit(5),
+                'products.product.media',
+                'products.product.category',
+                'products.product.resellerPrices',
+                'products.product.wholesales',
+            ])
+            ->first();
 
-        $featuredCategories = Category::active()
-            ->featured()
-            ->with(['products' => fn($q) => $q->active()->with(['media', 'resellerPrices', 'wholesales'])->limit(6)])
-            ->get();
+        $products = Product::active()->with(['media', 'category', 'resellerPrices', 'wholesales'])
+            ->latest()
+            ->paginate(12)->withQueryString();
+        $categories = Category::active()->featured()->get();
 
         return Inertia::render('Home/Index', [
-            'sliders' => SliderResource::collection($sliders),
             'flashsales' => $flashSales ? FlashsaleResource::make($flashSales) : null,
-            'newArrivals' => ProductSimpleResource::collection($newArrivals),
-            'featuredCategories' => CategoryResource::collection($featuredCategories),
+            'products' => ProductSimpleResource::collection($products),
+            'categories' => CategoryResource::collection($categories),
+            'filters' => $request->only(['category', 'search']),
         ]);
     }
 }

@@ -213,6 +213,7 @@ CREATE TABLE `customer_addresses` (
   `province_id` bigint unsigned NOT NULL,
   `district_id` bigint unsigned NOT NULL,
   `sub_district_id` bigint unsigned NOT NULL,
+  `village_id` bigint unsigned DEFAULT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `phone` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `address` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -227,10 +228,12 @@ CREATE TABLE `customer_addresses` (
   KEY `customer_addresses_province_id_foreign` (`province_id`),
   KEY `customer_addresses_district_id_foreign` (`district_id`),
   KEY `customer_addresses_sub_district_id_foreign` (`sub_district_id`),
+  KEY `customer_addresses_village_id_foreign` (`village_id`),
   CONSTRAINT `customer_addresses_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
   CONSTRAINT `customer_addresses_district_id_foreign` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `customer_addresses_province_id_foreign` FOREIGN KEY (`province_id`) REFERENCES `provinces` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `customer_addresses_sub_district_id_foreign` FOREIGN KEY (`sub_district_id`) REFERENCES `sub_districts` (`id`) ON DELETE CASCADE
+  CONSTRAINT `customer_addresses_sub_district_id_foreign` FOREIGN KEY (`sub_district_id`) REFERENCES `sub_districts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `customer_addresses_village_id_foreign` FOREIGN KEY (`village_id`) REFERENCES `villages` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `customers`;
@@ -742,6 +745,7 @@ DROP TABLE IF EXISTS `promotions`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `promotions` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` tinytext COLLATE utf8mb4_unicode_ci,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
@@ -752,7 +756,8 @@ CREATE TABLE `promotions` (
   `target_anchor` enum('_self','_blank') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '_self',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `promotions_uuid_unique` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `provinces`;
@@ -882,6 +887,110 @@ CREATE TABLE `tags` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `template_section_contents`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `template_section_contents` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `section_id` bigint unsigned NOT NULL,
+  `field_id` bigint unsigned NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci COMMENT 'Stored value for the field',
+  `meta` json DEFAULT NULL COMMENT 'Additional metadata, e.g. image alt text, link target, etc.',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `template_section_contents_section_id_field_id_unique` (`section_id`,`field_id`),
+  UNIQUE KEY `template_section_contents_uuid_unique` (`uuid`),
+  KEY `template_section_contents_field_id_foreign` (`field_id`),
+  CONSTRAINT `template_section_contents_field_id_foreign` FOREIGN KEY (`field_id`) REFERENCES `template_section_fields` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `template_section_contents_section_id_foreign` FOREIGN KEY (`section_id`) REFERENCES `template_sections` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `template_section_fields`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `template_section_fields` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `section_id` bigint unsigned NOT NULL,
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Field key/identifier, e.g. title, subtitle, description, image_url, button_text, button_link',
+  `label` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Human-readable label for the field',
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'text' COMMENT 'text, textarea, image, url, select, toggle, color, number, richtext',
+  `placeholder` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `default_value` text COLLATE utf8mb4_unicode_ci,
+  `options` json DEFAULT NULL COMMENT 'For select fields: [{label, value}]',
+  `is_required` tinyint(1) NOT NULL DEFAULT '0',
+  `order_priority` int unsigned NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `template_section_fields_section_id_key_unique` (`section_id`,`key`),
+  UNIQUE KEY `template_section_fields_uuid_unique` (`uuid`),
+  CONSTRAINT `template_section_fields_section_id_foreign` FOREIGN KEY (`section_id`) REFERENCES `template_sections` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `template_sections`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `template_sections` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `template_id` bigint unsigned NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'e.g. hero, stories, banner, gallery, cta, testimonials, products, etc.',
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `icon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Heroicon or icon identifier for display',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `order_priority` int unsigned NOT NULL DEFAULT '0' COMMENT 'SortableJS ordering',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `template_sections_uuid_unique` (`uuid`),
+  KEY `template_sections_template_id_foreign` (`template_id`),
+  CONSTRAINT `template_sections_template_id_foreign` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `templates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `templates` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color_scheme` json DEFAULT NULL COMMENT 'JSON: { primary, secondary, accent, background, text, etc. }',
+  `thumbnail` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `templates_uuid_unique` (`uuid`),
+  UNIQUE KEY `templates_code_unique` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `transaction_shipping_details`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `transaction_shipping_details` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` bigint unsigned NOT NULL,
+  `warehouse_id` bigint unsigned NOT NULL,
+  `courier_code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `courier_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `price` decimal(15,2) NOT NULL,
+  `weight` int NOT NULL,
+  `estimation` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `transaction_shipping_details_transaction_id_foreign` (`transaction_id`),
+  KEY `transaction_shipping_details_warehouse_id_foreign` (`warehouse_id`),
+  CONSTRAINT `transaction_shipping_details_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `transaction_shipping_details_warehouse_id_foreign` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `transactions`;
@@ -1058,9 +1167,19 @@ CREATE TABLE `warehouses` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `province_id` bigint unsigned DEFAULT NULL,
+  `district_id` bigint unsigned DEFAULT NULL,
+  `village_id` bigint unsigned DEFAULT NULL,
+  `postal_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `warehouses_sub_district_id_foreign` (`sub_district_id`),
-  CONSTRAINT `warehouses_sub_district_id_foreign` FOREIGN KEY (`sub_district_id`) REFERENCES `sub_districts` (`id`) ON DELETE CASCADE
+  KEY `warehouses_province_id_foreign` (`province_id`),
+  KEY `warehouses_district_id_foreign` (`district_id`),
+  KEY `warehouses_village_id_foreign` (`village_id`),
+  CONSTRAINT `warehouses_district_id_foreign` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `warehouses_province_id_foreign` FOREIGN KEY (`province_id`) REFERENCES `provinces` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `warehouses_sub_district_id_foreign` FOREIGN KEY (`sub_district_id`) REFERENCES `sub_districts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `warehouses_village_id_foreign` FOREIGN KEY (`village_id`) REFERENCES `villages` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `wishlists`;
@@ -1153,3 +1272,11 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (63,'2026_03_07_000
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (65,'2026_03_07_020450_create_villages_table',11);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (66,'2026_03_07_020005_add_apicoid__code_to_provinces_table',12);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (69,'2026_03_07_020458_create_villages_table',13);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (70,'2026_03_09_075435_add_village_id_to_customer_addresses_table',14);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (71,'2026_03_09_215656_add_address_columns_to_warehouses_table',15);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (72,'2026_03_09_215706_create_transaction_shipping_details_table',15);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (73,'2026_03_10_103909_add_uuid_to_promotions_table',16);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (74,'2026_03_14_152101_create_templates_table',17);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (75,'2026_03_14_152102_create_template_sections_table',17);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (76,'2026_03_14_152103_create_template_section_fields_table',17);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (77,'2026_03_14_152104_create_template_section_contents_table',17);

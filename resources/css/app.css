@@ -4,37 +4,41 @@
 
 @layer base {
     :root {
-        --background: #FFFFFF;
-        --foreground: 0 0% 3.9%;
-        --primary: #000000;
+        --background: 30 25% 99%;
+        --foreground: 20 30% 15%;
+        --primary: 25 80% 55%;
         --primary-foreground: 0 0% 98%;
-        --card: 0 0% 100%;
-        --card-foreground: 0 0% 3.9%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 3.9%;
-        --border: 0 0% 89.8%;
-        --input: 0 0% 89.8%;
-        --ring: 0 0% 3.9%;
-        --radius: 0rem;
+        --secondary: 40 30% 95%;
+        --secondary-foreground: 20 30% 15%;
+        --destructive: 348 80% 55%;
+        --destructive-foreground: 0 0% 98%;
+        --muted: 30 5% 93%;
+        --muted-foreground: 30 5% 45%;
+        --accent: 35 95% 55%;
+        --accent-foreground: 20 30% 15%;
+        --border: 30 10% 92%;
+        --input: 30 10% 92%;
+        --ring: 25 80% 55%;
+        --radius: 1rem;
     }
 
     body {
-        @apply bg-white text-black antialiased;
-        font-family: 'Plus Jakarta Sans', 'Noto Sans', sans-serif;
+        @apply bg-background text-foreground antialiased;
+        font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
     }
 }
 
 @layer components {
     .container {
-        @apply max-w-[1440px] mx-auto px-4 md:px-8;
+        @apply mx-auto max-w-[1440px] px-4 md:px-8;
     }
-    
+
     .btn-primary {
-        @apply bg-black text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-all duration-300 rounded-none;
+        @apply rounded-none bg-black px-8 py-3 text-sm font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-gray-800;
     }
-    
+
     .input-elegant {
-        @apply w-full bg-white border border-gray-200 py-3 px-4 text-sm focus:outline-none focus:border-black rounded-none transition-all duration-300;
+        @apply w-full rounded-none border border-gray-200 bg-white px-4 py-3 text-sm transition-all duration-300 focus:border-black focus:outline-none;
     }
 }
 

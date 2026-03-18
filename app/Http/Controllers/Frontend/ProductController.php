@@ -26,6 +26,14 @@ class ProductController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', $request->price_min);
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', $request->price_max);
+        }
+
         if ($request->has('sort')) {
             switch ($request->sort) {
                 case 'price_low':
@@ -33,6 +41,12 @@ class ProductController extends Controller
                     break;
                 case 'price_high':
                     $query->orderBy('price', 'desc');
+                    break;
+                case 'name_asc':
+                    $query->orderBy('name', 'asc');
+                    break;
+                case 'name_desc':
+                    $query->orderBy('name', 'desc');
                     break;
                 case 'newest':
                 default:
@@ -49,7 +63,7 @@ class ProductController extends Controller
         return Inertia::render('Products/Index', [
             'products' => ProductSimpleResource::collection($products),
             'categories' => CategoryResource::collection($categories),
-            'filters' => $request->only(['category', 'search', 'sort']),
+            'filters' => $request->only(['category', 'search', 'sort', 'price_min', 'price_max']),
         ]);
     }
 }
