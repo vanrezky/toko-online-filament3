@@ -3,17 +3,23 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CategoryResource;
 use App\Http\Resources\FlashsaleResource;
 use App\Http\Resources\ProductSimpleResource;
-use App\Models\Category;
 use App\Models\Flashsale;
 use App\Models\Product;
+use App\Services\TemplateService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class HomeController extends Controller
 {
+    protected TemplateService $templateService;
+
+    public function __construct(TemplateService $templateService)
+    {
+        $this->templateService = $templateService;
+    }
+
     public function index(Request $request)
     {
         if ($request->filled('search')) {
@@ -37,13 +43,14 @@ class HomeController extends Controller
         $products = Product::active()->with(['media', 'category', 'resellerPrices', 'wholesales'])
             ->latest()
             ->paginate(12)->withQueryString();
-        $categories = Category::active()->featured()->get();
+
+        $templateData = $this->templateService->getActiveTemplateWithSections();
 
         return Inertia::render('Home/Index', [
             'flashsales' => $flashSales ? FlashsaleResource::make($flashSales) : null,
             'products' => ProductSimpleResource::collection($products),
-            'categories' => CategoryResource::collection($categories),
             'filters' => $request->only(['category', 'search']),
+            'template' => $templateData,
         ]);
     }
 }

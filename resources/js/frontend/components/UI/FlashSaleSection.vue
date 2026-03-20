@@ -9,11 +9,17 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    title: {
+        type: String,
+        default: "",
+    },
     subtitle: {
         type: String,
         default: "Dapatkan harga spesial dengan periode terbatas",
     },
 });
+
+const sectionTitle = computed(() => props.title || props.flashsales?.name || "Flash Sale");
 
 const timeLeft = ref({
     hours: "00",
@@ -111,7 +117,7 @@ onUnmounted(() => {
                                 <Zap class="h-3 w-3" /> Promo Terbatas
                             </span>
                         </div>
-                        <h2 class="mt-1 text-xl font-bold text-foreground md:text-2xl">{{ flashsales.name }}</h2>
+                        <h2 class="mt-1 text-xl font-bold text-foreground md:text-2xl">{{ sectionTitle }}</h2>
                         <p class="mt-1 text-sm text-muted-foreground">{{ subtitle }}</p>
                     </div>
 

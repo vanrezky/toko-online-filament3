@@ -3,52 +3,64 @@
 namespace App\Http\Middleware;
 
 use App\Enums\CartStatus;
-use App\Filament\Resources\UserResource;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CustomerResource;
 use App\Http\Resources\PromotionResource;
-use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Page;
 use App\Models\Promotion;
 use App\Models\Wishlist;
+use App\Services\TemplateService;
 use App\Settings\GeneralSettings;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
-    /**
-     * The root template that's loaded on the first page visit.
-     *
-     * @see https://inertiajs.com/server-side-setup#root-template
-     *
-     * @var string
-     */
     protected $rootView = 'frontend';
 
-    /**
-     * Determines the current asset version.
-     *
-     * @see https://inertiajs.com/asset-versioning
-     */
     public function version(Request $request): ?string
     {
         return parent::version($request);
     }
 
-    /**
-     * Define the props that are shared by default.
-     *
-     * @see https://inertiajs.com/shared-data
-     *
-     * @return array<string, mixed>
-     */
+    protected function isFrontendRequest(Request $request): bool
+    {
+        $path = $request->path();
+        return !str_starts_with($path, 'admin') 
+            && !str_starts_with($path, 'filament')
+            && !str_starts_with($path, '_debugbar');
+    }
+
     public function share(Request $request): array
     {
-        return array_merge(parent::share($request), [
+        $isFrontend = $this->isFrontendRequest($request);
+
+        $shared = [
+            'settings' => function () {
+                $settings = app(GeneralSettings::class);
+                return [
+                    'logo' => $settings->getLogo() ?? '',
+                    'favicon' => $settings->getFavicon() ?? '',
+                    'site_name' => $settings->site_name ?? '',
+                ];
+            },
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+                'info' => $request->session()->get('info'),
+            ],
+        ];
+
+        if (!$isFrontend) {
+            return array_merge(parent::share($request), $shared);
+        }
+
+        return array_merge(parent::share($request), $shared, [
             'auth' => [
                 'user' => Auth::guard('customer')->user() ? CustomerResource::make(Auth::guard('customer')->user()) : null,
             ],
@@ -71,40 +83,39 @@ class HandleInertiaRequests extends Middleware
                         ]
                     ))->count();
                 }
-
-                return [];
+                return 0;
             },
-            'settings' => function () {
-                $settings = app(GeneralSettings::class);
-
-                return [
-                    'logo' => $settings->getLogo() ?? '',
-                    'favicon' => $settings->getFavicon() ?? '',
-                    'site_name' => $settings->site_name ?? '',
-                ];
+            'menu' => function () {
+                return Cache::remember('frontend_menu', 3600, function () {
+                    return [
+                        'header' => Page::headerMenu()->get()->map(fn($page) => [
+                            'name' => $page->title,
+                            'href' => route('frontend.page.show', $page->slug),
+                        ]),
+                        'footer' => Page::footerMenu()->get()->map(fn($page) => [
+                            'name' => $page->title,
+                            'href' => route('frontend.page.show', $page->slug),
+                        ]),
+                    ];
+                });
             },
-            'menu' => [
-                'header' => Page::headerMenu()->get()->map(fn($page) => [
-                    'name' => $page->title,
-                    'href' => route('frontend.page.show', $page->slug),
-                ]),
-                'footer' => Page::footerMenu()->get()->map(fn($page) => [
-                    'name' => $page->title,
-                    'href' => route('frontend.page.show', $page->slug),
-                ]),
-            ],
-            'categories' => CategoryResource::collection(
-                Category::homepage()->with('media')->get()
-            ),
-            'flash' => [
-                'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
-                'warning' => $request->session()->get('warning'),
-                'info' => $request->session()->get('info'),
-            ],
-            'promotions' => PromotionResource::collection(
-                Promotion::active()->with('media')->get()
-            ),
+            'categories' => function () {
+                return Cache::remember('frontend_categories', 3600, function () {
+                    return CategoryResource::collection(
+                        Category::homepage()->with('media')->get()
+                    );
+                });
+            },
+            'promotions' => function () {
+                return Cache::remember('frontend_promotions', 3600, function () {
+                    return PromotionResource::collection(
+                        Promotion::active()->with('media')->get()
+                    );
+                });
+            },
+            'colorScheme' => function () {
+                return app(TemplateService::class)->getColorScheme();
+            },
         ]);
     }
 }

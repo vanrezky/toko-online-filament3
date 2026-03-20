@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
+import { usePage } from "@inertiajs/vue3";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
 import HeroSection from "../../components/UI/HeroSection.vue";
 import FeaturedProducts from "../../components/UI/FeaturedProducts.vue";
@@ -14,42 +15,84 @@ const props = defineProps({
     products: Object,
     categories: Array,
     filters: Object,
+    template: Object,
 });
+
+const page = usePage();
+const colorScheme = computed(() => page.props.colorScheme);
 
 const allProducts = ref([...(props.products?.data || [])]);
 
-// Featured products (first 4 from products list)
 const featuredProducts = computed(() => {
     return allProducts.value.slice(0, 4);
 });
 
-// Watch for product changes
 watch(
     () => props.products?.data,
     (newData) => {
         allProducts.value = [...newData];
     },
 );
+
+const getSectionContent = (sectionType, key, defaultValue = "") => {
+    if (!props.template?.sections) return defaultValue;
+    const section = props.template.sections.find((s) => s.type === sectionType);
+    return section?.contents?.[key] || defaultValue;
+};
+
+const newsletterTitle = computed(() => getSectionContent("newsletter", "title", "Dapatkan Penawaran Spesial"));
+const newsletterSubtitle = computed(() =>
+    getSectionContent("newsletter", "subtitle", "Daftar newsletter untuk mendapatkan informasi tentang produk baru dan promo menarik."),
+);
+const newsletterButtonText = computed(() => getSectionContent("newsletter", "button_text", "Berlangganan"));
+
+const heroTitle = computed(() => getSectionContent("hero", "title", ""));
+const heroSubtitle = computed(() => getSectionContent("hero", "subtitle", ""));
+const heroImage = computed(() => getSectionContent("hero", "image_url", ""));
+const heroOverlay = computed(() => getSectionContent("hero", "overlay_color", "#2D1B0E80"));
+const heroButtonText = computed(() => getSectionContent("hero", "button_text", ""));
+const heroButtonLink = computed(() => getSectionContent("hero", "button_link", ""));
+const heroBadge = computed(() => getSectionContent("hero", "badge", ""));
+
+const featuredTitle = computed(() => getSectionContent("featured_products", "title", "Pilihan Terbaik"));
+const featuredSubtitle = computed(() => getSectionContent("featured_products", "subtitle", "Produk paling diminati pelanggan kami"));
+
+const allProductsTitle = computed(() => {
+    if (props.filters?.category) return props.filters.category;
+    return getSectionContent("products_grid", "title", "Semua Produk");
+});
+const allProductsSubtitle = computed(() => getSectionContent("products_grid", "subtitle", "Jelajahi koleksi lengkap produk kami"));
+
+const flashSaleTitle = computed(() => getSectionContent("flash_sale", "title", ""));
+const flashSaleSubtitle = computed(() => getSectionContent("flash_sale", "subtitle", "Dapatkan harga spesial dengan periode terbatas"));
 </script>
 
 <template>
-    <TemplateWrapper title="Home">
+    <TemplateWrapper title="Home" :color-scheme="colorScheme">
         <!-- Hero Section -->
-        <HeroSection />
+        <HeroSection
+            :title="heroTitle || 'Diskon Spesial Hari Ini'"
+            :subtitle="heroSubtitle || 'Dapatkan penawaran terbaik untuk produk pilihan Anda. Promo terbatas, jangan sampai kehabisan!'"
+            :badge="heroBadge"
+            :image-url="heroImage"
+            :overlay-color="heroOverlay"
+            :button-text="heroButtonText"
+            :button-link="heroButtonLink"
+        />
 
         <!-- Category Menu -->
-        <CategoryMenu :categories="categories" :active-category="selectedCategory" />
+        <CategoryMenu :categories="categories" />
 
         <!-- Pilihan Terbaik (Featured Products) -->
         <FeaturedProducts
             v-if="featuredProducts.length > 0 && !filters?.category"
             :products="featuredProducts"
-            title="Pilihan Terbaik"
-            subtitle="Produk paling diminati pelanggan kami"
+            :title="featuredTitle"
+            :subtitle="featuredSubtitle"
         />
 
         <!-- Flash Sale Section -->
-        <FlashSaleSection v-if="flashsales" :flashsales="flashsales" />
+        <FlashSaleSection v-if="flashsales" :flashsales="flashsales" :title="flashSaleTitle" :subtitle="flashSaleSubtitle" />
 
         <!-- All Products Section -->
         <section class="py-8 md:py-12">
@@ -58,9 +101,9 @@ watch(
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h2 class="text-xl font-bold text-foreground md:text-2xl">
-                            {{ filters?.category ? `${filters.category}` : "Semua Produk" }}
+                            {{ allProductsTitle }}
                         </h2>
-                        <p v-if="!filters?.category" class="mt-1 text-sm text-muted-foreground">Jelajahi koleksi lengkap produk kami</p>
+                        <p v-if="!filters?.category" class="mt-1 text-sm text-muted-foreground">{{ allProductsSubtitle }}</p>
                     </div>
                 </div>
 
@@ -71,7 +114,6 @@ watch(
 
                 <!-- Empty State -->
                 <div v-else class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 py-20 text-center">
-                    <!-- Decorative -->
                     <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/5"></div>
                     <div class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-primary/5"></div>
 
@@ -121,13 +163,11 @@ watch(
 
         <!-- Newsletter Section -->
         <section class="relative overflow-hidden bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 py-12 md:py-16">
-            <!-- Decorative -->
             <div class="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
             <div class="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
 
             <div class="container mx-auto px-4">
                 <div class="relative z-10 mx-auto max-w-lg text-center">
-                    <!-- Icon -->
                     <div
                         class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/30"
                     >
@@ -147,9 +187,9 @@ watch(
                         </svg>
                     </div>
 
-                    <h2 class="mb-3 text-2xl font-bold text-foreground md:text-3xl">Dapatkan Penawaran Spesial</h2>
+                    <h2 class="mb-3 text-2xl font-bold text-foreground md:text-3xl">{{ newsletterTitle }}</h2>
                     <p class="mb-8 text-sm text-muted-foreground">
-                        Daftar newsletter untuk mendapatkan informasi tentang produk baru dan promo menarik.
+                        {{ newsletterSubtitle }}
                     </p>
 
                     <form class="flex flex-col gap-3 sm:flex-row" @submit.prevent>
@@ -162,7 +202,7 @@ watch(
                             type="submit"
                             class="rounded-xl bg-gradient-to-r from-primary to-primary/90 px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
                         >
-                            Berlangganan
+                            {{ newsletterButtonText }}
                         </button>
                     </form>
                 </div>
