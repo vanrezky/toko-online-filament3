@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Enums\CartStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
@@ -19,17 +18,54 @@ class CartController extends Controller
     {
         $cart = null;
         if (Auth::guard('customer')->check()) {
-            $cart = Cart::with(['items.product.media', 'items.productVariant.variantAttributes.productAttribute', 'items.productVariant.variantAttributes.productAttributeOption'])
+            $cart = Cart::with([
+                'items.product.media',
+                'items.productVariant.variantAttributes.productAttribute',
+                'items.productVariant.variantAttributes.productAttributeOption',
+            ])
                 ->active()
                 ->where('customer_id', Auth::guard('customer')->id())
                 ->first();
 
-            if ($cart) $cart = CartResource::make($cart);
+            if ($cart) {
+                $cart = $this->formatCart($cart);
+            }
         }
 
         return Inertia::render("Cart/Index", [
             'cart' => $cart
         ]);
+    }
+
+    protected function formatCart(Cart $cart): array
+    {
+        return [
+            'id' => $cart->id,
+            'uuid' => $cart->uuid,
+            'subtotal' => $cart->subtotal,
+            'items' => $cart->items->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                    'original_price' => $item->original_price,
+                    'discount' => $item->discount,
+                    'product' => $item->product ? [
+                        'id' => $item->product->id,
+                        'uuid' => $item->product->uuid,
+                        'name' => $item->product->name,
+                        'slug' => $item->product->slug,
+                        'thumbnail' => $item->product->getFirstMediaUrl('thumb') ?: $item->product->getFirstMediaUrl(),
+                    ] : null,
+                    'product_variant' => $item->productVariant ? [
+                        'id' => $item->productVariant->id,
+                        'variant_name' => $item->productVariant->variant_name,
+                    ] : null,
+                ];
+            }),
+        ];
     }
 
     public function store(Request $request)

@@ -23,8 +23,6 @@ watch(
 const subtotal = computed(() => {
     return localItems.value.reduce((total, item) => total + item.price * item.quantity, 0);
 });
-const tax = computed(() => Math.round(subtotal.value * 0.1));
-const total = computed(() => subtotal.value + tax.value);
 
 const updateQuantity = debounce((itemId, newQty) => {
     if (newQty < 1) return;
@@ -166,10 +164,6 @@ const removeItem = (id) => {
                                             <span class="font-medium text-foreground">{{ formatCurrency(subtotal) }}</span>
                                         </div>
                                         <div class="flex justify-between text-sm">
-                                            <span class="text-muted-foreground">Estimasi Pajak (10%)</span>
-                                            <span class="font-medium text-foreground">{{ formatCurrency(tax) }}</span>
-                                        </div>
-                                        <div class="flex justify-between text-sm">
                                             <span class="text-muted-foreground">Ongkos Kirim</span>
                                             <span class="font-medium text-foreground">Dihitung saat checkout</span>
                                         </div>
@@ -178,9 +172,8 @@ const removeItem = (id) => {
                                     <div class="py-4">
                                         <div class="mb-2 flex items-center justify-between">
                                             <span class="text-lg font-bold text-foreground">Total</span>
-                                            <span class="text-2xl font-bold text-primary">{{ formatCurrency(total) }}</span>
+                                            <span class="text-2xl font-bold text-primary">{{ formatCurrency(subtotal) }}</span>
                                         </div>
-                                        <p class="text-xs text-muted-foreground">* Harga sudah termasuk estimasi pajak</p>
                                     </div>
 
                                     <Link
@@ -190,21 +183,6 @@ const removeItem = (id) => {
                                         <span>Checkout</span>
                                         <ArrowRight class="h-4 w-4" />
                                     </Link>
-                                </div>
-
-                                <div class="rounded-2xl bg-white p-4 shadow-sm">
-                                    <div class="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Masukkan kode promo"
-                                            class="flex-grow rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <button
-                                            class="rounded-xl bg-foreground px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-foreground/90"
-                                        >
-                                            Pakai
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
                         </div>

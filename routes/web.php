@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\Auth\RegisterController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductDetailController;
+use App\Http\Controllers\Frontend\VoucherController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -75,6 +76,11 @@ Route::name('frontend.')->group(function () {
     Route::get('/wishlist', [\App\Http\Controllers\Frontend\WishlistController::class, 'index'])->name('wishlist');
     Route::get('/faq', \App\Http\Controllers\Frontend\FaqController::class)->name('faq');
     Route::post('/wishlist/toggle', [\App\Http\Controllers\Frontend\WishlistController::class, 'toggle'])->name('wishlist.toggle');
+
+    // Voucher routes
+    Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers');
+    Route::post('/vouchers/apply', [VoucherController::class, 'apply'])->name('vouchers.apply');
+    Route::post('/vouchers/remove', [VoucherController::class, 'remove'])->name('vouchers.remove');
 
     // Wildcard for product detail - MUST BE LAST
     Route::get('{product}', ProductDetailController::class)->name('product-detail');

@@ -13,7 +13,9 @@ class Cart extends Model
 {
     use HasFactory, HasUuidTrait;
 
-    protected $fillable = ['uuid', 'customer_id', 'status'];
+    protected $fillable = [
+        'uuid', 'customer_id', 'status',
+    ];
 
     public function getRouteKeyName(): string
     {
@@ -43,5 +45,12 @@ class Cart extends Model
     public function scopeAbandoned($query)
     {
         $query->where('status', CartStatus::Abandoned);
+    }
+
+    public function getSubtotalAttribute(): float
+    {
+        return $this->items->sum(function ($item) {
+            return $item->price * $item->quantity;
+        });
     }
 }

@@ -7,6 +7,7 @@ import FeaturedProducts from "../../components/UI/FeaturedProducts.vue";
 import FlashSaleSection from "../../components/UI/FlashSaleSection.vue";
 import ProductCard from "../../components/UI/ProductCard.vue";
 import CategoryMenu from "../../components/UI/CategoryMenu.vue";
+import VoucherSection from "../../components/UI/VoucherSection.vue";
 import { Link } from "@inertiajs/vue3";
 import { ChevronRight } from "lucide-vue-next";
 
@@ -93,6 +94,9 @@ const flashSaleSubtitle = computed(() => getSectionContent("flash_sale", "subtit
 
         <!-- Flash Sale Section -->
         <FlashSaleSection v-if="flashsales" :flashsales="flashsales" :title="flashSaleTitle" :subtitle="flashSaleSubtitle" />
+
+        <!-- Voucher Section -->
+        <VoucherSection title="Voucher Tersedia" subtitle="Simpan dan gunakan saat checkout" :limit="4" />
 
         <!-- All Products Section -->
         <section class="py-8 md:py-12">

@@ -1,15 +1,16 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { useForm, Link } from "@inertiajs/vue3";
+import { useForm, Link, router } from "@inertiajs/vue3";
 import axios from "axios";
-import { Loader2 } from "lucide-vue-next";
+import { Loader2, Ticket, X, Truck, Tag, AlertCircle } from "lucide-vue-next";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
-import { Truck, CreditCard, ShoppingBag, ChevronRight, MapPin, CheckCircle } from "lucide-vue-next";
 
 const props = defineProps({
     cart: Object,
     addresses: Array,
     shippingMethods: Array,
+    pendingVouchers: Object,
+    validatedVouchers: Object,
 });
 
 const form = useForm({
@@ -21,6 +22,19 @@ const form = useForm({
 
 const shippingResults = ref([]);
 const isLoadingShipping = ref(false);
+const isValidatingVouchers = ref(false);
+const localValidatedVouchers = ref(props.validatedVouchers || { shipping: null, product: null });
+const voucherCode = ref("");
+const isApplyingVoucher = ref(false);
+const voucherError = ref(null);
+
+watch(
+    () => props.validatedVouchers,
+    (newVal) => {
+        localValidatedVouchers.value = newVal || { shipping: null, product: null };
+    },
+    { deep: true },
+);
 
 const fetchShippingCosts = async () => {
     if (!form.address_id) return;
@@ -49,6 +63,22 @@ const fetchShippingCosts = async () => {
     }
 };
 
+const validateVouchers = async () => {
+    isValidatingVouchers.value = true;
+    try {
+        const response = await axios.get("/api/vouchers/validate-cookie", {
+            withCredentials: true,
+        });
+        if (response.data.success) {
+            localValidatedVouchers.value = response.data.data;
+        }
+    } catch (error) {
+        console.error("Failed to validate vouchers:", error);
+    } finally {
+        isValidatingVouchers.value = false;
+    }
+};
+
 watch(
     () => form.address_id,
     () => {
@@ -60,21 +90,95 @@ onMounted(() => {
     if (form.address_id) {
         fetchShippingCosts();
     }
+    validateVouchers();
 });
 
 const items = computed(() => props.cart?.items || []);
 const subtotal = computed(() => items.value.reduce((total, item) => total + item.price * item.quantity, 0));
+
+const shippingDiscount = computed(() => {
+    return localValidatedVouchers.value?.shipping?.discount_amount || 0;
+});
+
+const productDiscount = computed(() => {
+    return localValidatedVouchers.value?.product?.discount_amount || 0;
+});
+
+const totalVoucherDiscount = computed(() => {
+    return shippingDiscount.value + productDiscount.value;
+});
+
+const hasAnyVoucher = computed(() => {
+    return localValidatedVouchers.value?.shipping || localValidatedVouchers.value?.product;
+});
+
+const hasInvalidVoucher = computed(() => {
+    const shipping = localValidatedVouchers.value?.shipping;
+    const product = localValidatedVouchers.value?.product;
+    return (shipping && !shipping.valid) || (product && !product.valid);
+});
+
 const shippingFee = computed(() => {
     return Object.values(form.shipping_methods).reduce((sum, method) => sum + (method.price || 0), 0);
 });
-const total = computed(() => subtotal.value + shippingFee.value);
+
+const discountedShippingFee = computed(() => {
+    return Math.max(0, shippingFee.value - shippingDiscount.value);
+});
+
+const total = computed(() => subtotal.value + discountedShippingFee.value);
+const grandTotal = computed(() => {
+    return subtotal.value + discountedShippingFee.value - productDiscount.value;
+});
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
 };
 
 const submitOrder = () => {
+    if (isValidatingVouchers.value) {
+        return;
+    }
     form.post(route("frontend.checkout.store"));
+};
+
+const removeVoucher = async (type) => {
+    try {
+        await axios.post("/api/vouchers/remove", { type }, { withCredentials: true });
+        localValidatedVouchers.value[type] = null;
+    } catch (error) {
+        console.error("Failed to remove voucher:", error);
+    }
+};
+
+const canSubmitOrder = computed(() => {
+    return !isValidatingVouchers.value && !hasInvalidVoucher.value && form.address_id && Object.keys(form.shipping_methods).length > 0;
+});
+
+const applyVoucher = async () => {
+    if (!voucherCode.value.trim()) return;
+
+    isApplyingVoucher.value = true;
+    voucherError.value = null;
+
+    try {
+        const response = await axios.post("/api/vouchers/apply", { code: voucherCode.value.trim() }, { withCredentials: true });
+
+        if (response.data.success) {
+            voucherCode.value = "";
+            if (response.data.data?.pending) {
+                const pending = response.data.data.pending;
+                localValidatedVouchers.value = response.data.data.vouchers || localValidatedVouchers.value;
+            }
+            await validateVouchers();
+        } else {
+            voucherError.value = response.data.error?.message || "Voucher tidak valid";
+        }
+    } catch (error) {
+        voucherError.value = error.response?.data?.error?.message || "Terjadi kesalahan";
+    } finally {
+        isApplyingVoucher.value = false;
+    }
 };
 </script>
 
@@ -121,7 +225,20 @@ const submitOrder = () => {
                                                 <h3 class="text-sm font-bold text-[#2d1b0e]">{{ address.name }}</h3>
                                                 <p class="mt-1 text-xs text-[#6b5a4d]">{{ address.phone }}</p>
                                             </div>
-                                            <MapPin class="h-4 w-4 text-[#fa8456]" />
+                                            <svg class="h-4 w-4 text-[#fa8456]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                ></path>
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                ></path>
+                                            </svg>
                                         </div>
                                         <p class="mt-3 text-xs leading-relaxed text-[#6b5a4d]">
                                             {{ address.address }}<br />
@@ -129,7 +246,13 @@ const submitOrder = () => {
                                             {{ address.province?.name }} {{ address.postal_code }}
                                         </p>
                                         <div v-if="form.address_id === address.id" class="absolute -right-1.5 -top-1.5">
-                                            <CheckCircle class="h-5 w-5 text-[#fa8456] drop-shadow-sm" />
+                                            <svg class="h-5 w-5 text-[#fa8456] drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                    clip-rule="evenodd"
+                                                ></path>
+                                            </svg>
                                         </div>
                                     </div>
 
@@ -229,9 +352,8 @@ const submitOrder = () => {
                                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                                     <label
                                         v-for="method in [
-                                            { id: 'bank_transfer', name: 'Transfer Bank', icon: CreditCard },
-                                            { id: 'credit_card', name: 'Kartu Kredit', icon: CreditCard },
-                                            { id: 'qris', name: 'QRIS', icon: CreditCard },
+                                            { id: 'bank_transfer', name: 'Transfer Bank' },
+                                            { id: 'qris', name: 'QRIS' },
                                         ]"
                                         :key="method.id"
                                         class="flex cursor-pointer items-center rounded-xl border p-4 transition-all hover:bg-[#fafafa]"
@@ -243,7 +365,6 @@ const submitOrder = () => {
                                             v-model="form.payment_method"
                                             class="h-5 w-5 border-[#e8e6ef] text-[#fa8456] accent-[#fa8456] focus:ring-[#fa8456]"
                                         />
-                                        <component :is="method.icon" class="ml-4 h-5 w-5 text-[#6b5a4d]" />
                                         <span class="ml-3 text-sm font-semibold text-[#2d1b0e]">{{ method.name }}</span>
                                     </label>
                                 </div>
@@ -266,6 +387,115 @@ const submitOrder = () => {
                         <div class="lg:col-span-5">
                             <div class="sticky top-32 space-y-6 rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm md:p-8">
                                 <h2 class="border-b border-[#f0eef5] pb-4 text-sm font-bold text-[#2d1b0e]">Ringkasan Pesanan</h2>
+
+                                <!-- Pending Vouchers Section -->
+                                <div v-if="hasAnyVoucher || isValidatingVouchers" class="space-y-3">
+                                    <div class="mb-2 flex items-center gap-2">
+                                        <Ticket class="h-4 w-4 text-[#fa8456]" />
+                                        <span class="text-xs font-semibold text-[#2d1b0e]">Voucher Dipilih</span>
+                                    </div>
+
+                                    <!-- Shipping Voucher -->
+                                    <div
+                                        v-if="localValidatedVouchers?.shipping"
+                                        class="rounded-lg border p-3"
+                                        :class="localValidatedVouchers.shipping.valid ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'"
+                                    >
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                                                    <Truck class="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-semibold text-[#2d1b0e]">
+                                                        {{ localValidatedVouchers.shipping.name || localValidatedVouchers.shipping.code }}
+                                                    </p>
+                                                    <p v-if="localValidatedVouchers.shipping.valid" class="text-xs text-green-600">
+                                                        Hemat {{ localValidatedVouchers.shipping.formatted_discount }}
+                                                    </p>
+                                                    <p v-else class="flex items-center gap-1 text-xs text-red-600">
+                                                        <AlertCircle class="h-3 w-3" />
+                                                        {{ localValidatedVouchers.shipping.error }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button @click="removeVoucher('shipping')" class="text-gray-400 hover:text-red-500">
+                                                <X class="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Product Voucher -->
+                                    <div
+                                        v-if="localValidatedVouchers?.product"
+                                        class="rounded-lg border p-3"
+                                        :class="localValidatedVouchers.product.valid ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'"
+                                    >
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-green-100 text-green-600">
+                                                    <Tag class="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-semibold text-[#2d1b0e]">
+                                                        {{ localValidatedVouchers.product.name || localValidatedVouchers.product.code }}
+                                                    </p>
+                                                    <p v-if="localValidatedVouchers.product.valid" class="text-xs text-green-600">
+                                                        Hemat {{ localValidatedVouchers.product.formatted_discount }}
+                                                    </p>
+                                                    <p v-else class="flex items-center gap-1 text-xs text-red-600">
+                                                        <AlertCircle class="h-3 w-3" />
+                                                        {{ localValidatedVouchers.product.error }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button @click="removeVoucher('product')" class="text-gray-400 hover:text-red-500">
+                                                <X class="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Validating State -->
+                                    <div v-if="isValidatingVouchers" class="flex items-center justify-center gap-2 py-2">
+                                        <Loader2 class="h-4 w-4 animate-spin text-[#fa8456]" />
+                                        <span class="text-xs text-[#6b5a4d]">Memvalidasi voucher...</span>
+                                    </div>
+                                </div>
+
+                                <!-- Voucher Input -->
+                                <div class="rounded-lg border border-dashed border-[#e8e6ef] p-4">
+                                    <div class="mb-2 flex items-center gap-2">
+                                        <Ticket class="h-4 w-4 text-[#fa8456]" />
+                                        <span class="text-xs font-semibold text-[#2d1b0e]">Masukkan Kode Voucher</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <input
+                                            v-model="voucherCode"
+                                            type="text"
+                                            placeholder="Contoh: DISKON10"
+                                            class="flex-1 rounded-lg border border-[#e8e6ef] bg-[#fafafa] px-3 py-2 text-xs uppercase transition-all focus:border-[#fa8456] focus:bg-white focus:outline-none"
+                                            @keyup.enter="applyVoucher"
+                                        />
+                                        <button
+                                            @click="applyVoucher"
+                                            :disabled="!voucherCode.trim() || isApplyingVoucher"
+                                            class="flex items-center justify-center gap-1 rounded-lg bg-[#fa8456] px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-[#e56f3f] disabled:bg-[#c4bfc9]"
+                                        >
+                                            <Loader2 v-if="isApplyingVoucher" class="h-3 w-3 animate-spin" />
+                                            <span>Pakai</span>
+                                        </button>
+                                    </div>
+                                    <p v-if="voucherError" class="mt-2 text-xs text-red-500">{{ voucherError }}</p>
+                                </div>
+
+                                <!-- List Voucher Link -->
+                                <Link
+                                    :href="route('frontend.vouchers')"
+                                    class="flex items-center justify-center gap-2 rounded-lg border border-dashed border-[#e8e6ef] py-3 text-xs font-semibold text-[#6b5a4d] transition-all hover:border-[#fa8456] hover:text-[#fa8456]"
+                                >
+                                    <Ticket class="h-4 w-4" />
+                                    <span>List Voucher</span>
+                                </Link>
 
                                 <!-- Order Items (Mini list) -->
                                 <div class="max-h-[400px] space-y-4 overflow-y-auto pr-2">
@@ -294,20 +524,47 @@ const submitOrder = () => {
                                     </div>
                                     <div class="flex justify-between text-sm">
                                         <span class="text-[#6b5a4d]">Pengiriman</span>
-                                        <span class="font-semibold text-[#2d1b0e]">{{ formatCurrency(shippingFee) }}</span>
+                                        <span class="font-semibold text-[#2d1b0e]">
+                                            {{ formatCurrency(discountedShippingFee) }}
+                                            <span v-if="shippingDiscount > 0" class="ml-1 text-xs text-green-600">
+                                                (-{{ formatCurrency(shippingDiscount) }})
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div v-if="productDiscount > 0" class="flex justify-between text-sm text-green-600">
+                                        <span>Diskon Produk</span>
+                                        <span class="font-semibold">-{{ formatCurrency(productDiscount) }}</span>
                                     </div>
                                     <div class="flex justify-between border-t border-[#e8e6ef] pt-4">
                                         <span class="text-sm font-bold text-[#2d1b0e]">Total</span>
-                                        <span class="text-xl font-bold text-[#fa8456]">{{ formatCurrency(total) }}</span>
+                                        <span class="text-xl font-bold text-[#fa8456]">{{ formatCurrency(grandTotal) }}</span>
+                                    </div>
+                                    <div v-if="totalVoucherDiscount > 0" class="rounded-lg bg-green-50 p-3 text-center">
+                                        <p class="text-sm font-semibold text-green-700">💰 Hemat {{ formatCurrency(totalVoucherDiscount) }}</p>
                                     </div>
                                 </div>
 
                                 <button
                                     @click="submitOrder"
-                                    :disabled="form.processing"
+                                    :disabled="!canSubmitOrder || form.processing"
                                     class="flex w-full items-center justify-center gap-3 rounded-full bg-[#fa8456] py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-[#e56f3f] hover:shadow-lg disabled:bg-[#c4bfc9]"
                                 >
-                                    <ShoppingBag class="h-5 w-5" />
+                                    <svg v-if="form.processing" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path
+                                            class="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
+                                    </svg>
+                                    <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                        ></path>
+                                    </svg>
                                     <span>{{ form.processing ? "Memproses..." : "Buat Pesanan" }}</span>
                                 </button>
 

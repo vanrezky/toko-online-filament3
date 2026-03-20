@@ -49,4 +49,9 @@ class Transaction extends Model
     {
         return $this->hasMany(TransactionShippingDetail::class);
     }
+
+    public function vouchers(): HasMany
+    {
+        return $this->hasMany(TransactionVoucher::class);
+    }
 }

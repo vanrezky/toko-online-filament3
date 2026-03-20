@@ -10,9 +10,12 @@ use App\Models\CartItem;
 use App\Models\CustomerAddress;
 use App\Models\Transaction;
 use App\Models\TransactionShippingDetail;
+use App\Models\TransactionVoucher;
 use App\Models\Warehouse;
 use App\Services\ApicoidOngkirService;
 use App\Services\CacheService;
+use App\Services\VoucherCookieService;
+use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +23,15 @@ use Inertia\Inertia;
 
 class CheckoutController extends Controller
 {
+    protected VoucherCookieService $cookieService;
+    protected VoucherService $voucherService;
+
+    public function __construct(VoucherCookieService $cookieService, VoucherService $voucherService)
+    {
+        $this->cookieService = $cookieService;
+        $this->voucherService = $voucherService;
+    }
+
     public function __invoke(Request $request)
     {
         $customer = Auth::guard('customer')->user();
@@ -38,9 +50,14 @@ class CheckoutController extends Controller
             ->orderBy('is_featured', 'desc')
             ->get();
 
+        $pendingVouchers = $this->cookieService->get();
+        $validatedVouchers = $this->voucherService->validateFromCookie($pendingVouchers, $cart, $customer);
+
         return Inertia::render('Checkout/Index', [
             'cart' => CartResource::make($cart),
             'addresses' => $addresses,
+            'pendingVouchers' => $pendingVouchers,
+            'validatedVouchers' => $validatedVouchers,
         ]);
     }
 
@@ -62,8 +79,6 @@ class CheckoutController extends Controller
             return response()->json(['error' => 'Selected address does not have village information.'], 422);
         }
 
-        // Create a unique hash for the current cart state to use in cache key
-        // This ensures cache is busted if products, quantities, or prices change
         $cartHash = md5($cart->items->sortBy('id')->map(function ($item) {
             return $item->product_id . '-' . ($item->product_variant_id ?? '0') . '-' . $item->quantity . '-' . $item->price;
         })->implode('|'));
@@ -145,17 +160,19 @@ class CheckoutController extends Controller
             ];
         }
 
-        // Find a from_district_id from first item's warehouse if available
         $firstItem = $cart->items->first();
         $fromDistrictId = $firstItem->product->warehouse?->district_id ?: 1;
 
-        return DB::transaction(function () use ($request, $customer, $cart, $totalShippingCost, $totalWeight, $address, $fromDistrictId, $shippingDetails) {
+        $pendingVouchers = $this->cookieService->get();
+        $validatedVouchers = $this->voucherService->validateFromCookie($pendingVouchers, $cart, $customer);
+
+        return DB::transaction(function () use ($request, $customer, $cart, $totalShippingCost, $totalWeight, $address, $fromDistrictId, $shippingDetails, $validatedVouchers) {
             $transaction = Transaction::create([
                 'customer_id' => $customer->id,
                 'customer_address_id' => $address->id,
                 'weight' => $totalWeight,
                 'shipping_cost' => $totalShippingCost,
-                'courier_id' => 1, // Default or mock
+                'courier_id' => 1,
                 'from_district_id' => $fromDistrictId,
                 'to_district_id' => $address->district_id,
                 'payment_method' => $request->payment_method,
@@ -181,7 +198,25 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // Deactivate cart
+            foreach (['shipping', 'product'] as $type) {
+                $voucherData = $validatedVouchers[$type] ?? null;
+                if ($voucherData && $voucherData['valid'] ?? false) {
+                    $voucher = $this->voucherService->getVoucherByCode($voucherData['code']);
+                    if ($voucher) {
+                        $transaction->vouchers()->create([
+                            'voucher_code' => $voucherData['code'],
+                            'voucher_name' => $voucherData['name'],
+                            'voucher_type' => $type,
+                            'discount_type' => $voucherData['discount_type'],
+                            'discount_value' => $voucherData['discount_value'],
+                            'discount_amount' => $voucherData['discount_amount'],
+                        ]);
+                        $this->voucherService->trackUsage($voucher);
+                    }
+                }
+            }
+
+            $this->cookieService->clear();
             $cart->update(['status' => CartStatus::Checked_out]);
 
             return redirect()->route('frontend.orders.show', $transaction->uuid)->with('success', 'Order placed successfully!');
