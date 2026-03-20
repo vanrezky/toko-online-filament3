@@ -57,7 +57,7 @@ class ProductResource extends JsonResource
                     'id' => $variant->uuid,
                     'variant_name' => $variant->variant_name,
                     'sku' => $variant->sku,
-                    'price' => money($variant->price)->format(),
+                    'price' => $variant->price,
                     'raw_price' => $variant->price,
                     'stock' => $variant->stock,
                     'attributes' => $variant->variantAttributes->map(function ($attr) {
@@ -71,11 +71,11 @@ class ProductResource extends JsonResource
             'wholesales' => $wholesales->count() > 0
                 ? $wholesales->map(fn($w) => [
                     'min_qty' => $w->min_qty,
-                    'price' => money($w->price)->format(),
+                    'price' => $w->price,
                     'raw_price' => $w->price,
                 ])->prepend([
                     'min_qty' => (int) ($this->min_order ?: 1),
-                    'price' => money($targetPrice)->format(),
+                    'price' => $targetPrice,
                     'raw_price' => $targetPrice,
                 ])->unique('min_qty')->sortBy('min_qty')->values()
                 : [],

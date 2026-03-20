@@ -70,16 +70,40 @@ watch(
                 </div>
 
                 <!-- Empty State -->
-                <div v-else class="py-20 text-center">
-                    <div class="mb-4 text-6xl">📭</div>
-                    <h3 class="mb-2 text-xl font-bold text-foreground">Produk tidak ditemukan</h3>
-                    <p class="mb-6 text-sm text-muted-foreground">Saat ini belum ada produk yang tersedia.</p>
-                    <Link
-                        :href="route('frontend.products')"
-                        class="inline-block rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                        Lihat Semua Produk
-                    </Link>
+                <div v-else class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 py-20 text-center">
+                    <!-- Decorative -->
+                    <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/5"></div>
+                    <div class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-primary/5"></div>
+
+                    <div class="relative z-10">
+                        <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-lg">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-12 w-12 text-slate-300"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
+                                />
+                            </svg>
+                        </div>
+                        <h3 class="mb-2 text-xl font-bold text-foreground">Belum Ada Produk</h3>
+                        <p class="mx-auto mb-8 max-w-sm text-sm text-muted-foreground">
+                            Sepertinya belum ada produk yang tersedia saat ini. Yuk, cek kembali nanti!
+                        </p>
+                        <Link
+                            :href="route('frontend.home')"
+                            class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/90 px-8 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
+                        >
+                            Kembali ke Beranda
+                            <ChevronRight class="h-4 w-4" />
+                        </Link>
+                    </div>
                 </div>
 
                 <!-- View More -->
@@ -96,20 +120,47 @@ watch(
         </section>
 
         <!-- Newsletter Section -->
-        <section class="bg-primary/5 py-12">
-            <div class="container mx-auto px-4 text-center">
-                <div class="mx-auto max-w-md space-y-4">
-                    <h2 class="text-2xl font-bold text-foreground md:text-3xl">Dapatkan Penawaran Spesial</h2>
-                    <p class="text-sm text-muted-foreground">Daftar newsletter untuk mendapatkan informasi tentang produk baru dan promo menarik.</p>
+        <section class="relative overflow-hidden bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 py-12 md:py-16">
+            <!-- Decorative -->
+            <div class="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
+            <div class="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
+
+            <div class="container mx-auto px-4">
+                <div class="relative z-10 mx-auto max-w-lg text-center">
+                    <!-- Icon -->
+                    <div
+                        class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/30"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-8 w-8 text-primary-foreground"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+                            />
+                        </svg>
+                    </div>
+
+                    <h2 class="mb-3 text-2xl font-bold text-foreground md:text-3xl">Dapatkan Penawaran Spesial</h2>
+                    <p class="mb-8 text-sm text-muted-foreground">
+                        Daftar newsletter untuk mendapatkan informasi tentang produk baru dan promo menarik.
+                    </p>
+
                     <form class="flex flex-col gap-3 sm:flex-row" @submit.prevent>
                         <input
                             type="email"
                             placeholder="Masukkan email Anda"
-                            class="flex-grow rounded-full border border-border bg-white px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            class="flex-grow rounded-xl border border-white/50 bg-white px-5 py-3.5 text-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
                         />
                         <button
                             type="submit"
-                            class="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
+                            class="rounded-xl bg-gradient-to-r from-primary to-primary/90 px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
                         >
                             Berlangganan
                         </button>

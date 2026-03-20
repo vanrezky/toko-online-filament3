@@ -2,7 +2,23 @@
 import { ref, computed, watch, getCurrentInstance } from "vue";
 import { Link, useForm, router, usePage } from "@inertiajs/vue3";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
-import { User, Package, MapPin, Settings, LogOut, ChevronRight, Camera, Save, X, Plus, Trash2, CheckCircle2 } from "lucide-vue-next";
+import {
+    User,
+    Package,
+    MapPin,
+    Settings,
+    LogOut,
+    ChevronRight,
+    Camera,
+    Save,
+    X,
+    Plus,
+    Trash2,
+    CheckCircle2,
+    Edit3,
+    Heart,
+    Clock,
+} from "lucide-vue-next";
 import axios from "axios";
 
 const props = defineProps({
@@ -13,6 +29,7 @@ const props = defineProps({
 
 const page = usePage();
 const { proxy } = getCurrentInstance();
+
 const getSectionFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("section") || "overview";
@@ -173,13 +190,13 @@ const submitAddress = () => {
     }
 };
 
-const deleteAddress = (id) => {
+const deleteAddress = (id, addressName) => {
     proxy.$confirm({
         title: "Hapus Alamat",
-        message: "Apakah Anda yakin ingin menghapus alamat ini?",
+        message: `Apakah Anda yakin ingin menghapus alamat "${addressName}"?`,
         button: {
             no: "Batal",
-            yes: "Hapus",
+            yes: "Ya, Hapus",
         },
         callback: (confirm) => {
             if (confirm) {
@@ -209,63 +226,109 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
 
 <template>
     <TemplateWrapper title="Akun Saya">
-        <div class="min-h-screen bg-secondary/30 py-8 md:py-12">
+        <div class="relative min-h-screen overflow-hidden bg-gradient-to-br from-secondary/50 via-white to-secondary/30 py-8 md:py-12">
+            <!-- Decorative -->
+            <div class="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-primary/5 blur-3xl"></div>
+            <div class="absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-primary/5 blur-3xl"></div>
+
             <div class="container mx-auto px-4">
-                <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
+                <!-- Breadcrumb -->
+                <div class="relative z-10 mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+                    <span class="cursor-pointer transition-colors hover:text-foreground" @click="$inertia.get(route('frontend.home'))">Beranda</span>
+                    <ChevronRight class="h-4 w-4" />
+                    <span class="font-medium text-foreground">Akun Saya</span>
+                </div>
+
+                <div class="relative z-10 mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-[300px_1fr]">
                     <!-- Sidebar Navigation -->
                     <aside>
                         <div class="sticky top-24 space-y-4">
-                            <div class="rounded-2xl bg-white p-6 shadow-sm">
-                                <div class="flex items-center gap-4 border-b border-border pb-6">
-                                    <div class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-secondary">
-                                        <img
-                                            v-if="user.image || user.profile_photo_url"
-                                            :src="user.image || user.profile_photo_url"
-                                            class="h-full w-full object-cover"
-                                        />
-                                        <User v-else class="h-7 w-7 text-muted-foreground" />
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="truncate font-semibold text-foreground">{{ user.full_name }}</p>
-                                        <p class="truncate text-xs text-muted-foreground">{{ user.email }}</p>
+                            <!-- Profile Card -->
+                            <div class="overflow-hidden rounded-2xl bg-white shadow-xl">
+                                <!-- Header with Gradient -->
+                                <div class="bg-gradient-to-r from-primary to-primary/80 p-6 pb-8">
+                                    <div class="-mt-12 flex flex-col items-center text-center">
+                                        <div class="relative">
+                                            <div
+                                                class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-secondary shadow-lg"
+                                            >
+                                                <img
+                                                    v-if="user.image || user.profile_photo_url"
+                                                    :src="user.image || user.profile_photo_url"
+                                                    class="h-full w-full object-cover"
+                                                />
+                                                <User v-else class="h-10 w-10 text-muted-foreground" />
+                                            </div>
+                                            <div
+                                                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-primary-foreground shadow"
+                                            >
+                                                <CheckCircle2 class="h-4 w-4" />
+                                            </div>
+                                        </div>
+                                        <p class="mt-3 font-bold text-white">{{ user.full_name }}</p>
+                                        <p class="text-sm text-white/70">{{ user.email }}</p>
                                     </div>
                                 </div>
 
-                                <nav class="space-y-1 pt-4">
-                                    <template v-for="item in menuItems" :key="item.id">
-                                        <Link
-                                            v-if="item.href"
-                                            :href="item.href"
-                                            class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
-                                        >
-                                            <component :is="item.icon" class="h-5 w-5" />
-                                            <span>{{ item.name }}</span>
-                                        </Link>
-                                        <button
-                                            v-else
-                                            @click="activeSection = item.id"
-                                            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all"
-                                            :class="
-                                                activeSection === item.id || (activeSection === 'address_form' && item.id === 'addresses')
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                                            "
-                                        >
-                                            <component :is="item.icon" class="h-5 w-5" />
-                                            <span>{{ item.name }}</span>
-                                        </button>
-                                    </template>
+                                <!-- Menu Items -->
+                                <div class="p-4">
+                                    <nav class="space-y-1">
+                                        <template v-for="item in menuItems" :key="item.id">
+                                            <Link
+                                                v-if="item.href"
+                                                :href="item.href"
+                                                class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+                                            >
+                                                <component :is="item.icon" class="h-5 w-5" />
+                                                <span>{{ item.name }}</span>
+                                            </Link>
+                                            <button
+                                                v-else
+                                                @click="activeSection = item.id"
+                                                class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all"
+                                                :class="
+                                                    activeSection === item.id || (activeSection === 'address_form' && item.id === 'addresses')
+                                                        ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20'
+                                                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                                "
+                                            >
+                                                <component :is="item.icon" class="h-5 w-5" />
+                                                <span>{{ item.name }}</span>
+                                            </button>
+                                        </template>
 
+                                        <Link
+                                            :href="route('frontend.logout')"
+                                            method="post"
+                                            as="button"
+                                            class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 transition-all hover:bg-red-50"
+                                        >
+                                            <LogOut class="h-5 w-5" />
+                                            <span>Keluar</span>
+                                        </Link>
+                                    </nav>
+                                </div>
+                            </div>
+
+                            <!-- Quick Links -->
+                            <div class="overflow-hidden rounded-2xl bg-white p-4 shadow-lg">
+                                <h4 class="mb-3 text-sm font-semibold text-foreground">Akses Cepat</h4>
+                                <div class="space-y-2">
                                     <Link
-                                        :href="route('frontend.logout')"
-                                        method="post"
-                                        as="button"
-                                        class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 transition-all hover:bg-red-50"
+                                        :href="route('frontend.wishlist')"
+                                        class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
                                     >
-                                        <LogOut class="h-5 w-5" />
-                                        <span>Keluar</span>
+                                        <Heart class="h-4 w-4" />
+                                        <span>Daftar Keinginan</span>
                                     </Link>
-                                </nav>
+                                    <Link
+                                        :href="route('frontend.orders')"
+                                        class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+                                    >
+                                        <Clock class="h-4 w-4" />
+                                        <span>Riwayat Pesanan</span>
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </aside>
@@ -274,53 +337,94 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                     <div class="space-y-6">
                         <!-- OVERVIEW SECTION -->
                         <div v-if="activeSection === 'overview'" class="space-y-6">
-                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                <div class="rounded-2xl bg-primary p-6 text-primary-foreground">
-                                    <div class="mb-2 flex items-center gap-2">
-                                        <Package class="h-5 w-5" />
-                                        <span class="text-xs font-semibold uppercase tracking-wider opacity-80">Total Pesanan</span>
+                            <!-- Stats Grid -->
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div
+                                    class="group overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/80 p-6 shadow-xl shadow-primary/20 transition-all hover:shadow-2xl hover:shadow-primary/30"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="mb-2 flex items-center gap-2">
+                                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+                                                    <Package class="h-5 w-5 text-white" />
+                                                </div>
+                                                <span class="text-xs font-semibold uppercase tracking-wider text-white/80">Total Pesanan</span>
+                                            </div>
+                                            <h3 class="text-4xl font-bold text-white">0</h3>
+                                        </div>
+                                        <div class="rounded-2xl bg-white/20 p-3 backdrop-blur-sm transition-transform group-hover:scale-110">
+                                            <Package class="h-8 w-8 text-white" />
+                                        </div>
                                     </div>
-                                    <h3 class="text-4xl font-bold">0</h3>
                                 </div>
-                                <div class="rounded-2xl bg-white p-6 shadow-sm">
+
+                                <div class="group overflow-hidden rounded-2xl bg-white p-6 shadow-lg transition-all hover:shadow-xl">
                                     <div class="mb-2 flex items-center gap-2">
-                                        <MapPin class="h-5 w-5 text-muted-foreground" />
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                                            <MapPin class="h-5 w-5 text-primary" />
+                                        </div>
                                         <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Alamat Default</span>
                                     </div>
-                                    <div v-if="featuredAddress" class="space-y-1">
-                                        <h4 class="font-semibold text-foreground">{{ featuredAddress.name }}</h4>
-                                        <p class="text-sm text-muted-foreground">
-                                            {{ featuredAddress.address }}, {{ featuredAddress.village_name }},
-                                            {{ featuredAddress.sub_district_name }}, {{ featuredAddress.district_name }}
+                                    <div v-if="featuredAddress" class="space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-foreground">{{ featuredAddress.name }}</h4>
+                                            <span class="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">Default</span>
+                                        </div>
+                                        <p class="line-clamp-2 text-sm text-muted-foreground">
+                                            {{ featuredAddress.address }}, {{ featuredAddress.village_name }}, {{ featuredAddress.sub_district_name }}
                                         </p>
                                     </div>
-                                    <p v-else class="text-sm text-muted-foreground">Belum ada alamat default</p>
-                                    <button @click="activeSection = 'addresses'" class="mt-4 text-xs font-semibold text-primary hover:underline">
+                                    <div v-else class="py-2">
+                                        <p class="mb-3 text-sm text-muted-foreground">Belum ada alamat default</p>
+                                    </div>
+                                    <button
+                                        @click="activeSection = 'addresses'"
+                                        class="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary/80"
+                                    >
+                                        <Edit3 class="h-3 w-3" />
                                         Kelola Alamat
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="rounded-2xl bg-white p-6 shadow-sm">
-                                <h3 class="mb-6 text-lg font-bold text-foreground">Aktivitas Terbaru</h3>
-                                <div class="flex flex-col items-center justify-center py-16 text-center">
-                                    <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
-                                        <Package class="h-8 w-8 text-muted-foreground" />
+                            <!-- Recent Activity -->
+                            <div class="overflow-hidden rounded-2xl bg-white p-6 shadow-lg">
+                                <h3 class="mb-6 flex items-center gap-2 text-lg font-bold text-foreground">
+                                    <Clock class="h-5 w-5 text-primary" />
+                                    Aktivitas Terbaru
+                                </h3>
+                                <div class="flex flex-col items-center justify-center py-12 text-center">
+                                    <div
+                                        class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-secondary/50 shadow-inner"
+                                    >
+                                        <Package class="h-10 w-10 text-muted-foreground" />
                                     </div>
-                                    <p class="text-sm font-medium text-muted-foreground">Belum ada aktivitas terbaru</p>
+                                    <p class="mb-2 font-semibold text-foreground">Belum ada aktivitas terbaru</p>
+                                    <p class="text-sm text-muted-foreground">Mulai belanja untuk melihat aktivitas Anda di sini</p>
+                                    <Link
+                                        :href="route('frontend.products')"
+                                        class="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40"
+                                    >
+                                        Mulai Belanja
+                                        <ChevronRight class="h-4 w-4" />
+                                    </Link>
                                 </div>
                             </div>
                         </div>
 
                         <!-- SETTINGS SECTION -->
-                        <div v-if="activeSection === 'settings'" class="rounded-2xl bg-white p-6 shadow-sm md:p-8">
-                            <h2 class="mb-8 text-xl font-bold text-foreground">Pengaturan Akun</h2>
+                        <div v-if="activeSection === 'settings'" class="overflow-hidden rounded-2xl bg-white p-6 shadow-xl md:p-8">
+                            <div class="mb-8">
+                                <h2 class="text-xl font-bold text-foreground">Pengaturan Akun</h2>
+                                <p class="mt-1 text-sm text-muted-foreground">Kelola informasi profil dan preferensi akun Anda</p>
+                            </div>
 
                             <form @submit.prevent="submitProfile" class="space-y-8">
+                                <!-- Avatar Section -->
                                 <div class="flex flex-col items-center gap-4 md:items-start">
                                     <div class="group relative">
                                         <div
-                                            class="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-secondary shadow-inner"
+                                            class="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-secondary to-secondary/50 shadow-inner"
                                         >
                                             <img
                                                 v-if="imagePreview || user.image || user.profile_photo_url"
@@ -332,7 +436,7 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                                         <button
                                             type="button"
                                             @click="$refs.fileInput.click()"
-                                            class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100"
+                                            class="absolute inset-0 flex items-center justify-center rounded-full bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
                                         >
                                             <Camera class="h-8 w-8 text-white" />
                                         </button>
@@ -367,19 +471,19 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col gap-3 pt-6 sm:flex-row">
+                                <div class="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row">
                                     <button
                                         type="submit"
                                         :disabled="profileForm.processing"
-                                        class="flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 disabled:opacity-50"
+                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-8 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-lg"
                                     >
                                         <Save class="h-4 w-4" />
-                                        <span>Simpan</span>
+                                        <span>{{ profileForm.processing ? "Menyimpan..." : "Simpan" }}</span>
                                     </button>
                                     <button
                                         type="button"
                                         @click="activeSection = 'overview'"
-                                        class="rounded-full bg-secondary px-8 py-3 text-sm font-semibold text-foreground transition-all hover:bg-muted"
+                                        class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-8 py-3 text-sm font-semibold text-foreground shadow-sm transition-all hover:bg-secondary"
                                     >
                                         Batal
                                     </button>
@@ -392,11 +496,11 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <h2 class="text-xl font-bold text-foreground">Alamat Pengiriman</h2>
-                                    <p class="text-sm text-muted-foreground">Kelola alamat pengiriman pesanan Anda.</p>
+                                    <p class="mt-1 text-sm text-muted-foreground">Kelola alamat pengiriman pesanan Anda</p>
                                 </div>
                                 <button
                                     @click="openAddressForm()"
-                                    class="flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90"
+                                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40"
                                 >
                                     <Plus class="h-4 w-4" />
                                     <span>Tambah Baru</span>
@@ -407,20 +511,20 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                                 <div
                                     v-for="address in addresses || []"
                                     :key="address.id"
-                                    class="rounded-2xl bg-white p-6 shadow-sm transition-all"
-                                    :class="address.is_featured ? 'ring-2 ring-primary' : 'hover:shadow-md'"
+                                    class="group overflow-hidden rounded-2xl bg-white p-6 shadow-lg transition-all hover:shadow-xl"
+                                    :class="address.is_featured ? 'ring-2 ring-primary' : ''"
                                 >
                                     <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                                         <div class="space-y-2">
                                             <div class="flex items-center gap-2">
-                                                <h3 class="font-semibold text-foreground">{{ address.name }}</h3>
+                                                <h3 class="font-bold text-foreground">{{ address.name }}</h3>
                                                 <span
                                                     v-if="address.is_featured"
-                                                    class="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground"
+                                                    class="rounded-full bg-gradient-to-r from-primary to-primary/80 px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm"
                                                     >Default</span
                                                 >
                                             </div>
-                                            <p class="text-sm font-medium text-muted-foreground">{{ address.phone }}</p>
+                                            <p class="text-sm font-medium text-primary">{{ address.phone }}</p>
                                             <p class="text-sm text-muted-foreground">
                                                 {{ address.address }}<br />
                                                 {{ address.village_name }}, {{ address.sub_district_name }}, {{ address.district_name }}<br />
@@ -432,21 +536,24 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                                             <button
                                                 v-if="!address.is_featured"
                                                 @click="setFeaturedAddress(address)"
-                                                class="text-xs font-semibold text-primary hover:underline"
+                                                class="inline-flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary/80"
                                             >
+                                                <CheckCircle2 class="h-3 w-3" />
                                                 Jadikan Default
                                             </button>
-                                            <div class="flex items-center gap-4">
+                                            <div class="flex items-center gap-3">
                                                 <button
                                                     @click="openAddressForm(address)"
-                                                    class="text-sm font-medium text-foreground underline hover:text-primary"
+                                                    class="inline-flex items-center gap-1 text-sm font-medium text-foreground underline transition-colors hover:text-primary"
                                                 >
+                                                    <Edit3 class="h-3 w-3" />
                                                     Edit
                                                 </button>
                                                 <button
-                                                    @click="deleteAddress(address.id)"
-                                                    class="text-sm font-medium text-red-500 hover:text-red-700"
+                                                    @click="deleteAddress(address.id, address.name)"
+                                                    class="inline-flex items-center gap-1 text-sm font-medium text-red-500 transition-colors hover:text-red-700"
                                                 >
+                                                    <Trash2 class="h-3 w-3" />
                                                     Hapus
                                                 </button>
                                             </div>
@@ -456,27 +563,40 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
 
                                 <div
                                     v-if="!addresses || addresses.length === 0"
-                                    class="rounded-2xl border-2 border-dashed border-border bg-white py-16 text-center"
+                                    class="relative overflow-hidden rounded-3xl border-2 border-dashed border-border bg-gradient-to-br from-slate-50 to-slate-100 py-16 text-center"
                                 >
-                                    <MapPin class="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                                    <p class="mb-4 text-sm font-medium text-muted-foreground">Belum ada alamat tersimpan</p>
-                                    <button
-                                        @click="openAddressForm()"
-                                        class="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90"
-                                    >
-                                        Tambah Alamat Pertama
-                                    </button>
+                                    <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/5"></div>
+                                    <div class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-primary/5"></div>
+
+                                    <div class="relative z-10">
+                                        <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg">
+                                            <MapPin class="h-10 w-10 text-muted-foreground" />
+                                        </div>
+                                        <p class="mb-6 text-sm font-medium text-muted-foreground">Belum ada alamat tersimpan</p>
+                                        <button
+                                            @click="openAddressForm()"
+                                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40"
+                                        >
+                                            <Plus class="h-4 w-4" />
+                                            Tambah Alamat Pertama
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- ADDRESS FORM SECTION -->
-                        <div v-if="activeSection === 'address_form'" class="rounded-2xl bg-white p-6 shadow-sm md:p-8">
+                        <div v-if="activeSection === 'address_form'" class="overflow-hidden rounded-2xl bg-white p-6 shadow-xl md:p-8">
                             <div class="mb-8 flex items-center justify-between">
-                                <h2 class="text-xl font-bold text-foreground">{{ editingAddress ? "Edit Alamat" : "Alamat Pengiriman Baru" }}</h2>
+                                <div>
+                                    <h2 class="text-xl font-bold text-foreground">{{ editingAddress ? "Edit Alamat" : "Alamat Pengiriman Baru" }}</h2>
+                                    <p class="mt-1 text-sm text-muted-foreground">
+                                        {{ editingAddress ? "Perbarui informasi alamat Anda" : "Tambahkan alamat baru untuk pengiriman" }}
+                                    </p>
+                                </div>
                                 <button
                                     @click="activeSection = 'addresses'"
-                                    class="rounded-full p-2 text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+                                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-foreground shadow-sm transition-all hover:bg-primary hover:text-primary-foreground"
                                 >
                                     <X class="h-5 w-5" />
                                 </button>
@@ -577,21 +697,21 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                                     <p v-if="addressForm.errors.address" class="text-xs text-red-500">{{ addressForm.errors.address }}</p>
                                 </div>
 
-                                <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-3 rounded-xl bg-secondary/50 p-4">
                                     <input
                                         id="is_featured"
                                         type="checkbox"
                                         v-model="addressForm.is_featured"
-                                        class="h-5 w-5 rounded border-border bg-secondary text-primary focus:ring-primary"
+                                        class="h-5 w-5 rounded border-border bg-white text-primary focus:ring-primary"
                                     />
                                     <label for="is_featured" class="cursor-pointer text-sm font-medium">Jadikan alamat default</label>
                                 </div>
 
-                                <div class="flex flex-col gap-3 pt-4 sm:flex-row">
+                                <div class="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row">
                                     <button
                                         type="submit"
                                         :disabled="addressForm.processing"
-                                        class="flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 disabled:opacity-50"
+                                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-8 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-lg"
                                     >
                                         <Save class="h-4 w-4" />
                                         <span>{{ addressForm.processing ? "Menyimpan..." : "Simpan Alamat" }}</span>
@@ -599,7 +719,7 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
                                     <button
                                         type="button"
                                         @click="activeSection = 'addresses'"
-                                        class="rounded-full bg-secondary px-8 py-3 text-sm font-semibold text-foreground transition-all hover:bg-muted"
+                                        class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-8 py-3 text-sm font-semibold text-foreground shadow-sm transition-all hover:bg-secondary"
                                     >
                                         Batal
                                     </button>
@@ -615,11 +735,11 @@ const featuredAddress = computed(() => props.addresses?.find((a) => a.is_feature
 
 <style scoped>
 .input-field {
-    @apply w-full rounded-xl border border-border bg-secondary px-4 py-3.5 text-sm transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20;
+    @apply w-full rounded-xl border border-border bg-gradient-to-r from-secondary/30 to-secondary/10 px-4 py-3.5 text-sm transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20;
 }
 
 .select-field {
-    @apply w-full appearance-none rounded-xl border border-border bg-secondary px-4 py-3.5 text-sm transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply w-full appearance-none rounded-xl border border-border bg-gradient-to-r from-secondary/30 to-secondary/10 px-4 py-3.5 text-sm transition-all focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.75rem center;
     background-repeat: no-repeat;
