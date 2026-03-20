@@ -58,16 +58,33 @@ class BlogController extends Controller
         // Increment views
         $post->increment('views');
 
+        // Get related posts from same category
         $relatedPosts = BlogPost::where('blog_category_id', $post->blog_category_id)
             ->where('id', '!=', $post->id)
             ->where('is_status', BlogPostStatus::PUBLISHED)
             ->latest('published_at')
-            ->limit(3)
+            ->limit(4)
             ->get();
+
+        // Get suggested posts based on tags (excluding same category posts already in relatedPosts)
+        $postTags = $post->tags->pluck('name')->toArray();
+        $relatedPostIds = $relatedPosts->pluck('id')->toArray();
+        
+        $suggestedPosts = collect();
+        if (!empty($postTags)) {
+            $suggestedPosts = BlogPost::withAnyTags($postTags)
+                ->where('id', '!=', $post->id)
+                ->whereNotIn('id', $relatedPostIds)
+                ->where('is_status', BlogPostStatus::PUBLISHED)
+                ->latest('published_at')
+                ->limit(3)
+                ->get();
+        }
 
         return Inertia::render('Blog/Show', [
             'post' => BlogPostResource::make($post),
             'relatedPosts' => BlogPostResource::collection($relatedPosts),
+            'suggestedPosts' => BlogPostResource::collection($suggestedPosts),
         ]);
     }
 }
