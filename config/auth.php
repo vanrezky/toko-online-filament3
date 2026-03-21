@@ -108,13 +108,15 @@ return [
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
+            'reset guard' => 'web',
         ],
         'customers' => [
             'provider' => 'customers',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
-        ]
+            'reset guard' => 'customer',
+        ],
     ],
 
     /*

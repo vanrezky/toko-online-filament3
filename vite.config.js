@@ -13,11 +13,9 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            http: "stream-http",
-            https: "https-browserify",
             "@frontend": path.resolve(__dirname, "resources/js/frontend"),
-            "@styles": path.resolve(__dirname, "resources/css/frontend"), // Menambahkan alias @styles
-            "ziggy-js": path.resolve("vendor/tightenco/ziggy"),
+            "@styles": path.resolve(__dirname, "resources/css/frontend"),
+            "ziggy-js": path.resolve("vendor/tightenco/ziggy/dist/index.esm.js"),
         },
     },
 });

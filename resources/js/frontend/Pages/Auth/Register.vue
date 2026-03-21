@@ -1,7 +1,15 @@
 <script setup>
+import { ref } from "vue";
 import { useForm, Link } from "@inertiajs/vue3";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
-import { Mail, Lock, User, ArrowRight } from "lucide-vue-next";
+import { Mail, Lock, User, ArrowRight, Check, X, Eye, EyeOff } from "lucide-vue-next";
+
+const props = defineProps({
+    secure_password: {
+        type: Boolean,
+        default: false,
+    },
+});
 
 const form = useForm({
     first_name: "",
@@ -10,6 +18,21 @@ const form = useForm({
     password: "",
     password_confirmation: "",
 });
+
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
+
+const passwordRules = {
+    minLength: (p) => p.length >= 8,
+    uppercase: (p) => /[A-Z]/.test(p),
+    number: (p) => /\d/.test(p),
+    symbol: (p) => /[!@#$%^&*(),.?":{}|<>]/.test(p),
+};
+
+const isPasswordValid = (rule) => {
+    if (!props.secure_password) return null;
+    return rule(form.password);
+};
 
 const submit = () => {
     form.post(route("frontend.signup.post"), {
@@ -80,14 +103,53 @@ const submit = () => {
                                     <input
                                         id="password"
                                         v-model="form.password"
-                                        type="password"
+                                        :type="showPassword ? 'text' : 'password'"
                                         required
-                                        class="w-full rounded-xl border border-border bg-secondary px-4 py-3.5 pl-11 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        class="w-full rounded-xl border border-border bg-secondary px-4 py-3.5 pl-11 pr-11 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         placeholder="Min. 8 karakter"
                                     />
                                     <Lock class="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
+                                    <button
+                                        type="button"
+                                        @click="showPassword = !showPassword"
+                                        class="absolute right-4 top-3.5 text-muted-foreground transition-colors hover:text-foreground"
+                                    >
+                                        <component :is="showPassword ? EyeOff : Eye" class="h-5 w-5" />
+                                    </button>
                                 </div>
                                 <p v-if="form.errors.password" class="text-xs text-red-500">{{ form.errors.password }}</p>
+
+                                <div v-if="secure_password && form.password" class="mt-3 space-y-1.5 rounded-xl bg-secondary/50 p-3">
+                                    <p class="text-xs font-medium text-muted-foreground">Password harus mengandung:</p>
+                                    <div
+                                        class="flex items-center gap-2 text-xs"
+                                        :class="isPasswordValid(passwordRules.minLength) ? 'text-green-600' : 'text-red-500'"
+                                    >
+                                        <component :is="isPasswordValid(passwordRules.minLength) ? Check : X" class="h-3.5 w-3.5" />
+                                        Minimal 8 karakter
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-2 text-xs"
+                                        :class="isPasswordValid(passwordRules.uppercase) ? 'text-green-600' : 'text-red-500'"
+                                    >
+                                        <component :is="isPasswordValid(passwordRules.uppercase) ? Check : X" class="h-3.5 w-3.5" />
+                                        1 huruf besar
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-2 text-xs"
+                                        :class="isPasswordValid(passwordRules.number) ? 'text-green-600' : 'text-red-500'"
+                                    >
+                                        <component :is="isPasswordValid(passwordRules.number) ? Check : X" class="h-3.5 w-3.5" />
+                                        1 angka
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-2 text-xs"
+                                        :class="isPasswordValid(passwordRules.symbol) ? 'text-green-600' : 'text-red-500'"
+                                    >
+                                        <component :is="isPasswordValid(passwordRules.symbol) ? Check : X" class="h-3.5 w-3.5" />
+                                        1 simbol
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="space-y-2">
@@ -96,12 +158,19 @@ const submit = () => {
                                     <input
                                         id="password_confirmation"
                                         v-model="form.password_confirmation"
-                                        type="password"
+                                        :type="showConfirmPassword ? 'text' : 'password'"
                                         required
-                                        class="w-full rounded-xl border border-border bg-secondary px-4 py-3.5 pl-11 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        class="w-full rounded-xl border border-border bg-secondary px-4 py-3.5 pl-11 pr-11 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         placeholder="Ulangi kata sandi"
                                     />
                                     <Lock class="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
+                                    <button
+                                        type="button"
+                                        @click="showConfirmPassword = !showConfirmPassword"
+                                        class="absolute right-4 top-3.5 text-muted-foreground transition-colors hover:text-foreground"
+                                    >
+                                        <component :is="showConfirmPassword ? EyeOff : Eye" class="h-5 w-5" />
+                                    </button>
                                 </div>
                             </div>
                         </div>

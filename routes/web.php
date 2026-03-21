@@ -4,6 +4,7 @@ use App\Http\Controllers\Frontend\AccountController;
 use App\Http\Controllers\Frontend\Auth\ForgotPasswordController;
 use App\Http\Controllers\Frontend\Auth\LoginController;
 use App\Http\Controllers\Frontend\Auth\RegisterController;
+use App\Http\Controllers\Frontend\Auth\ResetPasswordController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductDetailController;
@@ -36,6 +37,9 @@ Route::name('frontend.')->group(function () {
         Route::get('/register', RegisterController::class)->name('signup');
         Route::post('/register', [RegisterController::class, 'register'])->name('signup.post');
         Route::get('/forgot-password', ForgotPasswordController::class)->name('forgot-password');
+        Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('forgot-password.send');
+        Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('reset-password');
+        Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('reset-password.update');
     });
 
     // Authenticated routes for customers

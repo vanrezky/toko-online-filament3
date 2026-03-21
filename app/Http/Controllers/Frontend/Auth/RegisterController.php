@@ -14,7 +14,9 @@ class RegisterController extends Controller
 {
     public function __invoke(Request $request)
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'secure_password' => settings('secure_password'),
+        ]);
     }
 
     public function register(Request $request)
@@ -23,7 +25,7 @@ class RegisterController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:customers',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', securePassword(8)],
         ]);
 
         $customer = Customer::create([

@@ -1,4 +1,5 @@
 <script setup>
+import { watch } from "vue";
 import { useForm, Link } from "@inertiajs/vue3";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
 import { Mail, ArrowRight, ArrowLeft } from "lucide-vue-next";
@@ -9,10 +10,20 @@ const props = defineProps({
 
 const form = useForm({
     email: "",
+    guard: "customer",
 });
 
+watch(
+    () => props.status,
+    (newStatus) => {
+        if (newStatus) {
+            form.reset();
+        }
+    },
+);
+
 const submit = () => {
-    form.post(route("password.email"));
+    form.post(route("frontend.forgot-password.send"));
 };
 </script>
 
