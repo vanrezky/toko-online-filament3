@@ -30,7 +30,6 @@ class DatabaseSeeder extends Seeder
             CustomerSeeder::class,
             ResellerSeeder::class,
             PageSeeder::class,
-            PaymentGatewaySeeder::class,
             FaqSeeder::class,
             BlogCategorySeeder::class,
             BlogPostSeeder::class,

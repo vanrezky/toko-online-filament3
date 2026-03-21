@@ -25,19 +25,29 @@ class ManagePaymentGateway extends Page
     protected static ?string $navigationGroup = 'Setting';
     protected static ?int $navigationSort = 5;
     protected static ?string $slug = 'setting/payment-gateway-settings';
+    protected static ?string $navigationLabel = 'Payment Gateways';
 
     protected static string $view = 'filament.pages.manage-payment-gateway';
+
 
     public ?array $data = [];
 
     public function mount(PaymentGatewaySettings $settings): void
     {
-        $this->form->fill($settings->toArray());
+        $data = $settings->toArray();
+        $gatewayAliases = ['midtrans', 'stripe', 'xendit'];
+
+        foreach ($gatewayAliases as $alias) {
+            $data["{$alias}_is_active"] = ($settings->active_gateway === $alias);
+        }
+
+        $this->form->fill($data);
     }
 
     public function form(Form $form): Form
     {
         $currencies = Currency::active()->pluck('name', 'code')->toArray();
+        $gatewayAliases = ['midtrans', 'stripe', 'xendit'];
 
         return $form
             ->schema([
@@ -49,7 +59,16 @@ class ManagePaymentGateway extends Page
                             ->schema([
                                 Toggle::make('midtrans_is_active')
                                     ->label('Set as Active Gateway')
-                                    ->helperText('Only one gateway can be active at a time'),
+                                    ->helperText('Only one gateway can be active at a time')
+                                    ->afterStateUpdated(function ($state, callable $set) use ($gatewayAliases) {
+                                        if ($state) {
+                                            foreach ($gatewayAliases as $alias) {
+                                                if ($alias !== 'midtrans') {
+                                                    $set("{$alias}_is_active", false);
+                                                }
+                                            }
+                                        }
+                                    }),
 
                                 Section::make('Credentials')
                                     ->schema([
@@ -99,7 +118,16 @@ class ManagePaymentGateway extends Page
                             ->schema([
                                 Toggle::make('stripe_is_active')
                                     ->label('Set as Active Gateway')
-                                    ->helperText('Only one gateway can be active at a time'),
+                                    ->helperText('Only one gateway can be active at a time')
+                                    ->afterStateUpdated(function ($state, callable $set) use ($gatewayAliases) {
+                                        if ($state) {
+                                            foreach ($gatewayAliases as $alias) {
+                                                if ($alias !== 'stripe') {
+                                                    $set("{$alias}_is_active", false);
+                                                }
+                                            }
+                                        }
+                                    }),
 
                                 Section::make('Credentials')
                                     ->schema([
@@ -146,7 +174,16 @@ class ManagePaymentGateway extends Page
                             ->schema([
                                 Toggle::make('xendit_is_active')
                                     ->label('Set as Active Gateway')
-                                    ->helperText('Only one gateway can be active at a time'),
+                                    ->helperText('Only one gateway can be active at a time')
+                                    ->afterStateUpdated(function ($state, callable $set) use ($gatewayAliases) {
+                                        if ($state) {
+                                            foreach ($gatewayAliases as $alias) {
+                                                if ($alias !== 'xendit') {
+                                                    $set("{$alias}_is_active", false);
+                                                }
+                                            }
+                                        }
+                                    }),
 
                                 Section::make('Credentials')
                                     ->schema([
