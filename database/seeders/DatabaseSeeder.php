@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             ProductAttributeSeeder::class,
             CourierSeeder::class,
             TemplateSeeder::class,
+            CurrencySeeder::class,
         ]);
     }
 }

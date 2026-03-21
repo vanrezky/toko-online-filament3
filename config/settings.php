@@ -1,6 +1,7 @@
 <?php
 
 use App\Settings\GeneralSettings;
+use App\Settings\PaymentGatewaySettings;
 
 return [
 
@@ -9,7 +10,8 @@ return [
      * put them (manually) here.
      */
     'settings' => [
-        GeneralSettings::class
+        GeneralSettings::class,
+        PaymentGatewaySettings::class,
 
     ],
 
