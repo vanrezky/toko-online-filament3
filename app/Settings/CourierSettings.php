@@ -17,6 +17,9 @@ class CourierSettings extends Settings
     public ?string $apicoid_api_key;
     public ?string $apicoid_base_url = "https://api.co.id/";
 
+    // Kurir Toko
+    public ?int $kurir_toko_price = 0;
+
     // Default Courier
     public ?string $default_courier = "pickup";
 

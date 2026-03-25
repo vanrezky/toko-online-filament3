@@ -90,7 +90,21 @@ class ManageCourier extends Page
                                             ->placeholder('https://api.co.id/'),
                                     ]),
 
-                            ])
+                            ]),
+                        Tab::make('kurir_toko')
+                            ->label('Kurir Toko')
+                            ->icon('heroicon-o-currency-dollar')
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('kurir_toko_price')
+                                            ->label('Tarif Pengiriman Kurir Toko')
+                                            ->numeric()
+                                            ->prefix('Rp')
+                                            ->default(0)
+                                            ->required(),
+                                    ]),
+                            ]),
                     ]),
 
                 Section::make('General')
