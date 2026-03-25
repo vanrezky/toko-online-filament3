@@ -35,11 +35,11 @@ class BlogPost extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('status', true);
+        return $query->where('is_status', BlogPostStatus::PUBLISHED);
     }
 
     public function scopeInactive($query)
     {
-        return $query->where('status', false);
+        return $query->where('is_status', BlogPostStatus::DRAFT);
     }
 }

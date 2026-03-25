@@ -2,24 +2,26 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\CustomerOverview;
-use App\Filament\Widgets\CustomerWidget;
-use App\Filament\Widgets\EarningStatisticWidget;
-use App\Filament\Widgets\Revenue;
+use App\Filament\Widgets\LowStockAlertWidget;
+use App\Filament\Widgets\OrdersByStatusChart;
+use App\Filament\Widgets\RecentOrdersTable;
+use App\Filament\Widgets\SalesStatsOverviewWidget;
+use App\Filament\Widgets\SalesTrendChart;
+use App\Filament\Widgets\TopProductsChart;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
-use Filament\Pages\Page;
-use Filament\Widgets\AccountWidget;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    // protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    // protected static string $view = 'filament.pages.dashboard';
-
     use HasFiltersForm;
+
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+
+    protected static ?string $title = 'Dashboard';
+
+    protected static ?string $slug = 'dashboard';
 
     public function filtersForm(Form $form): Form
     {
@@ -27,15 +29,26 @@ class Dashboard extends \Filament\Pages\Dashboard
             ->schema([
                 Section::make()
                     ->schema([
-                        DatePicker::make('startDate'),
-                        DatePicker::make('endDate'),
+                        DatePicker::make('startDate')
+                            ->placeholder('Start Date')
+                            ->displayFormat('d M Y'),
+                        DatePicker::make('endDate')
+                            ->placeholder('End Date')
+                            ->displayFormat('d M Y'),
                     ])
-                    ->columns(3),
+                    ->columns(2),
             ]);
     }
 
-    public function getWidgetData(): array
+    public function getWidgets(): array
     {
-        return [];
+        return [
+            SalesStatsOverviewWidget::class,
+            SalesTrendChart::class,
+            TopProductsChart::class,
+            OrdersByStatusChart::class,
+            RecentOrdersTable::class,
+            LowStockAlertWidget::class,
+        ];
     }
 }

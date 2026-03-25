@@ -24,7 +24,8 @@ class UserResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::superUser(false)->count();
+        $count = \App\Services\NavigationBadgeCache::getUserCount();
+        return $count > 0 ? (string) $count : null;
     }
 
 

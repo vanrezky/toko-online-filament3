@@ -37,4 +37,17 @@ class CustomerAddress extends Model
     {
         return $this->belongsTo(Village::class);
     }
+
+    public function getFullAddressAttribute(): string
+    {
+        $parts = array_filter([
+            $this->address,
+            $this->subDistrict?->name,
+            $this->district?->name,
+            $this->province?->name,
+            $this->postal_code,
+        ]);
+
+        return implode(', ', $parts);
+    }
 }

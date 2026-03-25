@@ -35,6 +35,11 @@ class Transaction extends Model
         return 'uuid';
     }
 
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(TransactionProduct::class);
@@ -53,5 +58,45 @@ class Transaction extends Model
     public function vouchers(): HasMany
     {
         return $this->hasMany(TransactionVoucher::class);
+    }
+
+    public function getSubtotalAttribute(): float
+    {
+        return (float) $this->products->sum(fn($p) => $p->price * $p->quantity);
+    }
+
+    public function getProductDiscountAttribute(): float
+    {
+        return (float) $this->products->sum('discount');
+    }
+
+    public function getVoucherDiscountAttribute(): float
+    {
+        return (float) $this->vouchers->sum('discount_amount');
+    }
+
+    public function getTotalDiscountAttribute(): float
+    {
+        return $this->product_discount + $this->voucher_discount;
+    }
+
+    public function getTotalAmountAttribute(): float
+    {
+        return $this->subtotal - $this->total_discount + $this->shipping_cost + ($this->cod ? $this->cod_fee : 0);
+    }
+
+    public function getTotalItemsAttribute(): int
+    {
+        return (int) $this->products->sum('quantity');
+    }
+
+    public function getDigitalProductsCountAttribute(): int
+    {
+        return (int) $this->products->where('is_digital', true)->count();
+    }
+
+    public function hasDigitalProducts(): bool
+    {
+        return $this->digital_products_count > 0;
     }
 }

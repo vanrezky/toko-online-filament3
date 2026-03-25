@@ -3,15 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransactionResource\Pages;
-use App\Filament\Resources\TransactionResource\RelationManagers;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TransactionResource extends Resource
 {
@@ -25,50 +25,32 @@ class TransactionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('uuid')
-                    ->label('UUID')
-                    ->required()
-                    ->maxLength(36),
-                Forms\Components\TextInput::make('customer_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DateTimePicker::make('timelimit'),
-                Forms\Components\TextInput::make('customer_address_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('weight')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('shipping_cost')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('courier_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('from_district_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('to_district_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\Toggle::make('cod')
-                    ->required(),
-                Forms\Components\TextInput::make('cod_fee')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('receipt_code')
-                    ->maxLength(255),
-                Forms\Components\DateTimePicker::make('delivery_date'),
-                Forms\Components\TextInput::make('status')
-                    ->required(),
-                Forms\Components\DateTimePicker::make('complete_date'),
-                Forms\Components\Toggle::make('request_cancellation')
-                    ->required(),
-                Forms\Components\TextInput::make('notes')
-                    ->maxLength(255),
+                Forms\Components\Section::make('Order Information')
+                    ->schema([
+                        Forms\Components\TextInput::make('uuid')
+                            ->label('Order ID')
+                            ->disabled(),
+                        Forms\Components\Select::make('status')
+                            ->options([
+                                'unpaid' => 'Unpaid',
+                                'shipped' => 'Shipped',
+                                'delivered' => 'Delivered',
+                                'rejected' => 'Rejected',
+                                'completed' => 'Completed',
+                            ])
+                            ->required(),
+                        Forms\Components\TextInput::make('receipt_code')
+                            ->maxLength(255),
+                        Forms\Components\DateTimePicker::make('timelimit'),
+                        Forms\Components\DateTimePicker::make('delivery_date'),
+                        Forms\Components\DateTimePicker::make('complete_date'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Customer Notes')
+                    ->schema([
+                        Forms\Components\Textarea::make('notes')
+                            ->rows(3),
+                    ]),
             ]);
     }
 
@@ -77,64 +59,111 @@ class TransactionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('uuid')
-                    ->label('UUID')
+                    ->label('Order')
+                    ->searchable()
+                    ->description(fn(Transaction $record) => $record->created_at->format('d M Y, H:i'))
+                    ->tooltip(fn(Transaction $record) => $record->uuid),
+
+                Tables\Columns\TextColumn::make('customer.full_name')
+                    ->label('Customer')
+                    ->description(fn(Transaction $record) => $record->customer?->email)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('customer_id')
-                    ->numeric()
+
+                Tables\Columns\TextColumn::make('total_amount')
+                    ->label('Total')
+                    ->money('IDR')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('timelimit')
-                    ->dateTime()
+
+                Tables\Columns\TextColumn::make('total_items')
+                    ->label('Items')
+                    ->suffix(' items'),
+
+                Tables\Columns\BadgeColumn::make('status')
+                    ->colors([
+                        'warning' => 'unpaid',
+                        'info' => 'shipped',
+                        'success' => 'delivered',
+                        'danger' => 'rejected',
+                        'success' => 'completed',
+                    ])
+                    ->formatStateUsing(fn(string $state): string => ucfirst($state))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('customer_address_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('weight')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('shipping_cost')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('courier_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('from_district_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('to_district_id')
-                    ->numeric()
-                    ->sortable(),
+
                 Tables\Columns\IconColumn::make('cod')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('cod_fee')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('receipt_code')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('delivery_date')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('complete_date')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('request_cancellation')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('notes')
-                    ->searchable(),
+                    ->boolean()
+                    ->label('COD')
+                    ->trueIcon('heroicon-m-check')
+                    ->falseIcon('heroicon-m-x-mark'),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
+            ->modifyQueryUsing(fn(Builder $query) => $query->with('customer'))
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options([
+                        'unpaid' => 'Unpaid',
+                        'shipped' => 'Shipped',
+                        'delivered' => 'Delivered',
+                        'rejected' => 'Rejected',
+                        'completed' => 'Completed',
+                    ])
+                    ->multiple()
+                    ->preload(),
+
+                Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from'),
+                        Forms\Components\DatePicker::make('created_until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn(Builder $query): Builder => $query->whereDate(
+                                    'created_at',
+                                    '>=',
+                                    $data['created_from']
+                                )
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn(Builder $query): Builder => $query->whereDate(
+                                    'created_at',
+                                    '<=',
+                                    $data['created_until']
+                                )
+                            );
+                    })
+                    ->columns(2),
+
+                Filter::make('cod')
+                    ->form([
+                        Forms\Components\Toggle::make('cod_only'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['cod_only'],
+                            fn(Builder $query): Builder => $query->where('cod', true)
+                        );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (!$data['cod_only']) {
+                            return null;
+                        }
+                        return 'COD orders only';
+                    }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -154,8 +183,18 @@ class TransactionResource extends Resource
     {
         return [
             'index' => Pages\ListTransactions::route('/'),
-            'create' => Pages\CreateTransaction::route('/create'),
+            'view' => Pages\ViewTransaction::route('/{record}'),
             'edit' => Pages\EditTransaction::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) \App\Services\NavigationBadgeCache::getTransactionUnpaidCount();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
     }
 }

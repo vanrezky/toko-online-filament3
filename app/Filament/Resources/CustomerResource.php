@@ -59,12 +59,13 @@ class CustomerResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        $count = \App\Services\NavigationBadgeCache::getCustomerCount();
+        return $count > 0 ? (string) $count : null;
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return static::getModel()::count() > 10 ? 'info' : 'primary';
+        return \App\Services\NavigationBadgeCache::getCustomerCount() > 10 ? 'info' : 'primary';
     }
 
     public static function form(Form $form): Form

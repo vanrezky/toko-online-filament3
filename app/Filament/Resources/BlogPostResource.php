@@ -48,7 +48,8 @@ class BlogPostResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        $count = \App\Services\NavigationBadgeCache::getBlogPostCount();
+        return $count > 0 ? (string) $count : null;
     }
 
     public static function form(Form $form): Form

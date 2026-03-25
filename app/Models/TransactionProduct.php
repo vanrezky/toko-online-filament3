@@ -39,4 +39,9 @@ class TransactionProduct extends Model
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
+
+    public function getSubtotalAttribute(): float
+    {
+        return ($this->price * $this->quantity) - $this->discount;
+    }
 }
