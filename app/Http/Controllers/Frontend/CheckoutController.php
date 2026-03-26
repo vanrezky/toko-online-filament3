@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Enums\CartStatus;
+use App\Enums\CourierCode;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
@@ -16,6 +17,7 @@ use App\Services\ApicoidOngkirService;
 use App\Services\CacheService;
 use App\Services\VoucherCookieService;
 use App\Services\VoucherService;
+use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +34,7 @@ class CheckoutController extends Controller
         $this->voucherService = $voucherService;
     }
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, PaymentGatewayService $paymentGatewayService)
     {
         $customer = Auth::guard('customer')->user();
 
@@ -55,13 +57,14 @@ class CheckoutController extends Controller
 
         return Inertia::render('Checkout/Index', [
             'cart' => CartResource::make($cart),
-            'addresses' => $addresses,
+            'addresses' => \App\Http\Resources\AddressResource::collection($addresses),
             'pendingVouchers' => $pendingVouchers,
             'validatedVouchers' => $validatedVouchers,
+            'activeGateway' => $paymentGatewayService->getActiveGatewayAlias(),
         ]);
     }
 
-    public function getShippingCosts(Request $request, ApicoidOngkirService $ongkirService)
+    public function getShippingCosts(Request $request, ApicoidOngkirService $ongkirService, \App\Settings\CourierSettings $courierSettings)
     {
         $request->validate([
             'address_id' => 'required|exists:customer_addresses,id',
@@ -85,10 +88,29 @@ class CheckoutController extends Controller
 
         $cacheKey = "shipping_costs_{$customer->id}_{$address->id}_{$cartHash}";
 
-        $shippingResults = CacheService::remember($cacheKey, 1800, function () use ($cart, $address, $ongkirService) {
+
+        $shippingResults = CacheService::remember($cacheKey, 1800, function () use ($cart, $address, $ongkirService, $courierSettings) {
             $warehouseGroups = $cart->items->groupBy(function ($item) {
                 return $item->product->warehouse_id ?: 0;
             });
+
+            $activeCouriers = \App\Models\Courier::active()->get();
+            $isPickupActive = $activeCouriers->contains('code', CourierCode::PICKUP->value);
+            $isKurirTokoActive = $activeCouriers->contains('code', CourierCode::KURIR_TOKO->value);
+
+            $pickupOption = $isPickupActive ? [
+                'courier_code' => CourierCode::PICKUP->value,
+                'courier_name' => 'Pick Up',
+                'price' => 0,
+                'estimation' => 'Hari yang sama',
+            ] : null;
+
+            $kurirTokoOption = $isKurirTokoActive ? [
+                'courier_code' => CourierCode::KURIR_TOKO->value,
+                'courier_name' => 'Kurir Toko',
+                'price' => $courierSettings->kurir_toko_price,
+                'estimation' => '1-2 Hari',
+            ] : null;
 
             $results = [];
 
@@ -106,15 +128,29 @@ class CheckoutController extends Controller
                     $totalWeight
                 );
 
+                $options = [];
                 if (isset($costs['status']) && $costs['status'] === 'success') {
+                    $options = $costs['result'];
+                }
+
+                if ($pickupOption) {
+                    $options[] = $pickupOption;
+                }
+                
+                if ($kurirTokoOption) {
+                    $options[] = $kurirTokoOption;
+                }
+
+                if (!empty($options)) {
                     $results[] = [
                         'warehouse_id' => $warehouseId,
                         'warehouse_name' => $warehouse->name,
                         'weight' => $totalWeight,
-                        'options' => $costs['result']
+                        'options' => $options
                     ];
                 }
             }
+
 
             return $results;
         });
@@ -122,7 +158,7 @@ class CheckoutController extends Controller
         return response()->json($shippingResults);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, PaymentGatewayService $paymentGatewayService)
     {
         $request->validate([
             'address_id' => 'required|exists:customer_addresses,id',
@@ -138,6 +174,9 @@ class CheckoutController extends Controller
             ->firstOrFail();
 
         if ($cart->items->isEmpty()) {
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Your cart is empty.'], 400);
+            }
             return redirect()->route('frontend.cart')->with('error', 'Your cart is empty.');
         }
 
@@ -166,7 +205,7 @@ class CheckoutController extends Controller
         $pendingVouchers = $this->cookieService->get();
         $validatedVouchers = $this->voucherService->validateFromCookie($pendingVouchers, $cart, $customer);
 
-        return DB::transaction(function () use ($request, $customer, $cart, $totalShippingCost, $totalWeight, $address, $fromDistrictId, $shippingDetails, $validatedVouchers) {
+        return DB::transaction(function () use ($request, $customer, $cart, $totalShippingCost, $totalWeight, $address, $fromDistrictId, $shippingDetails, $validatedVouchers, $paymentGatewayService) {
             $transaction = Transaction::create([
                 'customer_id' => $customer->id,
                 'customer_address_id' => $address->id,
@@ -218,6 +257,20 @@ class CheckoutController extends Controller
 
             $this->cookieService->clear();
             $cart->update(['status' => CartStatus::Checked_out]);
+
+            $paymentResponse = $paymentGatewayService->createPayment($transaction);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'transaction_uuid' => $transaction->uuid,
+                    'payment' => [
+                        'provider' => $paymentGatewayService->getActiveGatewayAlias(),
+                        'payment_url' => $paymentResponse->paymentUrl,
+                        'snap_token' => $paymentResponse->metadata['snap_token'] ?? null,
+                    ]
+                ]);
+            }
 
             return redirect()->route('frontend.orders.show', $transaction->uuid)->with('success', 'Order placed successfully!');
         });

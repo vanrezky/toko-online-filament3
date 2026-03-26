@@ -11,12 +11,13 @@ const props = defineProps({
     shippingMethods: Array,
     pendingVouchers: Object,
     validatedVouchers: Object,
+    activeGateway: String,
 });
 
 const form = useForm({
     address_id: props.addresses?.find((a) => a.is_featured)?.id || props.addresses?.[0]?.id || null,
     shipping_methods: {},
-    payment_method: "bank_transfer",
+    payment_method: props.activeGateway === 'midtrans' ? 'midtrans' : 'bank_transfer',
     notes: "",
 });
 
@@ -27,6 +28,7 @@ const localValidatedVouchers = ref(props.validatedVouchers || { shipping: null, 
 const voucherCode = ref("");
 const isApplyingVoucher = ref(false);
 const voucherError = ref(null);
+const isProcessingOrder = ref(false);
 
 watch(
     () => props.validatedVouchers,
@@ -135,11 +137,68 @@ const formatCurrency = (amount) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
 };
 
-const submitOrder = () => {
-    if (isValidatingVouchers.value) {
+const submitOrder = async () => {
+    if (isValidatingVouchers.value || isProcessingOrder.value) {
         return;
     }
-    form.post(route("frontend.checkout.store"));
+    
+    isProcessingOrder.value = true;
+
+    try {
+        const response = await axios.post(route("frontend.checkout.store"), form.data());
+
+        if (response.data.success) {
+            const payment = response.data.payment;
+
+            if (payment && payment.provider === 'midtrans' && payment.snap_token) {
+                const isProduction = payment.payment_url && payment.payment_url.includes('app.midtrans.com');
+                const scriptUrl = isProduction 
+                    ? 'https://app.midtrans.com/snap/snap.js'
+                    : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+                const loadSnapScript = new Promise((resolve) => {
+                    if (document.getElementById('midtrans-script')) {
+                        return resolve();
+                    }
+                    const script = document.createElement('script');
+                    script.id = 'midtrans-script';
+                    script.src = scriptUrl;
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                });
+
+                await loadSnapScript;
+
+                window.snap.pay(payment.snap_token, {
+                    onSuccess: function() {
+                        window.location.href = route('frontend.orders.show', response.data.transaction_uuid);
+                    },
+                    onPending: function() {
+                        window.location.href = route('frontend.orders.show', response.data.transaction_uuid);
+                    },
+                    onError: function() {
+                        window.location.href = route('frontend.orders.show', response.data.transaction_uuid);
+                    },
+                    onClose: function() {
+                        window.location.href = route('frontend.orders.show', response.data.transaction_uuid);
+                    }
+                });
+            } else if (payment && payment.payment_url) {
+                window.location.href = payment.payment_url;
+            } else {
+                window.location.href = route('frontend.orders.show', response.data.transaction_uuid);
+            }
+        }
+    } catch (error) {
+        console.error("Checkout failed", error);
+        if (error.response && error.response.status === 422) {
+            form.errors = error.response.data.errors || {};
+        } else {
+            alert(error.response?.data?.error || 'Gagal memproses pesanan. Silakan coba lagi.');
+        }
+    } finally {
+        isProcessingOrder.value = false;
+    }
 };
 
 const removeVoucher = async (type) => {
@@ -242,8 +301,8 @@ const applyVoucher = async () => {
                                         </div>
                                         <p class="mt-3 text-xs leading-relaxed text-[#6b5a4d]">
                                             {{ address.address }}<br />
-                                            {{ address.sub_district?.name }}, {{ address.district?.name }}<br />
-                                            {{ address.province?.name }} {{ address.postal_code }}
+                                            {{ address.sub_district_name }}, {{ address.district_name }}<br />
+                                            {{ address.province_name }} {{ address.postal_code }}
                                         </p>
                                         <div v-if="form.address_id === address.id" class="absolute -right-1.5 -top-1.5">
                                             <svg class="h-5 w-5 text-[#fa8456] drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
@@ -287,7 +346,24 @@ const applyVoucher = async () => {
                                     </div>
                                 </div>
 
-                                <div v-if="shippingResults.length > 0" class="space-y-6">
+                                <div v-if="isLoadingShipping" class="space-y-6 animate-pulse">
+                                    <div v-for="i in 2" :key="i" class="space-y-4">
+                                        <div class="h-4 w-1/3 rounded bg-gray-200"></div>
+                                        <div class="space-y-2">
+                                            <div v-for="j in 2" :key="j" class="flex items-center justify-between rounded-xl border border-[#e8e6ef] p-4">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="h-5 w-5 rounded-full bg-gray-200"></div>
+                                                    <div>
+                                                        <div class="mb-2 h-4 w-24 rounded bg-gray-200"></div>
+                                                        <div class="h-3 w-32 rounded bg-gray-200"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="h-4 w-16 rounded bg-gray-200"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else-if="shippingResults.length > 0" class="space-y-6">
                                     <div v-for="warehouse in shippingResults" :key="warehouse.warehouse_id" class="space-y-4">
                                         <h3 class="border-b border-[#f0eef5] pb-2 text-xs font-semibold text-[#6b5a4d]">
                                             Dikirim dari {{ warehouse.warehouse_name }}
@@ -343,7 +419,7 @@ const applyVoucher = async () => {
                             </section>
 
                             <!-- Payment Method Section -->
-                            <section class="rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm md:p-8">
+                            <section v-if="activeGateway !== 'midtrans'" class="rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm md:p-8">
                                 <div class="mb-6 flex items-center gap-3">
                                     <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fa8456] text-sm font-bold text-white">3</div>
                                     <h2 class="text-base font-bold text-[#2d1b0e]">Metode Pembayaran</h2>
@@ -546,10 +622,10 @@ const applyVoucher = async () => {
 
                                 <button
                                     @click="submitOrder"
-                                    :disabled="!canSubmitOrder || form.processing"
+                                    :disabled="!canSubmitOrder || isProcessingOrder"
                                     class="flex w-full items-center justify-center gap-3 rounded-full bg-[#fa8456] py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-[#e56f3f] hover:shadow-lg disabled:bg-[#c4bfc9]"
                                 >
-                                    <svg v-if="form.processing" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <svg v-if="isProcessingOrder" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path
                                             class="opacity-75"
@@ -565,7 +641,7 @@ const applyVoucher = async () => {
                                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                                         ></path>
                                     </svg>
-                                    <span>{{ form.processing ? "Memproses..." : "Buat Pesanan" }}</span>
+                                    <span>{{ isProcessingOrder ? "Memproses..." : "Buat Pesanan" }}</span>
                                 </button>
 
                                 <div class="pt-2">

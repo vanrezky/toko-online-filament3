@@ -33,7 +33,6 @@ class MidtransGateway implements PaymentGatewayInterface
 
         Config::$serverKey = $creds['server_key'] ?? null;
         Config::$clientKey = $creds['client_key'] ?? null;
-        Config::$merchantId = $creds['merchant_id'] ?? null;
         Config::$isProduction = ($creds['mode'] ?? 'sandbox') === 'production';
         Config::$isSanitized = true;
         Config::$is3ds = true;

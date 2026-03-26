@@ -2,6 +2,7 @@
 
 namespace App\Settings;
 
+use App\Enums\CourierCode;
 use Spatie\LaravelSettings\Settings;
 
 class CourierSettings extends Settings
@@ -21,7 +22,7 @@ class CourierSettings extends Settings
     public ?int $kurir_toko_price = 0;
 
     // Default Courier
-    public ?string $default_courier = "pickup";
+    public ?string $default_courier = CourierCode::PICKUP->value;
 
     public static function group(): string
     {

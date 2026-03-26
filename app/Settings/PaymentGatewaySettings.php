@@ -14,16 +14,19 @@ class PaymentGatewaySettings extends Settings
     public ?string $midtrans_merchant_id;
     public ?string $midtrans_mode;
     public array $midtrans_supported_currencies = [];
+    public array $midtrans_channels = [];
 
     public ?string $stripe_api_key;
     public ?string $stripe_webhook_secret;
     public ?string $stripe_mode;
     public array $stripe_supported_currencies = [];
+    public array $stripe_channels = [];
 
     public ?string $xendit_api_key;
     public ?string $xendit_secret_key;
     public ?string $xendit_mode;
     public array $xendit_supported_currencies = [];
+    public array $xendit_channels = [];
 
     public ?string $default_currency;
 
@@ -110,18 +113,21 @@ class PaymentGatewaySettings extends Settings
                 'merchant_id' => $this->midtrans_merchant_id,
                 'mode' => $this->midtrans_mode,
                 'supported_currencies' => $this->midtrans_supported_currencies,
+                'channels' => $this->midtrans_channels,
             ],
             'stripe' => [
                 'api_key' => $this->stripe_api_key,
                 'webhook_secret' => $this->stripe_webhook_secret,
                 'mode' => $this->stripe_mode,
                 'supported_currencies' => $this->stripe_supported_currencies,
+                'channels' => $this->stripe_channels,
             ],
             'xendit' => [
                 'api_key' => $this->xendit_api_key,
                 'secret_key' => $this->xendit_secret_key,
                 'mode' => $this->xendit_mode,
                 'supported_currencies' => $this->xendit_supported_currencies,
+                'channels' => $this->xendit_channels,
             ],
             default => null,
         };
