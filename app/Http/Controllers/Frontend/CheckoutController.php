@@ -268,6 +268,7 @@ class CheckoutController extends Controller
                         'provider' => $paymentGatewayService->getActiveGatewayAlias(),
                         'payment_url' => $paymentResponse->paymentUrl,
                         'snap_token' => $paymentResponse->metadata['snap_token'] ?? null,
+                        'client_key' => $paymentResponse->metadata['client_key'] ?? null,
                     ]
                 ]);
             }

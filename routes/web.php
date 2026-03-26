@@ -63,7 +63,7 @@ Route::name('frontend.')->group(function () {
         Route::post('/checkout', [\App\Http\Controllers\Frontend\CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/orders', [\App\Http\Controllers\Frontend\OrderController::class, 'index'])->name('orders');
         Route::get('/orders/{transaction}', [\App\Http\Controllers\Frontend\OrderController::class, 'show'])->name('orders.show');
-        Route::post('/orders/{transaction}/payment-method', [\App\Http\Controllers\Frontend\OrderController::class, 'changePaymentMethod'])->name('orders.payment-method');
+        Route::post('/orders/{transaction}/pay', [\App\Http\Controllers\Frontend\OrderController::class, 'pay'])->name('orders.pay');
     });
 
     // Public shop routes
@@ -85,6 +85,9 @@ Route::name('frontend.')->group(function () {
     Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers');
     Route::post('/vouchers/apply', [VoucherController::class, 'apply'])->name('vouchers.apply');
     Route::post('/vouchers/remove', [VoucherController::class, 'remove'])->name('vouchers.remove');
+
+    // Webhook routes
+    Route::post('/webhooks/payment/{gateway}', \App\Http\Controllers\PaymentWebhookController::class)->name('webhooks.payment');
 
     // Wildcard for product detail - MUST BE LAST
     Route::get('{product}', ProductDetailController::class)->name('product-detail');

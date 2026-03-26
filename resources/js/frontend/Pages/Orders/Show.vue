@@ -1,12 +1,12 @@
 <script setup>
 import { computed, ref } from "vue";
-import { Link, useForm } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
+import axios from "axios";
 import TemplateWrapper from "../../components/TemplateWrapper.vue";
-import { Package, ChevronLeft, Clock, MapPin, Truck, CreditCard, CheckCircle2, AlertCircle, ArrowRight, ExternalLink, X } from "lucide-vue-next";
+import { Package, ChevronLeft, Clock, MapPin, Truck, CreditCard, CheckCircle2, AlertCircle, ArrowRight, ExternalLink, Loader2 } from "lucide-vue-next";
 
 const props = defineProps({
     order: Object,
-    paymentMethods: Array,
 });
 
 const statusColors = {
@@ -48,16 +48,64 @@ const isExpired = computed(() => {
     return props.order.timelimit && new Date(props.order.timelimit) < new Date();
 });
 
-const showPaymentModal = ref(false);
-const paymentForm = useForm({
-    payment_method: props.order.payment_method,
-});
+const isProcessingPayment = ref(false);
 
-const changePayment = () => {
-    paymentForm.post(route("frontend.orders.payment-method", props.order.id), {
-        onSuccess: () => (showPaymentModal.value = false),
-        preserveScroll: true,
-    });
+const payOrder = async () => {
+    if (isProcessingPayment.value) return;
+    
+    isProcessingPayment.value = true;
+    try {
+        const response = await axios.post(route("frontend.orders.pay", props.order.id));
+        
+        if (response.data.success) {
+            const payment = response.data.payment;
+
+            if (payment && payment.provider === 'midtrans' && payment.snap_token) {
+                const isProduction = payment.payment_url && payment.payment_url.includes('app.midtrans.com');
+                const scriptUrl = isProduction 
+                    ? 'https://app.midtrans.com/snap/snap.js'
+                    : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+                const loadSnapScript = new Promise((resolve) => {
+                    if (document.getElementById('midtrans-script')) {
+                        return resolve();
+                    }
+                    const script = document.createElement('script');
+                    script.id = 'midtrans-script';
+                    script.src = scriptUrl;
+                    script.setAttribute('data-client-key', payment.client_key);
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                });
+
+                await loadSnapScript;
+
+                window.snap.pay(payment.snap_token, {
+                    onSuccess: function() {
+                        router.reload();
+                    },
+                    onPending: function() {
+                        router.reload();
+                    },
+                    onError: function() {
+                        router.reload();
+                    },
+                    onClose: function() {
+                        router.reload();
+                    }
+                });
+            } else if (payment && payment.payment_url) {
+                window.location.href = payment.payment_url;
+            } else {
+                router.reload();
+            }
+        }
+    } catch (error) {
+        console.error("Payment initiation failed", error);
+        alert(error.response?.data?.error || 'Gagal memulai pembayaran. Silakan coba lagi.');
+    } finally {
+        isProcessingPayment.value = false;
+    }
 };
 </script>
 
@@ -105,9 +153,13 @@ const changePayment = () => {
                         </div>
                         <button
                             v-if="!isExpired"
-                            class="rounded-full bg-[#fa8456] px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-[#e56f3f] hover:shadow-lg"
+                            type="button"
+                            @click="payOrder"
+                            :disabled="isProcessingPayment"
+                            class="flex-shrink-0 flex items-center gap-2 rounded-full bg-[#fa8456] px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-[#e56f3f] hover:shadow-lg disabled:bg-[#c4bfc9]"
                         >
-                            Bayar Sekarang
+                            <Loader2 v-if="isProcessingPayment" class="h-4 w-4 animate-spin" />
+                            <span>{{ isProcessingPayment ? "Memproses..." : "Bayar Sekarang" }}</span>
                         </button>
                     </div>
 
@@ -176,24 +228,14 @@ const changePayment = () => {
                         <div class="space-y-6 lg:col-span-4">
                             <!-- Payment Section -->
                             <section class="space-y-5 rounded-xl border border-[#e8e6ef] bg-white p-6 shadow-sm md:p-8">
-                                <div class="flex items-center justify-between border-b border-[#f0eef5] pb-4">
-                                    <div class="flex items-center gap-3 text-[#fa8456]">
-                                        <CreditCard class="h-5 w-5" />
-                                        <h2 class="text-sm font-bold text-[#2d1b0e]">Pembayaran</h2>
-                                    </div>
-                                    <button
-                                        v-if="order.status === 'unpaid' && !isExpired"
-                                        @click="showPaymentModal = true"
-                                        class="text-sm font-semibold text-[#fa8456] transition-colors hover:text-[#e56f3f]"
-                                    >
-                                        Ubah
-                                    </button>
+                                <div class="flex items-center gap-3 border-b border-[#f0eef5] pb-4 text-[#fa8456]">
+                                    <CreditCard class="h-5 w-5" />
+                                    <h2 class="text-sm font-bold text-[#2d1b0e]">Pembayaran</h2>
                                 </div>
                                 <div class="space-y-1 text-sm text-[#6b5a4d]">
-                                    <p class="font-semibold text-[#2d1b0e]">{{ order.payment_method?.replace("_", " ") || "Belum dipilih" }}</p>
                                     <p>
                                         Status:
-                                        <span :class="order.status === 'unpaid' ? 'text-[#fa8456]' : 'text-[#22c55e]'">{{
+                                        <span class="font-semibold" :class="order.status === 'unpaid' ? 'text-[#fa8456]' : 'text-[#22c55e]'">{{ 
                                             order.status === "unpaid" ? "Menunggu Pembayaran" : "Lunas"
                                         }}</span>
                                     </p>
@@ -228,65 +270,6 @@ const changePayment = () => {
             </div>
         </div>
 
-        <!-- Payment Selection Modal -->
-        <transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="transition duration-200 ease-in"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-        >
-            <div v-if="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-                    <div class="mb-8 flex items-center justify-between">
-                        <h3 class="text-lg font-bold text-[#2d1b0e]">Ubah Metode Pembayaran</h3>
-                        <button @click="showPaymentModal = false" class="text-[#6b5a4d] transition-colors hover:text-[#2d1b0e]">
-                            <X class="h-6 w-6" />
-                        </button>
-                    </div>
 
-                    <form @submit.prevent="changePayment" class="space-y-5">
-                        <div class="space-y-3">
-                            <label
-                                v-for="method in paymentMethods"
-                                :key="method.id"
-                                class="flex cursor-pointer items-center rounded-xl border p-4 transition-all"
-                                :class="
-                                    paymentForm.payment_method === method.id
-                                        ? 'border-[#fa8456] bg-[#fff5f0]'
-                                        : 'border-[#e8e6ef] hover:border-[#fa8456]/50'
-                                "
-                            >
-                                <input
-                                    type="radio"
-                                    v-model="paymentForm.payment_method"
-                                    :value="method.id"
-                                    class="h-5 w-5 border-[#e8e6ef] text-[#fa8456] accent-[#fa8456] focus:ring-[#fa8456]"
-                                />
-                                <span class="ml-4 text-sm font-semibold text-[#2d1b0e]">{{ method.name }}</span>
-                            </label>
-                        </div>
-
-                        <div class="flex flex-col gap-3 pt-4">
-                            <button
-                                type="submit"
-                                :disabled="paymentForm.processing"
-                                class="w-full rounded-full bg-[#fa8456] py-4 text-sm font-bold text-white shadow-md transition-all hover:bg-[#e56f3f] hover:shadow-lg disabled:bg-[#c4bfc9]"
-                            >
-                                {{ paymentForm.processing ? "Memperbarui..." : "Konfirmasi" }}
-                            </button>
-                            <button
-                                type="button"
-                                @click="showPaymentModal = false"
-                                class="w-full py-3 text-sm font-semibold text-[#6b5a4d] transition-colors hover:text-[#2d1b0e]"
-                            >
-                                Batal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </transition>
     </TemplateWrapper>
 </template>

@@ -14,10 +14,18 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = Transaction::with(['products.product.media', 'address.province', 'address.district', 'address.subDistrict'])
-            ->where('customer_id', Auth::guard('customer')->id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $orders = Transaction::with([
+            'products' => function($query) {
+                $query->select('id', 'transaction_id', 'product_id', 'quantity', 'price', 'discount', 'description');
+            },
+            'products.product' => function($query) {
+                $query->select('id', 'uuid', 'name', 'slug');
+            },
+            'products.product.media'
+        ])
+        ->where('customer_id', Auth::guard('customer')->id())
+        ->orderBy('created_at', 'desc')
+        ->get(['id', 'uuid', 'customer_id', 'status', 'shipping_cost', 'cod_fee', 'created_at', 'timelimit']);
 
         return Inertia::render('Orders/Index', [
             'orders' => OrderResource::collection($orders)
@@ -32,44 +40,56 @@ class OrderController extends Controller
         }
 
         $transaction->load([
-            'address.province',
-            'address.district',
-            'address.subDistrict',
+            'address' => function($query) {
+                $query->select('id', 'name', 'phone', 'address', 'province_id', 'district_id', 'sub_district_id', 'postal_code');
+            },
+            'address.province:id,name',
+            'address.district:id,name',
+            'address.subDistrict:id,name',
+            'products' => function($query) {
+                $query->select('id', 'transaction_id', 'product_id', 'quantity', 'price', 'discount', 'description');
+            },
+            'products.product' => function($query) {
+                $query->select('id', 'uuid', 'name', 'slug', 'description');
+            },
             'products.product.media',
-            'products.product.category',
-            'products.productVariant.variantAttributes.productAttributeOption'
+            'products.product.category:id,name'
         ]);
-
-        // Mock payment methods for now, or fetch from DB if integrated
-        $paymentMethods = [
-            ['id' => 'bank_transfer', 'name' => 'Bank Transfer'],
-            ['id' => 'credit_card', 'name' => 'Credit Card'],
-            ['id' => 'paypal', 'name' => 'PayPal'],
-        ];
 
         return Inertia::render('Orders/Show', [
             'order' => OrderResource::make($transaction),
-            'paymentMethods' => $paymentMethods,
         ]);
     }
-    public function changePaymentMethod(Request $request, Transaction $transaction)
+
+    public function pay(Transaction $transaction, \App\Services\PaymentGatewayService $paymentGatewayService)
     {
         if ($transaction->customer_id !== Auth::guard('customer')->id()) {
             abort(403);
         }
 
         if ($transaction->status !== 'unpaid') {
-            return redirect()->back()->with('error', 'Payment method cannot be changed for this order status.');
+            return response()->json(['error' => 'Order is already paid or cancelled.'], 400);
         }
 
-        $request->validate([
-            'payment_method' => 'required'
-        ]);
+        try {
+            $paymentResponse = $paymentGatewayService->createPayment($transaction);
 
-        $transaction->update([
-            'payment_method' => $request->payment_method
-        ]);
+            if (!$paymentResponse->success) {
+                return response()->json(['error' => $paymentResponse->errorMessage], 400);
+            }
 
-        return redirect()->back()->with('success', 'Payment method updated successfully.');
+            return response()->json([
+                'success' => true,
+                'payment' => [
+                    'provider' => $paymentGatewayService->getActiveGatewayAlias(),
+                    'payment_url' => $paymentResponse->paymentUrl,
+                    'snap_token' => $paymentResponse->metadata['snap_token'] ?? null,
+                    'client_key' => $paymentResponse->metadata['client_key'] ?? null,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to initiate payment: ' . $e->getMessage()], 500);
+        }
     }
+
 }

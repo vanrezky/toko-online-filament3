@@ -7,7 +7,6 @@ use App\Services\Gateways\Contracts\PaymentGatewayInterface;
 use App\Services\Gateways\DTOs\PaymentResponse;
 use App\Services\Gateways\DTOs\PaymentStatus;
 use App\Services\Gateways\DTOs\WebhookResult;
-use App\Services\Gateways\MidtransGateway;
 use App\Settings\PaymentGatewaySettings;
 use InvalidArgumentException;
 
@@ -26,7 +25,9 @@ class PaymentGatewayService
         }
 
         return match ($this->settings->active_gateway) {
-            'midtrans' => new MidtransGateway($this->settings),
+            'midtrans' => new \App\Services\Gateways\MidtransGateway($this->settings),
+            'stripe' => new \App\Services\Gateways\StripeGateway($this->settings),
+            'xendit' => new \App\Services\Gateways\XenditGateway($this->settings),
             default => null,
         };
     }

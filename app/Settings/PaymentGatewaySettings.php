@@ -2,7 +2,6 @@
 
 namespace App\Settings;
 
-use Illuminate\Support\Facades\Crypt;
 use Spatie\LaravelSettings\Settings;
 
 class PaymentGatewaySettings extends Settings
@@ -33,66 +32,6 @@ class PaymentGatewaySettings extends Settings
     public static function group(): string
     {
         return 'payment';
-    }
-
-    public function getMidtransServerKeyAttribute(?string $value): ?string
-    {
-        return $value ? Crypt::decrypt($value) : null;
-    }
-
-    public function setMidtransServerKeyAttribute(?string $value): void
-    {
-        $this->attributes['midtrans_server_key'] = $value ? Crypt::encrypt($value) : null;
-    }
-
-    public function getMidtransClientKeyAttribute(?string $value): ?string
-    {
-        return $value ? Crypt::decrypt($value) : null;
-    }
-
-    public function setMidtransClientKeyAttribute(?string $value): void
-    {
-        $this->attributes['midtrans_client_key'] = $value ? Crypt::encrypt($value) : null;
-    }
-
-    public function getStripeApiKeyAttribute(?string $value): ?string
-    {
-        return $value ? Crypt::decrypt($value) : null;
-    }
-
-    public function setStripeApiKeyAttribute(?string $value): void
-    {
-        $this->attributes['stripe_api_key'] = $value ? Crypt::encrypt($value) : null;
-    }
-
-    public function getStripeWebhookSecretAttribute(?string $value): ?string
-    {
-        return $value ? Crypt::decrypt($value) : null;
-    }
-
-    public function setStripeWebhookSecretAttribute(?string $value): void
-    {
-        $this->attributes['stripe_webhook_secret'] = $value ? Crypt::encrypt($value) : null;
-    }
-
-    public function getXenditApiKeyAttribute(?string $value): ?string
-    {
-        return $value ? Crypt::decrypt($value) : null;
-    }
-
-    public function setXenditApiKeyAttribute(?string $value): void
-    {
-        $this->attributes['xendit_api_key'] = $value ? Crypt::encrypt($value) : null;
-    }
-
-    public function getXenditSecretKeyAttribute(?string $value): ?string
-    {
-        return $value ? Crypt::decrypt($value) : null;
-    }
-
-    public function setXenditSecretKeyAttribute(?string $value): void
-    {
-        $this->attributes['xendit_secret_key'] = $value ? Crypt::encrypt($value) : null;
     }
 
     public function isGatewayActive(string $alias): bool
@@ -155,3 +94,4 @@ class PaymentGatewaySettings extends Settings
         };
     }
 }
+

@@ -163,6 +163,7 @@ const submitOrder = async () => {
                     const script = document.createElement('script');
                     script.id = 'midtrans-script';
                     script.src = scriptUrl;
+                    script.setAttribute('data-client-key', payment.client_key);
                     script.onload = resolve;
                     document.head.appendChild(script);
                 });

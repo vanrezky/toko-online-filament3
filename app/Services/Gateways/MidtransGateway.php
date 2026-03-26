@@ -28,14 +28,28 @@ class MidtransGateway implements PaymentGatewayInterface
         $creds = $this->settings->getActiveGatewayCredentials();
 
         if (!$creds) {
+            Log::warning('Midtrans: No active gateway credentials found');
             return;
         }
 
-        Config::$serverKey = $creds['server_key'] ?? null;
-        Config::$clientKey = $creds['client_key'] ?? null;
+        $serverKey = $creds['server_key'] ?? null;
+        $clientKey = $creds['client_key'] ?? null;
+
+        if (!$serverKey || !$clientKey) {
+            Log::warning('Midtrans: Server key or client key is empty', [
+                'has_server_key' => !empty($serverKey),
+                'has_client_key' => !empty($clientKey),
+                'mode' => $creds['mode'] ?? 'sandbox',
+            ]);
+        }
+
+        Config::$serverKey = $serverKey;
+        Config::$clientKey = $clientKey;
         Config::$isProduction = ($creds['mode'] ?? 'sandbox') === 'production';
         Config::$isSanitized = true;
         Config::$is3ds = true;
+
+        $this->config = $creds;
     }
 
     public function getAlias(): string
@@ -76,19 +90,24 @@ class MidtransGateway implements PaymentGatewayInterface
         }
 
         try {
+            // Ensure products and their related product info are loaded
+            $transaction->loadMissing(['products.product', 'customer']);
+
             $itemDetails = [];
             $totalAmount = 0;
 
-            foreach ($transaction->products as $product) {
-                $price = (int) $product->pivot->price;
-                $quantity = (int) $product->pivot->qty;
+            foreach ($transaction->products as $item) {
+                $price = (int) $item->price;
+                $discount = (int) $item->discount;
+                $netPrice = $price - $discount;
+                $quantity = (int) $item->quantity;
                 $itemDetails[] = [
-                    'id' => $product->id,
-                    'price' => $price,
+                    'id' => $item->product?->uuid ?? $item->id,
+                    'price' => $netPrice,
                     'quantity' => $quantity,
-                    'name' => $product->name,
+                    'name' => $item->product?->name ?? ('Product #' . $item->product_id),
                 ];
-                $totalAmount += $price * $quantity;
+                $totalAmount += $netPrice * $quantity;
             }
 
             if ($transaction->shipping_cost > 0) {
@@ -117,8 +136,8 @@ class MidtransGateway implements PaymentGatewayInterface
             ];
 
             $customerDetails = [];
-            if ($transaction->address && $transaction->address->customer) {
-                $customer = $transaction->address->customer;
+            $customer = $transaction->customer;
+            if ($customer) {
                 $customerDetails = [
                     'first_name' => $customer->name ?? 'Customer',
                     'email' => $customer->email ?? '',
@@ -138,6 +157,13 @@ class MidtransGateway implements PaymentGatewayInterface
                 ];
             }
 
+            Log::info('Midtrans: Creating Snap token', [
+                'order_id' => $transaction->uuid,
+                'gross_amount' => $totalAmount,
+                'mode' => Config::$isProduction ? 'production' : 'sandbox',
+                'has_server_key' => !empty(Config::$serverKey),
+            ]);
+
             $snapToken = Snap::getSnapToken($payload);
 
             $paymentUrl = Config::$isProduction
@@ -151,6 +177,7 @@ class MidtransGateway implements PaymentGatewayInterface
                 errorMessage: null,
                 metadata: [
                     'snap_token' => $snapToken,
+                    'client_key' => Config::$clientKey,
                     'mode' => Config::$isProduction ? 'production' : 'sandbox',
                 ]
             );
@@ -158,6 +185,9 @@ class MidtransGateway implements PaymentGatewayInterface
             Log::error('Midtrans payment creation failed', [
                 'transaction_id' => $transaction->uuid,
                 'error' => $e->getMessage(),
+                'mode' => Config::$isProduction ? 'production' : 'sandbox',
+                'has_server_key' => !empty(Config::$serverKey),
+                'server_key_prefix' => Config::$serverKey ? substr(Config::$serverKey, 0, 8) . '...' : 'EMPTY',
             ]);
 
             return new PaymentResponse(
@@ -172,7 +202,7 @@ class MidtransGateway implements PaymentGatewayInterface
     public function getPaymentStatus(string $transactionId): PaymentStatus
     {
         try {
-            $result = CoreApi::status($transactionId);
+            $result = \Midtrans\Transaction::status($transactionId);
 
             return new PaymentStatus(
                 status: $this->mapStatus($result->transaction_status ?? 'unknown'),
@@ -202,6 +232,8 @@ class MidtransGateway implements PaymentGatewayInterface
         try {
             $transactionId = $payload['order_id'] ?? null;
             $status = $payload['transaction_status'] ?? null;
+            $statusCode = $payload['status_code'] ?? null;
+            $grossAmount = $payload['gross_amount'] ?? null;
             $signatureKey = $payload['signature_key'] ?? null;
 
             if (!$transactionId || !$status) {
@@ -215,7 +247,8 @@ class MidtransGateway implements PaymentGatewayInterface
             $creds = $this->settings->getActiveGatewayCredentials();
             $serverKey = $creds['server_key'] ?? '';
 
-            $signature = hash('sha512', $transactionId . $status . $serverKey);
+            // Midtrans signature: SHA512(order_id + status_code + gross_amount + server_key)
+            $signature = hash('sha512', $transactionId . $statusCode . $grossAmount . $serverKey);
 
             if ($signature !== $signatureKey) {
                 Log::warning('Midtrans webhook signature mismatch', [
@@ -232,7 +265,9 @@ class MidtransGateway implements PaymentGatewayInterface
             return new WebhookResult(
                 success: true,
                 action: WebhookResult::ACTION_PROCESS,
-                message: 'Webhook processed successfully'
+                message: 'Webhook processed successfully',
+                transactionId: $transactionId,
+                status: $this->mapStatus($status)
             );
         } catch (\Exception $e) {
             Log::error('Midtrans webhook handling failed', [

@@ -7,7 +7,9 @@ class WebhookResult
     public function __construct(
         public readonly bool $success,
         public readonly string $action,
-        public readonly ?string $message
+        public readonly ?string $message = null,
+        public readonly ?string $transactionId = null,
+        public readonly ?string $status = null
     ) {}
 
     public const ACTION_PROCESS = 'process';
