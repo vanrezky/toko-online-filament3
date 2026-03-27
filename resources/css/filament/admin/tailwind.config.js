@@ -1,4 +1,4 @@
-import preset from "../../../../vendor/filament/filament/tailwind.config.preset";
+import preset from "../../../../vendor/filament/filament/tailwind.config.preset.js";
 /** @type {import('tailwindcss').Config} */
 export default {
     presets: [preset],
@@ -6,7 +6,16 @@ export default {
         "./app/Filament/**/*.php",
         "./resources/views/filament/**/*.blade.php",
         "./vendor/filament/**/*.blade.php",
+        "./vendor/filament/*/src/**/*.php",
+        "./vendor/bezhan-salleh/**/*.blade.php",
         "node_modules/preline/dist/*.js",
+    ],
+    safelist: [
+        "dark",
+        {
+            pattern: /fi-/,
+            variants: ["dark", "hover", "focus"],
+        },
     ],
     theme: {
         screens: {
