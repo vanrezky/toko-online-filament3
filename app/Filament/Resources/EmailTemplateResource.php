@@ -6,11 +6,10 @@ use App\Filament\Resources\EmailTemplateResource\Pages;
 use App\Models\EmailTemplate;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\View;
 use Filament\Forms\Form;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
@@ -43,70 +42,45 @@ class EmailTemplateResource extends Resource
                             ->required()
                             ->maxLength(100)
                             ->unique(ignorable: fn ($record) => $record)
-                            ->disabled(fn ($record) => $record !== null),
+                            ->disabled(fn ($record) => $record !== null)
+                            ->columnSpan(1),
                         TextInput::make('name')
                             ->required()
-                            ->maxLength(255),
-                        Select::make('placeholders')
-                            ->multiple()
-                            ->options([
-                                'customer_name' => 'Customer Name',
-                                'email' => 'Email',
-                                'order_id' => 'Order ID',
-                                'order_total' => 'Order Total',
-                                'payment_url' => 'Payment URL',
-                                'payment_method' => 'Payment Method',
-                                'transaction_date' => 'Transaction Date',
-                                'expiry_time' => 'Expiry Time',
-                                'reset_url' => 'Reset URL',
-                                'expiry_minutes' => 'Expiry Minutes',
-                                'old_status' => 'Old Status',
-                                'new_status' => 'New Status',
-                                'tracking_number' => 'Tracking Number',
-                                'courier_name' => 'Courier Name',
-                                'reseller_name' => 'Reseller Name',
-                                'product_list' => 'Product List',
-                                'shipping_address' => 'Shipping Address',
-                                'order_date' => 'Order Date',
-                                'website_name' => 'Website Name',
-                            ])
-                            ->afterStateUpdated(function (Set $set, array $state) {
-                                $placeholders = collect($state)
-                                    ->map(fn ($val) => '{{'.$val.'}}')
-                                    ->implode(', ');
-                                $set('placeholders_display', $placeholders);
-                            }),
-                        TextInput::make('placeholders_display')
-                            ->label('Placeholders Reference')
-                            ->readOnly()
-                            ->helperText('Copy these placeholders to use in subject or body'),
-                    ])->columns(2),
+                            ->maxLength(255)
+                            ->columnSpan(1),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true)
+                            ->inline(false)
+                            ->columnSpan(1),
+                    ])->columns(3),
 
                 Section::make('Email Content')
                     ->schema([
                         TextInput::make('subject')
                             ->required()
-                            ->maxLength(255)
-                            ->helperText('Use placeholders like {{customer_name}}, {{order_id}}, etc.'),
+                            ->maxLength(255),
+                        View::make('filament.forms.placeholders'),
                         RichEditor::make('body')
                             ->required()
                             ->maxLength(65535)
                             ->toolbarButtons([
-                                'bold', 'italic', 'underline', 'strike',
-                                'alignLeft', 'alignCenter', 'alignRight', 'alignJustify',
-                                'orderedList', 'bulletList',
-                                'link', 'blockquote', 'codeBlock',
+                                'bold',
+                                'italic',
+                                'underline',
+                                'strike',
+                                'alignLeft',
+                                'alignCenter',
+                                'alignRight',
+                                'alignJustify',
+                                'orderedList',
+                                'bulletList',
+                                'link',
+                                'blockquote',
+                                'codeBlock',
                                 'clean',
-                            ])
-                            ->helperText('HTML is supported. Use placeholders like {{customer_name}}, {{order_id}}, etc.'),
+                            ]),
                     ]),
-
-                Section::make('Settings')
-                    ->schema([
-                        Toggle::make('is_active')
-                            ->label('Active')
-                            ->default(true),
-                    ])->columns(1),
             ]);
     }
 
@@ -149,9 +123,7 @@ class EmailTemplateResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
