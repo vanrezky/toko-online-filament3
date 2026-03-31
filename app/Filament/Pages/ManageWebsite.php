@@ -4,28 +4,28 @@ namespace App\Filament\Pages;
 
 use App\Constants\UploadPath;
 use App\Settings\GeneralSettings;
-use Filament\Forms;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
-use Illuminate\Support\HtmlString;
-use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class ManageWebsite extends SettingsPage
 {
     use HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+
     protected static ?string $navigationGroup = 'Setting';
+
     protected static ?int $navigationSort = 5;
+
     protected static ?string $slug = 'setting/settings';
 
     protected static string $settings = GeneralSettings::class;
@@ -95,7 +95,7 @@ class ManageWebsite extends SettingsPage
                                     TextInput::make('site_keywords')->helperText(__('Separated by comma')),
                                     TextInput::make('social_title'),
                                     TextInput::make('social_description'),
-                                ])->columnSpan(2)
+                                ])->columnSpan(2),
                             ])->columns(3),
                         Tab::make('Contact & Social Media')
                             ->icon('heroicon-o-rss')
@@ -121,7 +121,7 @@ class ManageWebsite extends SettingsPage
                                         'tls' => 'TLS',
                                     ]),
                                 TextInput::make('mail_username')->email(),
-                                TextInput::make('mail_password')
+                                TextInput::make('mail_password'),
 
                             ])->columns(2),
                         Tab::make('System')
@@ -146,9 +146,18 @@ class ManageWebsite extends SettingsPage
                                     ->helperText('Select the template that will be used for the website layout and appearance. You can switch templates to change the design without affecting the website content.'),
                                 Toggle::make('site_active')
                                     ->label(__('Site Active'))
-                                    ->helperText('Turn the website on or off. When disabled, visitors will not be able to access the site and may see a maintenance or temporary unavailable page.')
-                            ])
-                    ])->columnSpanFull()
+                                    ->helperText('Turn the website on or off. When disabled, visitors will not be able to access the site and may see a maintenance or temporary unavailable page.'),
+                            ]),
+                        Tab::make('Notifications')
+                            ->icon('heroicon-o-bell')
+                            ->schema([
+                                Textarea::make('admin_emails')
+                                    ->label(__('Admin Notification Emails'))
+                                    ->helperText('Enter email addresses separated by comma (,) to receive notifications for orders, payments, and other important events. Example: admin@example.com, support@example.com')
+                                    ->rows(3)
+                                    ->columnSpanFull(),
+                            ])->columns(1),
+                    ])->columnSpanFull(),
             ]);
     }
 }

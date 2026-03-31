@@ -4,15 +4,17 @@ namespace App\Notifications;
 
 use App\Models\Transaction;
 use App\Services\EmailTemplateService;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
 class OrderExpiryNotification extends Notification
 {
+    use Queueable;
+
     public function __construct(
-        public Transaction $transaction,
-        public string $paymentUrl
+        public Transaction $transaction
     ) {}
 
     public function via(object $notifiable): array
@@ -29,17 +31,19 @@ class OrderExpiryNotification extends Notification
             'customer_name' => $notifiable->full_name ?? trim($notifiable->first_name.' '.$notifiable->last_name),
             'order_id' => $transaction->uuid,
             'expiry_time' => $transaction->timelimit ? $transaction->timelimit->format('d M Y, H:i') : 'N/A',
-            'payment_url' => $this->paymentUrl,
             'website_name' => $websiteName,
         ];
 
         $emailTemplateService = app(EmailTemplateService::class);
-        $template = $emailTemplateService->send('order_expiry', $notifiable->email, $placeholders, false);
+        $template = $emailTemplateService->getTemplate('order_expiry');
 
         if ($template) {
+            $renderedSubject = $template->renderSubject($placeholders);
+            $renderedBody = $template->renderBody($placeholders);
+
             return (new MailMessage)
-                ->html($template->body)
-                ->subject($template->subject);
+                ->subject($renderedSubject)
+                ->view('emails.raw', ['content' => $renderedBody]);
         }
 
         Log::warning('Email template order_expiry not found', ['customer_id' => $notifiable->id]);

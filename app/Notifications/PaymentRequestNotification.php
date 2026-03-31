@@ -4,12 +4,15 @@ namespace App\Notifications;
 
 use App\Models\Transaction;
 use App\Services\EmailTemplateService;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
 class PaymentRequestNotification extends Notification
 {
+    use Queueable;
+
     public function __construct(
         public Transaction $transaction,
         public string $paymentUrl
@@ -35,12 +38,15 @@ class PaymentRequestNotification extends Notification
         ];
 
         $emailTemplateService = app(EmailTemplateService::class);
-        $template = $emailTemplateService->send('payment_request', $notifiable->email, $placeholders, false);
+        $template = $emailTemplateService->getTemplate('payment_request');
 
         if ($template) {
+            $renderedSubject = $template->renderSubject($placeholders);
+            $renderedBody = $template->renderBody($placeholders);
+
             return (new MailMessage)
-                ->html($template->body)
-                ->subject($template->subject);
+                ->subject($renderedSubject)
+                ->view('emails.raw', ['content' => $renderedBody]);
         }
 
         Log::warning('Email template payment_request not found', ['customer_id' => $notifiable->id]);

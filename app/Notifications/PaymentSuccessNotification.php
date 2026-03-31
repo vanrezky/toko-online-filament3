@@ -4,16 +4,18 @@ namespace App\Notifications;
 
 use App\Models\Transaction;
 use App\Services\EmailTemplateService;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
 class PaymentSuccessNotification extends Notification
 {
+    use Queueable;
+
     public function __construct(
         public Transaction $transaction,
-        public string $paymentMethod,
-        public string $transactionDate
+        public string $paymentMethod = 'Payment Gateway'
     ) {}
 
     public function via(object $notifiable): array
@@ -31,17 +33,20 @@ class PaymentSuccessNotification extends Notification
             'order_id' => $transaction->uuid,
             'order_total' => number_format($transaction->total_amount, 0, ',', '.'),
             'payment_method' => $this->paymentMethod,
-            'transaction_date' => $this->transactionDate,
+            'transaction_date' => now()->format('d M Y, H:i'),
             'website_name' => $websiteName,
         ];
 
         $emailTemplateService = app(EmailTemplateService::class);
-        $template = $emailTemplateService->send('payment_success', $notifiable->email, $placeholders, false);
+        $template = $emailTemplateService->getTemplate('payment_success');
 
         if ($template) {
+            $renderedSubject = $template->renderSubject($placeholders);
+            $renderedBody = $template->renderBody($placeholders);
+
             return (new MailMessage)
-                ->html($template->body)
-                ->subject($template->subject);
+                ->subject($renderedSubject)
+                ->view('emails.raw', ['content' => $renderedBody]);
         }
 
         Log::warning('Email template payment_success not found', ['customer_id' => $notifiable->id]);

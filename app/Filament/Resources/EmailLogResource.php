@@ -16,7 +16,7 @@ class EmailLogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope-open';
 
-    protected static ?string $navigationGroup = 'Master';
+    protected static ?string $navigationGroup = 'Logs';
 
     protected static ?string $navigationLabel = 'Email Logs';
 
@@ -25,8 +25,6 @@ class EmailLogResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $slug = 'email-logs';
-
-    protected static bool $shouldRegisterNavigation = false;
 
     public static function table(Table $table): Table
     {
@@ -46,10 +44,10 @@ class EmailLogResource extends Resource
                         'danger' => 'failed',
                         'warning' => 'pending',
                     ])
-                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                    ->formatStateUsing(fn($state) => ucfirst($state)),
                 TextColumn::make('error_message')
                     ->limit(50)
-                    ->tooltip(fn ($state) => $state),
+                    ->tooltip(fn($state) => $state),
                 TextColumn::make('sent_at')
                     ->dateTime()
                     ->sortable(),

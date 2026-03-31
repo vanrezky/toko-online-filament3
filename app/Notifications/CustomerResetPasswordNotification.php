@@ -3,11 +3,15 @@
 namespace App\Notifications;
 
 use App\Services\EmailTemplateService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
 
 class CustomerResetPasswordNotification extends Notification
 {
+    use Queueable;
+
     public string $token;
 
     public string $guard;
@@ -32,20 +36,28 @@ class CustomerResetPasswordNotification extends Notification
         ]);
 
         $expiryMinutes = config('auth.passwords.'.$this->getPasswordBrokerKey().'.expire', 60);
-        $websiteName = settings('general')->site_name ?? env('APP_NAME', 'Toko Online');
+        $generalSettings = settings('general');
+        $websiteName = $generalSettings?->site_name ?? env('APP_NAME', 'Toko Online');
+        $logoUrl = $generalSettings?->getLogo() ?? asset('images/logo.png');
 
         $emailTemplateService = app(EmailTemplateService::class);
-        $template = $emailTemplateService->send('reset_password', $notifiable->getEmailForPasswordReset(), [
-            'customer_name' => $notifiable->full_name ?? trim($notifiable->first_name.' '.$notifiable->last_name),
-            'reset_url' => $resetUrl,
-            'expiry_minutes' => $expiryMinutes,
-            'website_name' => $websiteName,
-        ], false);
+        $template = $emailTemplateService->getTemplate('reset_password');
 
         if ($template) {
+            $placeholders = [
+                'customer_name' => $notifiable->full_name ?? trim($notifiable->first_name.' '.$notifiable->last_name),
+                'reset_url' => $resetUrl,
+                'expiry_minutes' => $expiryMinutes,
+                'website_name' => $websiteName,
+                'logo_url' => $logoUrl,
+            ];
+
+            $renderedSubject = $template->renderSubject($placeholders);
+            $renderedBody = $template->renderBody($placeholders);
+
             return (new MailMessage)
-                ->html($template->body)
-                ->subject($template->subject);
+                ->subject($renderedSubject)
+                ->view('emails.raw', ['content' => $renderedBody]);
         }
 
         return (new MailMessage)

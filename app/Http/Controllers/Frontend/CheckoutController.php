@@ -7,17 +7,14 @@ use App\Enums\CourierCode;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
-use App\Models\CartItem;
 use App\Models\CustomerAddress;
 use App\Models\Transaction;
-use App\Models\TransactionShippingDetail;
-use App\Models\TransactionVoucher;
 use App\Models\Warehouse;
 use App\Services\ApicoidOngkirService;
 use App\Services\CacheService;
+use App\Services\PaymentGatewayService;
 use App\Services\VoucherCookieService;
 use App\Services\VoucherService;
-use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +23,7 @@ use Inertia\Inertia;
 class CheckoutController extends Controller
 {
     protected VoucherCookieService $cookieService;
+
     protected VoucherService $voucherService;
 
     public function __construct(VoucherCookieService $cookieService, VoucherService $voucherService)
@@ -43,7 +41,7 @@ class CheckoutController extends Controller
             ->where('customer_id', $customer->id)
             ->first();
 
-        if (!$cart || $cart->items->isEmpty()) {
+        if (! $cart || $cart->items->isEmpty()) {
             return redirect()->route('frontend.cart')->with('error', 'Your cart is empty.');
         }
 
@@ -78,16 +76,15 @@ class CheckoutController extends Controller
 
         $address = CustomerAddress::with('village')->findOrFail($request->address_id);
 
-        if (!$address->village) {
+        if (! $address->village) {
             return response()->json(['error' => 'Selected address does not have village information.'], 422);
         }
 
         $cartHash = md5($cart->items->sortBy('id')->map(function ($item) {
-            return $item->product_id . '-' . ($item->product_variant_id ?? '0') . '-' . $item->quantity . '-' . $item->price;
+            return $item->product_id.'-'.($item->product_variant_id ?? '0').'-'.$item->quantity.'-'.$item->price;
         })->implode('|'));
 
         $cacheKey = "shipping_costs_{$customer->id}_{$address->id}_{$cartHash}";
-
 
         $shippingResults = CacheService::remember($cacheKey, 1800, function () use ($cart, $address, $ongkirService, $courierSettings) {
             $warehouseGroups = $cart->items->groupBy(function ($item) {
@@ -116,11 +113,11 @@ class CheckoutController extends Controller
 
             foreach ($warehouseGroups as $warehouseId => $items) {
                 $warehouse = Warehouse::with('village')->find($warehouseId);
-                if (!$warehouse || !$warehouse->village) {
+                if (! $warehouse || ! $warehouse->village) {
                     continue;
                 }
 
-                $totalWeight = $items->sum(fn($item) => ($item->productVariant?->weight ?: $item->product->weight) * $item->quantity);
+                $totalWeight = $items->sum(fn ($item) => ($item->productVariant?->weight ?: $item->product->weight) * $item->quantity);
 
                 $costs = $ongkirService->getShippingCost(
                     $warehouse->village->apicoid_code,
@@ -136,21 +133,20 @@ class CheckoutController extends Controller
                 if ($pickupOption) {
                     $options[] = $pickupOption;
                 }
-                
+
                 if ($kurirTokoOption) {
                     $options[] = $kurirTokoOption;
                 }
 
-                if (!empty($options)) {
+                if (! empty($options)) {
                     $results[] = [
                         'warehouse_id' => $warehouseId,
                         'warehouse_name' => $warehouse->name,
                         'weight' => $totalWeight,
-                        'options' => $options
+                        'options' => $options,
                     ];
                 }
             }
-
 
             return $results;
         });
@@ -177,6 +173,7 @@ class CheckoutController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Your cart is empty.'], 400);
             }
+
             return redirect()->route('frontend.cart')->with('error', 'Your cart is empty.');
         }
 
@@ -260,6 +257,12 @@ class CheckoutController extends Controller
 
             $paymentResponse = $paymentGatewayService->createPayment($transaction);
 
+            // Send payment request notification
+            if ($paymentResponse->paymentUrl) {
+                SendPaymentRequestNotification::dispatch($transaction, $paymentResponse->paymentUrl)
+                    ->onQueue('default');
+            }
+
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -269,7 +272,7 @@ class CheckoutController extends Controller
                         'payment_url' => $paymentResponse->paymentUrl,
                         'snap_token' => $paymentResponse->metadata['snap_token'] ?? null,
                         'client_key' => $paymentResponse->metadata['client_key'] ?? null,
-                    ]
+                    ],
                 ]);
             }
 
