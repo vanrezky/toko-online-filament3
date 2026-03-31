@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\CustomerResetPasswordNotification;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -34,6 +35,11 @@ class ForgotPasswordController extends Controller
         $guard = $request->input('guard', 'customer');
 
         if ($this->hasTooManyAttempts($request)) {
+            Log::warning('Password reset throttled', [
+                'email' => $request->email,
+                'guard' => $guard,
+                'ip' => $request->ip(),
+            ]);
             $this->sendLockoutResponse($request);
         }
 
@@ -42,6 +48,11 @@ class ForgotPasswordController extends Controller
 
         if (! $user) {
             $this->incrementAttempts($request);
+            Log::info('Password reset requested for non-existent email', [
+                'email' => $request->email,
+                'guard' => $guard,
+                'ip' => $request->ip(),
+            ]);
             throw ValidationException::withMessages([
                 'email' => [trans(Password::RESET_THROTTLED)],
             ]);
@@ -49,7 +60,17 @@ class ForgotPasswordController extends Controller
 
         $token = Password::broker($guard === 'customer' ? 'customers' : 'users')->createToken($user);
 
-        $user->notify(new CustomerResetPasswordNotification($token, $guard));
+        $user->notify(
+            (new CustomerResetPasswordNotification($token, $guard))
+                ->onQueue('default')
+        );
+
+        Log::info('Password reset link sent', [
+            'email' => $request->email,
+            'guard' => $guard,
+            'user_id' => $user->id,
+            'ip' => $request->ip(),
+        ]);
 
         $this->clearAttempts($request);
 

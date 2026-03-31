@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\EmailLogResource\Pages;
 
 use App\Filament\Resources\EmailLogResource;
-use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\HtmlString;
 
 class ViewEmailLog extends ViewRecord
 {
@@ -20,7 +20,9 @@ class ViewEmailLog extends ViewRecord
             ->schema([
                 Section::make('Email Information')
                     ->schema([
-                        TextEntry::make('template_code'),
+                        TextEntry::make('template_code')
+                            ->badge()
+                            ->color('primary'),
                         TextEntry::make('recipient_email'),
                         TextEntry::make('subject'),
                         TextEntry::make('status')
@@ -33,9 +35,10 @@ class ViewEmailLog extends ViewRecord
                     ])->columns(2),
                 Section::make('Content')
                     ->schema([
-                        CodeEntry::make('body')
+                        TextEntry::make('body')
                             ->label('Body Content')
-                            ->language('html'),
+                            ->html()
+                            ->formatStateUsing(fn ($state) => new HtmlString($state)),
                     ]),
                 Section::make('Placeholders Used')
                     ->schema([
