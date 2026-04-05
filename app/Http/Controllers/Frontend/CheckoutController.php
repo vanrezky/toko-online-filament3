@@ -259,10 +259,9 @@ class CheckoutController extends Controller
             $paymentResponse = $paymentGatewayService->createPayment($transaction);
 
             // Send payment request notification
-            if ($paymentResponse->paymentUrl) {
-                SendPaymentRequestNotification::dispatch($transaction, $paymentResponse->paymentUrl)
-                    ->onQueue('default');
-            }
+            $orderUrl = route('frontend.orders.show', $transaction->uuid);
+            SendPaymentRequestNotification::dispatch($transaction, $orderUrl)
+                ->onQueue('default');
 
             if ($request->wantsJson()) {
                 return response()->json([
